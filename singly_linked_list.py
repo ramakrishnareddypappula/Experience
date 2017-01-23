@@ -85,6 +85,17 @@ class SingleLinkedList(object):
         self.head = prev
         return self.head
 
+    # Reverse the list using recursion.
+    @staticmethod
+    def recursive_reverse(obj, head):
+        if not head.next_node:
+            obj.head = head
+            return
+        SingleLinkedList.recursive_reverse(obj, head.next_node)
+        new_node = head.next_node
+        new_node.next_node = head
+        head.next_node = None
+
     # print using recursion
     @staticmethod
     def print_recursive(head):

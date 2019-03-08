@@ -1,3 +1,4 @@
+# module that implements single linked list.
 from __future__ import print_function
 
 class Node(object):

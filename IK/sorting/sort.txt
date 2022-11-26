@@ -1,0 +1,9 @@
+- Searching for a value in sorted array is faster than unsorted array.
+- Duplicates can be easily found.
+- Matching items in 2 or more files.
+- To find median and top K values quickly.
+- Truncated top of immense sorted list in UI(like Google, FB, amazon). These companies sort items based on relavence and show top 5/10 items. 
+
+
+For unsorted numbers: mean(averge of numbers) and range(diff of largest and smallest) can be done in single scan.
+for sorted numbers : find a specific number, find duplicates, find median, mode can be done in single scan. 

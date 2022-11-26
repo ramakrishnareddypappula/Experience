@@ -6,4 +6,70 @@
 
 
 For unsorted numbers: mean(averge of numbers) and range(diff of largest and smallest) can be done in single scan.
-for sorted numbers : find a specific number, find duplicates, find median, mode can be done in single scan. 
+for sorted numbers : find a specific number, find duplicates, find median, mode can be done in single scan.
+
+
+- Brute force design:
+- example: selection sort.
+- Selection sort:
+    - find the smallest element in iteration 1 and put at first.
+    - find the next smallest element in iteration 2 and put at second. so on.
+
+    Also
+    - from the last, find the largest element and swap it with last element.
+    - find the next largest element and swap with second last and so on.
+
+- design selection sort:
+    def selection_sort(A):
+        n = len(A)
+        for i in range(n):
+            minval = A[i]
+            minindex = i
+            for j in range(i + 1, n):
+                if A[j] < minval:
+                    minval = A[j]
+                    minindex = j
+            swap(A[i], A[minindex])
+        return A
+
+Time complexity: O(n ^ 2)
+Space complexity: constant
+
+
+- Efficieny:
+    - Time : how long the process runs on CPU. CPU time.
+    - Space: how much memory the process takes in RAM. RAM space.
+
+- normal operations like assignment, swap, comparison are done in constant amount of time.
+- For asymptotic operations only input size is considered. Language used, hardware used and OS used are ignored.
+
+- Bubble sort:
+    - In iteration 1: from the last, compare n and n-1 elements and arrange them in order. Then n-1 and n-2 compare. so on
+    so that after iteration 1, smallest value is at 0th index.
+    - In iteration 2: from the last, compare n and n-1 so that, second smallest is kept at 1st index.
+    - After iteration n: n elements are sorted.
+
+Time complexity: O(n ^ 2)
+Space complexity: constant
+
+Bubble sort is worst than selection sort since in each iteration n comparison, swappings are done. In selection sort, only 1 swap is done
+after every iteration.
+
+- design Bubble sort:
+    def bubble_sort(A):
+        l = len(A)
+        for i in range(l):
+            for j in range(n - 1, i + 1):
+                if A[j] < A[j - 1]:
+                    A[j], A[j - 1] = A[j - 1], A[j]
+        return A
+
+
+- For a sorted or reverse sorted array, n(n-1)/2 comparisons are needed in bubble sort.
+- 0 swap operations are performed for sorted array using bubble sort.
+- n(n-1)/2 swap operations are performed for reverse sorted array using bubble sort.
+
+
+
+
+

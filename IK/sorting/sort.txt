@@ -52,6 +52,8 @@ Space complexity: constant
 Time complexity: O(n ^ 2)
 Space complexity: constant
 
+With selection sort, the time complexity is same for best, average, worst case scenario O(n ^ 2).
+
 Bubble sort is worst than selection sort since in each iteration n comparison, swappings are done. In selection sort, only 1 swap is done
 after every iteration.
 
@@ -68,6 +70,39 @@ after every iteration.
 - For a sorted or reverse sorted array, n(n-1)/2 comparisons are needed in bubble sort.
 - 0 swap operations are performed for sorted array using bubble sort.
 - n(n-1)/2 swap operations are performed for reverse sorted array using bubble sort.
+
+With bubble sort, the time complexity is same for best, average, worst case scenario O(n ^ 2).
+
+
+- Insertion sort: It uses decrease-and-conquer algorithm.
+In first iteration, we take first element and sort it.
+In second iteration, we assign second index element as temp(pivot). Take the second index and compare with pivot. If second is lower than
+first, than move first to second and keep pivot to first.
+In third iteration, we assign third index element as temp(pivot). we move second index element to right if its greater than
+pivot and move first index element to right if its greater than pivot. Accordingly we keep temp in third or second or first position.
+and so on.
+
+- Design insertion sort:
+    def insertion_sort(A):
+        for i in range(len(A)):   # [5, 6, 2, 4]
+            pivot = A[i]
+            j = i - 1
+            while j >= 0 and A[j] > temp:
+                A[j+1] = A[j]
+                j -= 1
+            A[j + 1] = pivot
+        return A
+
+
+Time complexity: Best case scenario: if list is already sorted: O(n). No right shift operations are done.
+                 Average case scenario: some elements in list are sorted and some not sorted. O(n ^ 2).
+                 Worst case scenario: if list is reverse sorted: O(n ^ 2). All right shift operations are done.
+
+Size and nature(sorted or reverse sorted) of the input determine the complexity.
+
+Bogosort(also called stupid sort) randomly shuffles elements and checks if array is sorted every time until it is sorted.
+
+
 
 
 

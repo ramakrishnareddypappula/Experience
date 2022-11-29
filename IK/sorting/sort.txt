@@ -117,6 +117,14 @@ O(2 ^ N) = exponential time
 -Merge sort is not in-place algorithm. An auxiliary array of size n(O(n)) is required.
 -Insertion sort, quick sort, bubble sort and selection sort are in place algorithms(O(1)).
 
+- Merge sort:
+    It uses divide and conquer algorithm.
+    It splits the array into 2 equal half and assumes that they become sorted so that it can sort the 2 halves.
+    The 2 halves are split again until single element is there. Then at the above level, the single elements are arranged in sorted order.
+    Similar is done at the above levels. Finally the whole array is sorted.
+
+
+
 
 -Quick sort:
     We partition the given array into 2 halves with median in the middle. But we don't know median.

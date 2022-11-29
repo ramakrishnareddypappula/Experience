@@ -32,3 +32,5 @@ print(counting_sort([10, 5, 4, 2, 1]))
 print(counting_sort([4, 5, 2, 1, 0]))
 print(counting_sort([-2, 0, -1, 5, -1]))
 print(counting_sort([4000, -4000, 1]))
+
+# https://www.youtube.com/watch?v=pEJiGC-ObQE&t=1184s

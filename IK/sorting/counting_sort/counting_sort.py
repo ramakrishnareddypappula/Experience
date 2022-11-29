@@ -1,4 +1,5 @@
 
+# This will work for both positive and negative values.
 
 def counting_sort(arr):
     """

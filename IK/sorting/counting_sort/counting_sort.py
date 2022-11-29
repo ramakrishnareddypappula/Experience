@@ -1,14 +1,25 @@
 
+# Only for positive values.
+
 def counting_sort_with_positive_values(arr):
     output = [0 for _ in range(len(arr))]
     minval = 0
     maxval = max(arr)
+
+    # create a temp list with o to max + 1 values.
     temp = [0 for _ in range(minval, maxval + 1)]
+
+    # Whenever you see value in array, in temp list add +1 to that index.
     for i in range(len(arr)):
         temp[arr[i]] += 1
+
+    # from index 1 in temp list, add the previous values to current value and keep at that index.
     for j in range(1, len(temp)):
         temp[j] = temp[j] + temp[j - 1]
 
+    # 1. Get the value from input array.
+    # 2. At that in temp array, reduce value by 1.
+    # 3. the value that you get from above, at the index in output list, store the input value.
     for k in range(len(arr) - 1, -1, -1):
         val = arr[k]
         temp[val] = temp[val] - 1

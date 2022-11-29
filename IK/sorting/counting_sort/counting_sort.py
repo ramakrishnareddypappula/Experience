@@ -1,4 +1,27 @@
 
+def counting_sort_with_positive_values(arr):
+    output = [0 for _ in range(len(arr))]
+    minval = 0
+    maxval = max(arr)
+    temp = [0 for _ in range(minval, maxval + 1)]
+    for i in range(len(arr)):
+        temp[arr[i]] += 1
+    for j in range(1, len(temp)):
+        temp[j] = temp[j] + temp[j - 1]
+
+    for k in range(len(arr) - 1, -1, -1):
+        val = arr[k]
+        temp[val] = temp[val] - 1
+        output[temp[val]] = val
+    return output
+
+print(counting_sort_with_positive_values([2, 10, 1, 3, 2]))
+print(counting_sort_with_positive_values([10, 0]))
+print(counting_sort_with_positive_values([10, 5, 4, 2, 1]))
+print(counting_sort_with_positive_values([4, 5, 2, 1, 0]))
+
+
+# This will work for both positive and negative values.
 
 def counting_sort(arr):
     """
@@ -20,3 +43,5 @@ def counting_sort(arr):
         result[count_array[k - low] - 1] = k  # here too
         count_array[k - low] -= 1  # and here
     return result
+
+

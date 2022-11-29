@@ -1,58 +1,34 @@
 
-# Only for positive values.
+# For positive and negative values.
 
-def counting_sort_with_positive_values(arr):
+def counting_sort(arr):
     output = [0 for _ in range(len(arr))]
-    minval = 0
+    minval = min(arr)
     maxval = max(arr)
 
-    # create a temp list with o to max + 1 values.
+    # create a temp list with 0 to max + 1 values.
     temp = [0 for _ in range(minval, maxval + 1)]
 
     # Whenever you see value in array, in temp list add +1 to that index.
     for i in range(len(arr)):
-        temp[arr[i]] += 1
+        temp[arr[i] - minval] += 1
 
     # from index 1 in temp list, add the previous values to current value and keep at that index.
     for j in range(1, len(temp)):
         temp[j] = temp[j] + temp[j - 1]
 
-    # 1. Get the value from input array.
+    # 1. Get the value from input array from right side.
     # 2. At that in temp array, reduce value by 1.
     # 3. the value that you get from above, at the index in output list, store the input value.
     for k in range(len(arr) - 1, -1, -1):
         val = arr[k]
-        temp[val] = temp[val] - 1
-        output[temp[val]] = val
+        temp[val - minval] = temp[val- minval] - 1
+        output[temp[val - minval]] = val
     return output
 
-print(counting_sort_with_positive_values([2, 10, 1, 3, 2]))
-print(counting_sort_with_positive_values([10, 0]))
-print(counting_sort_with_positive_values([10, 5, 4, 2, 1]))
-print(counting_sort_with_positive_values([4, 5, 2, 1, 0]))
-
-
-# This will work for both positive and negative values.
-
-def counting_sort(arr):
-    """
-    Args:
-     arr(list_int32)
-    Returns:
-     list_int32
-    """
-    # Write your code here.
-    result = [0] * len(arr)
-    low = min(arr)
-    high = max(arr)
-    count_array = [0 for i in range(low, high + 1)]
-    for i in arr:
-        count_array[i - low] += 1  # use an offset index #[1,,,,1, ]
-    for j in range(1, len(count_array)):
-        count_array[j] = count_array[j] + count_array[j - 1]
-    for k in reversed(arr):
-        result[count_array[k - low] - 1] = k  # here too
-        count_array[k - low] -= 1  # and here
-    return result
-
-
+print(counting_sort([2, 10, 1, 3, 2]))
+print(counting_sort([10, 0]))
+print(counting_sort([10, 5, 4, 2, 1]))
+print(counting_sort([4, 5, 2, 1, 0]))
+print(counting_sort([-2, 0, -1, 5, -1]))
+print(counting_sort([4000, -4000, 1]))

@@ -251,17 +251,30 @@ The smaller and bigger pointers start after pivot index on same side.
 
     Heap is represented as a binary tree.
     If we take root node as index 1, left node of root as index 2 and right node as index 3.
-    root node = i , left node = 2 * i, right node = 2 * i + 1
-    same is true for any node.
+    If node is at index = i
+    Its left child is at index = 2i
+    Its right child is at index = 2i + 1
+    its parent is at index = i // 2
+
+    Full binary tree:
+    If each node of tree has 2 child nodes is called full binary tree. Means height H0 has 1 node, H1 has 3 nodes, H2 has
+    7 nodes etc.
+
+    Complete binary tree:
+    All levels are filled except leaf level which is filled as left as possible.
+    Height is log n.
+    Heap is a complete binary tree.
 
     Insert an element:
     Height of binary tree in Log n. Therefore to insert an element at correct node of binary tree or to move up,
     O(log n) is time complexity for 1 element. For n elements, it is O(n log n)
+    In insertion of max heap, insert as the leaf, then swap the places so that tree's properties are satisfied.
 
     Remove priority element:
     If root element is removed(for example), the bottom leaf node is moved to root. Property 2 is checked and moved down
     until property 2 is satisfied.
     Time complexity for n elements in O(n log n).
+    In delete of max heap, we always delete the root and right most leaf will take its place then we adjust.
 
     Total time complexity of binary heap is O(n log n).
     Time complexity of insert is O(log n).

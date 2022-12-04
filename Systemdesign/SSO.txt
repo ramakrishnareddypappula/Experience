@@ -1,0 +1,35 @@
+SSO: Single Sign On.
+
+SSO is an authentication scheme. It allows users to securley access to multiple applications with single ID.
+
+With SSO, User can access many apps without login each time.
+
+SSO is built on concept called federated identity.
+                                                             ----> workday
+user ---> my company cloud(service provider) ---> identity provider(okta) ----> slack(other service providers)
+                                                             ----> zoom
+
+Identity provider shares identity information across multiple secure apps.
+
+2 types:
+- SAML : Security Assertion Markup Language
+        It's an xml based open standard for exchanging identity information across multiple apps.
+
+        Working:
+        - When a person tries to connect to my company app(Service providerSP), it sends SAR(Saml Authentication Request) to browser.
+          SAR is xml doc which tells to talk to company.okta.com
+        - The browser redirects the SAR to Identity provider(IDP- okta).
+        - The identity provider sends the login page to user.
+        - Once user enter login details, the IDP sends the signed SAML assertion. This is called SAML assertion.
+          SAML assertion contains user details and what user can access with service provider.
+        - browser sends signed assertion response to service provider. Service provider validates that the assertion is signed IDP.
+          This is generally done by public key cryptography.
+        - Then access is granted.
+
+- Open ID connect : Google uses it. It uses JWT(Json Web Token) to share identity information between services.
+        Its implementation is different but overall concept is same. Instead of SAML but it uses Json instead of saml.
+
+
+https://www.youtube.com/watch?v=O1cRJWYF-g4
+
+okta, auth0, one login are common IDPs.

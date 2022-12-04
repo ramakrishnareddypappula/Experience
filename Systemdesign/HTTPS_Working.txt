@@ -1,0 +1,24 @@
+
+HTTPS sends the data in encrypted format.
+This encryption form is called TLS. Transport Layer Security.
+
+
+Steps:
+1. TCP handshake: Similar to Http, first browser establishes the connection with server using 3 way TCP handshake.
+2. Certificate check: This is called TLS handshake. browser sends "client hello" to server.
+   hello msg contains
+        1) What TLS version is supported. TLS 1.2, 1.3 etc.
+        2) What cipher suites(its encryption algo to encrypt data) it supported. RSA etc.
+   Server chooses and sends "server hello" msg and certificate to client.
+   Server sends lot of information in certificate. One of them is server public key in asymmetric encryption.
+   Asymmetric encryption: A piece of data that is encrypted by public can only be decrypted by private key.
+   At the end, client and server have agreed on TLS version, cipher suite used and certificate.
+3. key change: client generates an session key which is encrypted by server's public key is sent to server.
+    server after receiving the encryption key, decrypts using its private key.
+4. Data transmission: Encrypted data is transmitted using symmetric encryption.
+    symmetric encryption: single key is used to encrypt and decrypt the data.
+    here symmetric encryption is used since asymmetric is computationally expensive and not suitable for bulk transmission.
+
+
+https://www.youtube.com/watch?v=67kItGjvRs0
+

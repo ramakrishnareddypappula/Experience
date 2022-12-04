@@ -1,0 +1,13 @@
+
+Redis began cacheing db but evolved into primary db.
+
+- Redis in In memory(RAM) db not db. Which means memory access is faster and high read/write through put than disk.
+- Code wise it is very simple to implement than on-disk.
+- Redis is single-thread which avoid locking mechanism with multi-threaded and hence solid performance.
+  With single-thread, sometimes thread gets blocked waiting for completion. TO avoid this, IO multiplexing is used.
+  IO multiplexing: OS allows single thread app to wait on many sockets simultaneously. Generally select and poll system calls
+  are used. Epoll performance varient system call is used in redis which supports many sockets.
+- In multi-core CPUs, 1 Redis instance is run on 1 cpu.
+
+
+https://www.youtube.com/watch?v=5TRFpFBccQM

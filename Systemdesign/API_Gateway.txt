@@ -1,0 +1,33 @@
+
+AWS, google, microsoft etc cloud service provide API gateway.
+
+For clients like pc, mobile, web, API gateway is the single point of entry.
+It sits between client and backend services.
+
+API Gateway provides:
+- authentication and security policy enforcement.
+- load balancing
+- protocol translation and service discovery
+- monitoring, logging, analytics and billing.
+- caching
+
+API gateway flow
+
+Client --- send request(cloud be REST/graph ql http or some other) --> API gateway validates the request ---->
+
+API Gateway checks Allow list and deny list(Also rate limit) ---> API Gateway passes the request to Identity provider for
+
+Authentication/Authorization(Here rate limit check is done, like logins per second) ---> API gateway service discovery and dynamic routing
+
+component locates appropriate backend service component --> API gateway transfer request into appropriate protocol and sends to service.
+
+Once response is received for request, the reverse process is executed until response receives client.
+
+
+
+rate limit: The API gateway can reject requests from a particular ip address after some rate limit is reached in particular time.
+
+API gateway should be deployed at multiple regions to improve availability.
+Many cloud providers deploy at multiple locations near to client.
+
+https://www.youtube.com/watch?v=6ULyxuHKxg8

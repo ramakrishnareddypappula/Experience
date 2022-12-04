@@ -1,0 +1,19 @@
+
+1299 - Replace elements with great on right side:
+- Basically, arr[i] = max(arr[i + 1: ])
+- arr[0] = max(arr[1:])
+- arr[1] = max(arr[2:])
+
+So if we do from reverse:
+- arr[1] = max(arr[2], arr[3])
+- arr[0] = max(arr[1], arr[2])
+
+- Iterate from right side.
+- Initialize right element to -1
+- maxval = max(arr[i] , rightmax)
+- arr[i] = rightmax
+- rightmax = maxval
+
+
+71: simplify path:
+Construct a stack and then push if string is seen and pop if .. is seen.

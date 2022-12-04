@@ -1,0 +1,16 @@
+What happens when you type url in browser?
+
+When you type url http://www.example.com/product/user/phone.
+url - uniform Resource locator.
+http: is a scheme. Its a protocol that tells the browser to connect to another system. Here we used http(port 80), we can also you https(port 443).
+With https connection is encrypted.
+example.com : its a domain. Its the domain name of the site. Browser needs to know how to reach the server(ip). This is done through DNS lookup.
+DNS translates domain names to ip addresses. To make DNS lookup faster, Caching is done at multiple levels. First browser caches the ip for some time.
+If browser does not have it, it asks OS. If OS does not have it, Browser looks up ip using recursive dns lookup until ip is found.
+Now browser got the ip. It makes connection using http or https. A 3 way handshake is done before establishing the tcp connection.
+Once established, modern browsers use keep-alive to reuse established tcp connection. If https is used, handshake is even more complicates using
+SSL/TLS handshake. Once established, the browser sends a simple http request and receives the http response and renders the content.
+product/user: path. Imagine as directory.
+phone: resource. Imagine as file in file system.
+
+https://www.youtube.com/watch?v=AlkDbnbv7dk

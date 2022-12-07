@@ -1,0 +1,22 @@
+
+CDN: Content Delivery Network.
+
+It was designed to speed up the static HTML content delivery to end users around the world.
+
+To make content faster to reach users, CDN deploys 100 of server across the world. These servers are called Point Of Presence(POPs).
+
+Different CDN providers like Amazon, Akamai, Cloudflare use different technologies.
+2 common ones are 1) DNS based routing 2) Anycast.
+
+1) DNS based routing: Each POPs has different ip. When user looks up for ip, the DNS returns nearest POP ip address.
+
+2) Anycast: All POPs have same ip. The network sends the request to nearest POP.
+
+Each POP acts as reverse proxy with the huge content.
+Since the POP only asks for a copy if its not there, it reduces the cost and bandwidth.
+
+Modern CDNs improve the content format of the files(video 720p, 1080p etc), reduce the size of files, transform image file
+from old format to new format.
+
+All TLS connections terminate at CDN which significantly reduces the round trip time during the connection establishment.
+It also provides security to the origin server.

@@ -340,3 +340,11 @@ Bucket sort:
 Quicksort analysis: Quiz 003
 The overall space complexity of selection sort, bubble sort and insertion sort is O(1) or O(n).
 
+Algorithms:
+Brute-Force : Bubble, selection sort
+Decrease and conquer: Insertion sort
+Divide and conquer: Quick and Merge sort.
+Transform and conquer: heap sort.
+
+
+

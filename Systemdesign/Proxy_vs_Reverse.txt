@@ -1,0 +1,19 @@
+
+Forward Proxy: It is present in inside the company network.
+Forward proxy acts as the middle man between clients and server.
+
+Advantages:
+1) Ip addresses of clients are hidden. Harder to trace the clients.
+2) Policies can be applied to restrict website access similar to firewall.
+
+
+Reverse Proxy sits in between client and server on the server side.
+NGINX can be used for reverse proxy.
+
+Advantages:
+1) It protects the website.
+2) For load balancing, it can be used.
+3) Caching is done. If client asks for same content, the cached content can be sent instead of sending to the server.
+4) Handles SSL encryption.
+
+Many websites have reverse proxies setup.

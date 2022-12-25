@@ -1,0 +1,350 @@
+- Searching for a value in sorted array is faster than unsorted array.
+- Duplicates can be easily found.
+- Matching items in 2 or more files.
+- To find median and top K values quickly.
+- Truncated top of immense sorted list in UI(like Google, FB, amazon). These companies sort items based on relavence and show top 5/10 items. 
+
+
+For unsorted numbers: mean(averge of numbers) and range(diff of largest and smallest) can be done in single scan.
+for sorted numbers : find a specific number, find duplicates, find median, mode can be done in single scan.
+
+
+- Brute force design:
+- example: selection sort.
+- Selection sort:
+    - find the smallest element in iteration 1 and put at first.
+    - find the next smallest element in iteration 2 and put at second. so on.
+
+    Also
+    - from the last, find the largest element and swap it with last element.
+    - find the next largest element and swap with second last and so on.
+
+- design selection sort:
+    def selection_sort(A):
+        n = len(A)
+        for i in range(n):
+            minval = A[i]
+            minindex = i
+            for j in range(i + 1, n):
+                if A[j] < minval:
+                    minval = A[j]
+                    minindex = j
+            swap(A[i], A[minindex])
+        return A
+
+Time complexity: O(n ^ 2)
+Space complexity: constant
+
+
+- Efficieny:
+    - Time : how long the process runs on CPU. CPU time.
+    - Space: how much memory the process takes in RAM. RAM space.
+
+- normal operations like assignment, swap, comparison are done in constant amount of time.
+- For asymptotic operations only input size is considered. Language used, hardware used and OS used are ignored.
+
+- Bubble sort:
+    - In iteration 1: from the last, compare n and n-1 elements and arrange them in order. Then n-1 and n-2 compare. so on
+    so that after iteration 1, smallest value is at 0th index.
+    - In iteration 2: from the last, compare n and n-1 so that, second smallest is kept at 1st index.
+    - After iteration n: n elements are sorted.
+
+Time complexity: O(n ^ 2)
+Space complexity: constant
+
+With selection sort, the time complexity is same for best, average, worst case scenario O(n ^ 2).
+
+Bubble sort is worst than selection sort since in each iteration n comparison, swappings are done. In selection sort, only 1 swap is done
+after every iteration.
+
+- design Bubble sort:
+    def bubble_sort(A):
+        l = len(A)
+        for i in range(l):
+            for j in range(n - 1, i + 1):
+                if A[j] < A[j - 1]:
+                    A[j], A[j - 1] = A[j - 1], A[j]
+        return A
+
+
+- For a sorted or reverse sorted array, n(n-1)/2 comparisons are needed in bubble sort.
+- 0 swap operations are performed for sorted array using bubble sort.
+- n(n-1)/2 swap operations are performed for reverse sorted array using bubble sort.
+
+With bubble sort, the time complexity is same for best, average, worst case scenario O(n ^ 2).
+
+
+- Insertion sort: It uses decrease-and-conquer algorithm.
+In first iteration, we take first element and sort it.
+In second iteration, we assign second index element as temp(pivot). Take the second index and compare with pivot. If second is lower than
+first, than move first to second and keep pivot to first.
+In third iteration, we assign third index element as temp(pivot). we move second index element to right if its greater than
+pivot and move first index element to right if its greater than pivot. Accordingly we keep temp in third or second or first position.
+and so on.
+
+We can do right shift or left shift.
+
+- Design insertion sort:
+    def insertion_sort(A):
+        for i in range(len(A)):   # [5, 6, 2, 4]
+            pivot = A[i]
+            j = i - 1
+            while j >= 0 and A[j] > temp:
+                A[j+1] = A[j]
+                j -= 1
+            A[j + 1] = pivot
+        return A
+
+
+Time complexity: Best case scenario: if list is already sorted: O(n). No right shift operations are done.
+                 Average case scenario: some elements in list are sorted and some not sorted. O(n ^ 2).
+                 Worst case scenario: if list is reverse sorted: O(n ^ 2). All right shift operations are done.
+
+Size and nature(sorted or reverse sorted) of the input determine the complexity.
+
+Bogosort(also called stupid sort) randomly shuffles elements and checks if array is sorted every time until it is sorted.
+
+In-place and other practical considerations:
+O(1) = constant time
+O(log n) = logrithmic time
+O(n) = linear time
+O(n log n) = linearithmic time
+O(n ^ 2) = Quadratic time
+O(n ^ 3) = Qubic time
+O(2 ^ N) = exponential time
+
+-In place algorithm: Algorithm is said to in place if it does not require extra memory, except a constant amount of memory units.
+-Merge sort is not in-place algorithm. An auxiliary array of size n(O(n)) is required.
+-Insertion sort, quick sort, bubble sort and selection sort are in place algorithms(O(1)).
+
+- Merge sort:
+    It uses divide and conquer algorithm.
+    It splits the array into 2 equal half and assumes that they become sorted so that it can sort the 2 halves.
+    The 2 halves are split again until single element is there. Then at the above level, the single elements are arranged in sorted order.
+    Similar is done at the above levels. Finally the whole array is sorted.
+
+
+
+
+-Quick sort:
+    We partition the given array into 2 halves with median in the middle. But we don't know median.
+    The elements to left are lower than pivot(median) and elements to the right are higher than pivot.
+    But we don't know which element is to be taken as pivot. Hence we assume 0th index element is pivot.
+    Again from left elements a pivot is picked and from right elements a pivot is picked and so on.
+
+[5->pivot,7,6,3,1,2,4]
+    |
+  partition
+    |
+[3,1,2,4 ->left subarray 5,->pivot  6, 7 -> right subarray]
+    |
+[1,2 -> left 3,-> pivot 4 -> right , 5,-> pivot 6, 7 -> right]
+
+Best and average case: If pivot(median) picked splits evenly the list, Then O(n log n).
+Worst case: if pivot picked is smallest/largest, Then O(n ^ 2). For sorted and reverse sorted.
+
+This algorithm often runs faster than merge sort, Hence it is called quick sort.
+
+Quick sort requires auxillary array for partitioning.
+
+Hence to do in place partitioning lomuto's partitioning is used.
+
+-Design: Randomized quick sort with lomuto's(in place) partition
+The smaller and bigger pointers start after pivot index on same side.
+    def helper(A, start, end):
+        # leaf worker
+        if start >= end:
+            return
+        # internal node worker
+        pivotindex = a random element belongs to [start, end] # To avoid picking pivot as start element every time.
+        swap A[pivotindex], A[start]
+
+
+        lomuto's partition
+        -----------
+        smaller = start
+        for bigger in start +1 to end:
+            if A[bigger] < A[start]
+                smaller++
+                swap A[smaller], A[bigger]
+        swap A[start], A[smaller]
+        -------------
+
+        helper(A, start, smaller - 1)
+        helper(A, smaller + 1, end)
+
+    def quicksort(A):
+        helper(A, 0, length(A) - 1)
+        return A
+
+-Hoare's partitioning for quick sort.
+    pivot is the start. smaller = start + 1. bigger = end.
+    If the value at smaller index is smaller than pivot then increment the smaller. Like wise, if the value at bigger index
+    is bigger than pivot the decrement the bigger.
+    If the value at smaller index is bigger than pivot then check the bigger index. If its value is smaller than pivot. Then swap
+    both the values.
+
+    O(n) and is in place partition.
+    Replace lomuto's partition with hoare_partition from above code, it will work.
+
+    def helper(A, start, end):
+        # leaf worker
+        if start >= end:
+            return
+        # internal node worker
+        pivotindex = a random element belongs to [start, end] # To avoid picking pivot as start element every time.
+        swap A[pivotindex], A[start]
+
+
+        hoare's partition
+        -----------
+        smaller = start + 1
+        bigger = end
+        while smaller <= bigger:
+            if A[smaller] < A[start]:
+                smaller += 1
+            elif A[bigger] > A[start]:
+                bigger -= 1
+            else:
+                swap A[smaller], A[bigger]
+                smaller += 1
+                bigger -= 1
+        swap A[start], A[bigger] # swap pivot to the middle.
+        -------------
+
+        helper(A, start, bigger - 1)
+        helper(A, bigger + 1, end)
+
+    def quicksort(A):
+        helper(A, 0, length(A) - 1)
+        return A
+
+- Abstract Data type(ADT): Its a transform and conquer algorithm.
+    A specification of 1) what the data is
+                       2) what operations will be performed on the data.
+    It does not say about how it will be implemented.
+
+- Priority Queue ADT:
+    In regular queue, element that is first pushed in is poped out(FIFO).
+    Using priority queue, we can 1) insert an element
+                                 2) Take out based on priority(or extract minimum)
+    It can take normal integers or objects with well defined keys.
+    There are 2 kinds of priority queues
+        1) min priority queue: smaller value has more priority.
+        2) max priority queue: larger value has more priority.
+
+     Time complexity : O(log n) for insertion and deletion.
+
+    examples:
+        1) CPU schedular schedules processes based on priority queues.
+        2) printer prints based on priority queues.
+
+    binary heap can be used for internal sorting in priority queues.
+
+- Binary heap:
+    property 1: Its a complete binary tree.
+    property 2: priority of any node >= priority of its children.
+    If elements are not in order, we need to rearrange which is called heapify.
+
+    max heap has max value at root node.
+    min heap has min value at root node.
+
+    Heap is represented as a binary tree.
+    If we take root node as index 1, left node of root as index 2 and right node as index 3.
+    If node is at index = i
+    Its left child is at index = 2i
+    Its right child is at index = 2i + 1
+    its parent is at index = i // 2
+
+    Full binary tree:
+    If each node of tree has 2 child nodes is called full binary tree. Means height H0 has 1 node, H1 has 3 nodes, H2 has
+    7 nodes etc.
+
+    Complete binary tree:
+    All levels are filled except leaf level which is filled as left as possible.
+    Height is log n.
+    Heap is a complete binary tree.
+
+    Insert an element:
+    Height of binary tree in Log n. Therefore to insert an element at correct node of binary tree or to move up,
+    O(log n) is time complexity for 1 element. For n elements, it is O(n log n)
+    In insertion of max heap, insert as the leaf, then swap the places so that tree's properties are satisfied.
+
+    Remove priority element:
+    If root element is removed(for example), the bottom leaf node is moved to root. Property 2 is checked and moved down
+    until property 2 is satisfied.
+    Time complexity for n elements in O(n log n).
+    In delete of max heap, we always delete the root and right most leaf will take its place then we adjust.
+
+    Total time complexity of binary heap is O(n log n).
+    Time complexity of insert is O(log n).
+    Time complexity of delete is O(log n).
+    Time complexity of change priority is O(log n).
+    Time complexity of build heap is O(n).
+
+    Heap sort is in place sort.
+    Heap sort is not a stable algorithm.
+
+- Decision Trees and lower bounds on sorting:
+    Decision Trees are visualized using Trees where first element is compared with second and then with third.
+    At the leaf node the output is written like a < b < c
+    With comparison based sorting, the best time complexity can be O(n log n). This is proven.
+
+Timsort combines merge-sort and insertion-sort for worst case=O(n log n) and best case=O(n) time.
+Timsort is python standard sorting algorithm since 2.3 version.
+
+
+- Counting sort:
+    Its not a comparison sort.
+    It a stable sorting algorithm which means order is preserved in the output. Means if there are 2 1's in array, their order
+    will be same as input array.
+    Counting sort will not work on negative values.
+    Values should be in range 0 to k(max element in range).
+    For storing the count of elements we require another array.
+    Counting sort assumes finite set like 1-10, 1-100, 1-1000 etc.
+    eg: [1, 0, 3, 1, 3, 1], in this there are 1 occurance of 0, 3 occurances of 1 and 2 occurances of 3 and 0 occurances of 2.
+
+Radix sort:
+    Radix = base. eg: base 10, base 2(bits) etc.
+    For a fixed size list, Radix sort is best performance than merge sort and others.
+    Time complexity: O(n)
+    Radix sort is stable sort since order is preserved.
+    n integers, d digits, in some base(base 10 example)
+
+    design: For numbers take 10 buckets(0-9). for Alphabets take 26 buckets(A-Z).
+
+    eg: [21, 345, 13, 101, 50, 234, 1] # 7 integers, 3 digits long.
+         Sorting is done from left(Least sig digit) to right(MSD).
+    Step 1: There will be 10 buckets. Add all numbers with least sig. digit like 0 in 20 etc. to bucket 1 and
+            Add all numbers with least sig. digit like 1 in 21 etc. to bucket 2 etc.
+            [50, 21, 101, 1, 13, 234, 345]
+    Step 2: There will be 10 buckets again.
+            Add all numbers with second least sig. digit like 0 in 201 etc. to bucket 1 and
+            Add all numbers with second least sig. digit like 1 in 212 etc. to bucket 2 etc.
+            [101, 01, 13, 21, 234, 345, 50]
+    Step 3: Similarly third least sig. digit.
+            [01, 13, 21, 50, 101, 234, 345]
+
+    Radix and counting sort can be used for fixed size numbers and strings.
+
+Bucket sort:
+    Divides entire range of values into set of buckets.
+    Counting sort is special condition of bucket sort where size = 1
+    Steps : 1. Setup an array of empty buckets
+            2. scatter: go over the original array putting objects in to the bucket.
+            3. sort each non-empty bucket.
+            4. Gather: visit the buckets in order and put all elements back into the original array.
+    Time complexity : O(n)
+
+
+Quicksort analysis: Quiz 003
+The overall space complexity of selection sort, bubble sort and insertion sort is O(1) or O(n).
+
+Algorithms:
+Brute-Force : Bubble, selection sort
+Decrease and conquer: Insertion sort
+Divide and conquer: Quick and Merge sort.
+Transform and conquer: heap sort.
+
+
+

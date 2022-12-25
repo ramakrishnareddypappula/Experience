@@ -1,0 +1,7 @@
+Traditionally applications were deployed on bare metal servers or vms.
+If a java app needs to be run on vm/bare metal, compatible java version must be present else error will be thrown.
+In short, Compatible libraries and dependencies must be present before running the app.
+
+Matrix from hell: Applications enhancement requires libraries and dependencies to be made in dev, stage, prod and cloud envs.
+If this is not smooth then it is calle matrix from hell.
+

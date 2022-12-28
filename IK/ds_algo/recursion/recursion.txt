@@ -64,8 +64,10 @@
 - Recursive solution may NOT be exponential all the time.
 
 
-- Permutations(order matters): has 2 types 1) repetitions allowed 2) repetitions not allowed.
-- Combinations : repetition not allowed and order not important.
+- Permutations(order matters): example: p, q, r, s number of of ways to group is permutation.
+    has 2 types 1) repetitions allowed 2) repetitions not allowed.
+- Combinations : example: p,q,r,s out of these letters, choosing 3 letters is a combination.
+    repetition not allowed and order not important.
     C(n, k) = C(n-1, k) + C(n - 1, k - 1)
     C(n, k) = n!/ (n - k)! * k!
 
@@ -89,3 +91,6 @@ def overall_function(s):
    helper(s, 0, slate, results)
 
 
+Backtracking : Sometimes a recursive problem has branches that wont give the valid solutions.
+               If you determine this early on in branch, you shouldn't keep recursing to all leaf cases from where you are.
+               This leads to exponnential improvement in combinatorial search.

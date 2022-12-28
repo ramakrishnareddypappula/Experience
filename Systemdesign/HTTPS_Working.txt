@@ -20,5 +20,9 @@ Steps:
     here symmetric encryption is used since asymmetric is computationally expensive and not suitable for bulk transmission.
 
 
+Unlike other types of servers, webservers does not negotiate encryption. If its encrypted(https), it must be sent to 443/8443.
+If its plain text(http) it must be sent to 80/8080.
+
+
 https://www.youtube.com/watch?v=67kItGjvRs0
 

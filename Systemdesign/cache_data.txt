@@ -1,0 +1,27 @@
+Where do we cache data?
+
+Data is caches everywhere.
+
+1. Client apps: HTTP repsonses can be cached by browser. when we request the data for the first time, the response is returned
+                with expiry policy in the http header. When we request again, client app tries to retrieve the data from browser first.
+
+2. CDN : CDN caches static web resources. The clients can retrieve data from CDN node nearby.
+
+3. Load Balancer: It can caches the resources as well.
+
+4. Message infra: Message brokers like kafka store messages on disk first and then consumers retrieve them at their own pace.
+                  kafka stores messages from a period of time.
+
+5. Services : Services cache the data at multiple layers like at cpu cache, RAM cache and disk cache.
+
+6. Distributed cache: Distributed cache like redis hold key-value pairs for multiple services in memory.
+                       This provides much better read/write performance than dbs.
+
+7. Full text search: Tools like elastic search search for full text.
+
+8. Databases: Data is cached at db level as well.
+                In db, memory is allocated to cache query results.
+
+
+https://blog.bytebytego.com/p/ep-38-where-do-we-cache-data#%C2%A7where-do-we-cache-data
+

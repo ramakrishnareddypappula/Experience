@@ -1,11 +1,17 @@
 #  Given collection of distinct integers, return all possible permutations
 #  no repititions
 # input = [1,2,3]
+# output = [
+# [1, 2, 3],
+# [1, 3, 2],
+# [2, 3, 1],
+# [2, 1, 3],
+# [3, 1, 2],
+# [3, 2, 1]
+# ]
 
-
-
-
-
+# Solution: for each position, what value to use?
+# what options we have ? Any not yet used from input.
 
 def helper(input1, slate, result):
     if len(input1) == 0:

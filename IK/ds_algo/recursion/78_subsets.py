@@ -3,6 +3,8 @@
 # nums = [1,2,3]
 # output = [[1, 2, 3], [1, 2], [1, 3], [1], [2, 3], [2], [3], []]
 
+# Solution:
+# - At every number, we should decide whether to include or exclude that number.
 
 # Time complexity = slate[:] will have O(n)
 # In every node of the tree we need to decide to include the number of not.

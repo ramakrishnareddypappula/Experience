@@ -1,0 +1,79 @@
+Kubernetes: Used to automate deployments and management containerized application.
+
+Advantages:
+    - Load balancing: Kubernetes evenly distributes traffic between applications.
+    - Automated rollouts and rollbacks: upgrades are done from time to time and rollback when upgrade fails.
+    - Auto scaling: Based on resource utilization, auto scale up and scale down are done.
+    - self healing: kubernetes monitors container health, restarts the containers, replace containers.
+
+Kubernetes objects:
+    There are 2 types of objects.
+    - Basic objects: Pod, service, namespace, volume.
+    - Advanced objects: Replication controllers, Replication sets, deployments, stateful sets and daemon sets.
+
+
+Pod : Smallest deployable unit kubernetes and can hold 1 or more containers.
+Node: pyhsical or vm that can hold multiple pods.
+Cluster: Group of nodes together. Contains 1 master node and multiple worker nodes.
+service : A logical collections of pods in k8 cluster. It maintains single ip. Traffic is sent to virtual ip is distributed to pods.
+ReplicaSet: Its a process that runs multiple instances of a pod.
+Deployment: A deployment will tell how to create and modify the instance of pods. ReplicaSet is automatically created.
+Namespace: Kubernetes cluster is divided into group of virtual clusters. Applications deployed in different namespaces can communicate with each other.
+           A namespace is created using kubectl command or YAML file.
+
+Kubernetes Architecture:
+    Kubernetes groups physical or vms as a cluster.
+    The cluster has control plane and worker node plane.
+    Control plane is the brain of the cluster. It manages worker nodes.
+    Applications are run on worker nodes.
+
+    Control plane components:
+    - Kube API server: kubectl commands interact with the cluster using kubeAPI server.
+    - etcd: A distributed key-value store to store API objects.
+    - kube controller manager: It performs routine checks. It interacts with kube schedular to ensure that kubernetes object brought back to desired state if they are not.
+    - cloud-controller-manager: Helps in integrating kubernetes with cloud provider APIs. Example: AWS s3 can easily interact with kubernetes using Cloud controller manager.
+    - Kube-schedular : Helps in scheduling the pods.
+
+    Worker node components:
+    - kubelet: Its the main service that takes specification from kube-apiserver and keeps the pods in desired state.
+    - kube-proxy: Proxy service running on each pod and exposes services to the external world.
+    - Container runtime: responsible for running containers. Kubernetes supports several container runtimes like docker, containerd.
+
+How kubernetes works:
+    - Kubernetes groups set of physical or virtual machines called nodes.
+    - On nodes, pods are run and each pod consists of 1 or more containers.
+    - Control plane orchestrates and takes care of worker nodes. It does scaling up, reallocating workloads.
+    - Using kubernetes dashboard and kubectl CLI tool we can interact with kubernetes cluster.
+
+Kubernetes labels:
+    labels are key-value pairs that are attached to pods etc.
+    eg: kubectl get pods -l environment=prod
+    here kubernetes pod is created with label env.
+
+Kubernetes deployment file:
+    kubernetes objects are defined in yaml file which is given as input to kubectl command. kubectl converts yaml to json while sending to kubernetes API.
+
+    yaml file contents
+     - apiVersion : version of kubernetes API used for creating this object.
+     - kind - (Pod, Deployment) : kubernetes object type that needs to be created.
+     - metadata : helps uniquely identify the object.
+     - spec : specifies the desired state of kubernetes object.
+
+Defining kubernetes service:
+    service is logical abstraction for deployed group of pods in cluster.
+    traffic directed towards service is directed towards pods.
+    deployment is managed by the selectors mentioned in service object.
+
+    service types:
+    Nodeport: Nodeport along with NodeIp can be used from outside.
+    http://<NodeIp>:<nodeport>
+    Clusterip: with this service type, the application deployment is reachable within the cluster.
+    Load balancer: The service is exposed to the outside world using cloud provider's load balancer. The load balancer's ip is used to route traffic
+                    towards the service.
+
+
+Kubernetes design patterns:
+
+
+
+

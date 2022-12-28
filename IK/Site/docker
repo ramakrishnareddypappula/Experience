@@ -1,0 +1,56 @@
+docker vs VM:
+    - In vm, hypervisor is installed over infrastructire which manges multiple virtual machines.
+    - In VM, if we want to run an app, dependencies and libraries must be present in vm.
+    - In docker, container engine abstract the host os and manages multiple containers.
+    - Each vm needs its own OS, while containers shares host os.
+    - Vm takes more time to boot up. containers come up quickly.
+
+
+For running a containerized application, docker enginer needs to be installed.
+> sudo systemctl start docker # to start the docker.
+> sudo systemctl status docker # to check the status.
+
+> docker -v # version.
+> docker info # system wide information including kernel version, number of containers and images.
+
+Docker Terminologies:
+    - Dockerfile: A text file. The contains specifics about base image, env variables, add files & dirs into the image and specify the
+                   process to start when container comes up.
+      example:
+        FROM ubuntu #  Dockerfile always starts with FROM. It says I want to use python3 as base image and top of which I want build additional stuff.
+                    # If I dont need any base image, then say "FROM scratch"
+        MAINTAINER RK # optional . who maintains this.
+        RUN apt-get update # to update.
+        ADD ./target/a.py /opt/a.py # Add from host machine to docker container image
+        WORKDIR /opt/app # specify the working directory from where the subsequent instructions are executed.
+        ENV PATH="$PATH:${PYTHONPATH}" # used for setting env variables.
+        ENTRYPOINT ["python", "a.py"] # command to be executed when docker container is started.
+        CMD ["echo", "hello world"] # to execute a command. RUN is executed during building of the image and CMD is executed after creating container.
+
+      > docker build -t myimage1:1.0 /path/of/Dockerfile   # 1.0 is the tag.
+      > docker images # it will have above generated build.
+      > docker run <imageid> # hello world is output.
+      > docker run --name userapp -d -p 4459:8080 myimage1 # host port is 4459 and container port is 8080. traffic received on port 4459 on host machine
+                                                        is directed to 8080.
+
+    - docker image: Using "docker build" command we can build docker image looking local repository. If not present, it looks at docker registry to pull the image.
+
+    - Docker Container: runtime instance of docker image is container.
+
+    - Docker engine: Tool installed on host os. It helps containerizing apps and helps running in multiple envs.
+
+    - Registry Service: repository. It is used to store docker images.
+
+Docker Architecture:
+    - Docker Daemon: A background process that creates and manages docker images, networks and volumes.
+    - Docker CLI: Its a client which interacts with docker daemon using REST APIs
+    - Docker objects: Images, containers, volumes and networks are all examples of docker objects.
+    - Docker registry: Its a repository for storing docker images.
+
+
+Docker Images:
+    By looking at the Dockerfile instructions, using "docker build" command we create an image.
+    "docker run" command is used to create and run docker container using docker image.
+
+
+

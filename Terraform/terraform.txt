@@ -1,0 +1,340 @@
+
+-What is Infrastructure As Code(IaC)?
+IaC is provisioning, configuring, updating, managing and destroying the infrastructure through code instead of manual process.
+We can manage any IaC component like DB, networks, storage and app config.
+Using Ansible or Terraform we can configure infrastructure components.
+
+They are many IAC tools like a) docker b) Ansible c) Terraform d) puppet e) Cloud formation etc.
+
+Ansible can be primarily used for configuration management while Terraform is used for provisioning.
+
+The main functionality of configuration management tools like ansible is
+1) Designed to install and manage software for db, storage etc.
+2) Maintains standard structure(using git).
+3) version control
+4) Idempotent(run 1 or 100.. only diff is executed to get system to desired state).
+
+The main functionality of provisioning tools like Terraform is
+1) VPC, dbs, storage, networks etc can be provisioned.
+2) Provider support for AWS, Azure, GCP etc while Cloud Formation support only AWS.
+3) Idempotent
+
+Terraform is developed by Hashicorp.
+Terraform works with physical machines, VMs, AWS, GCP, Azure etc.
+Terraform uses Hashicorp Configuration Language(HCL).
+The files end with .tf
+Terraform is declarative, It brings from current state to desired state.
+
+Terraform has 3 phases
+1) init : initializes the project and identifies the providers(AWS, Azure, GCP etc) to used.
+2) plan : Terraform drafts the plan to get to desired state.
+3) apply : Makes necessary changes to bring back to the desired state.
+
+resource: Every object that terraform manages is called resource.
+eg: A file, a vm, ec2 instance, s3 buckets.
+
+Terraform ensures the infrastructure in always in desired state.
+
+> terraform version
+returns version output.
+
+HCL syntax:
+<block> <parameters> {
+    key1 = value1
+    key2 = value2
+}
+
+eg:
+resource "local_file" "pet"{
+    filename = "/root/pets.txt"
+    content = "We love terraform." # content will show content when "terraform plan or apply" is run, if we dont want to show then
+                                    # sensitive_content should be written instead of content.
+}
+
+resource = block name
+"local_file" = resource type.
+local = provider, can also be aws etc.
+file = resource, can also be s3, ec2 etc.
+So resource_type can be aws_s3_bucket.
+"pet" = Resource name
+filename and content = arguments which dependent on resource type.
+
+eg: resource file of aws_ec2 instance creation
+
+resource "aws_instance" "webserver" {
+    ami = "ami-abcd"
+    instance_type = "t2.micro"
+}
+
+resource "aws_s3_bucket" "data"{
+    bucket = "s3_bucket_name"
+    acl = "private"
+}
+
+> terraform init # It will download and install plugins(latest version) based on .tf file. for above local_file, local plugin will be installed.
+                    # the official providers are available in terraform registry: registry.terraform.io. eg: aws, gcp, azure.
+                    # the verified providers is maintained by third party companies. eg: digital ocean.
+                    # the community providers is maintained in individual companies.
+                    # terraform init is safe and can be run any times.
+> terraform plan # execution plan will be shown here. The output is similar to git diff.
+> terraform apply # resource will be created or modified.
+> terraform show # to display what was executed.
+> terraform destroy # will destroy the infrastructure.
+
+Without terraform init, terraform plan will not work.
+provider_plugin version is known in terraform init output.
+The providers will provide list of resources and their arguments. Terraform documentation has all of this.
+
+The file name generally is "main.tf".
+After "terraform apply" a file with name terraform.tfstate is generated.
+
+update and destroy tf file:
+
+resource "local_file" "pet"{
+    filename = "/root/pets.txt"
+    content = "We love terraform."
+    file_permission = "0700"  # If we update this permission, terraform will delete and create a new file.
+}
+
+> terraform destroy # will delete the file created as well.
+
+Terraform providers:
+    When "terraform init" is run in a folder containing configuration files, terraform will download and install plugins.
+    plugins are installed in .terraform/plugins hidden directory under config files directory.
+
+Configuration directory:
+    There can be any number of config files under a directory or any number of resources under a file.
+    by default a configuration directory will have only 1 config file called "main.tf" which will contain all resources.
+    under dir
+    main.tf # all resource definitions.
+    variables.tf # contain variable declarations
+    output.tf # contains outputs from resources.
+    provider.tf # contains provider information.
+
+input variables:
+    in variables.tf under config dir.
+    variable "filename"{
+        default = "/root/pt.txt" # optional value.
+    }
+    variable "content"{
+        default = "abc"
+    }
+    variable "length"{
+        default = "1"
+    }
+
+
+    resource "local_file" "pet"{
+        filename = var.filename
+        content = var.content
+        file_permission = "0700"
+    }
+
+    Apart from default, type and description can be present.
+
+    variable "content"{
+        default = "abc"
+        type = string # optional . Can be number, bool, list, map, object, tuple,  any(Default Value)
+        description = "the content of the file" # optional
+    }
+
+    list example:
+    variable "prefix"{
+        default = ["Mr.", "Mrs.", "Sir"]
+        type = list
+    }
+
+    resource "random_pet" "mypet"{
+        filename = var.prefix[0] # "Mr."
+    }
+
+    we can also have
+    variable "prefix"{
+        default = ["1", "2", "3"]
+        type = list(number) # list(string), map(number) -> for the values, tuple will have different data types while set have same.
+    }
+
+
+Using Variables in Terraform:
+    if default values are not provided
+    example:
+    variable "prefix"{
+    }
+    During "terraform apply" prompt is given to provide the inputs.
+
+    OR
+    > terraform apply -var "filename=/root/pt.txt" -var "content=ABCD"
+
+    OR
+    export with TF_VAR as variable prefix
+    > export TF_VAR_filename="/root/pt.txt"
+    > export TF_VAR_content="ABCD"
+    > terraform apply
+
+    OR
+    terraform.tfvars or terraform.tfvars.json or *.auto.tfvars or *.auto.tfvars.json file will be automatically loaded by json.
+        filename="/root/pt.txt"
+        content="ABCD"
+    > terraform apply
+
+    if any other file name is provided then
+    > terraform apply -var-file variables.tfvars
+
+    If variable is provided in all above formats, terraform follows below precedence
+    # -var or -var-file  > *.auto.tfvars > terraform.tfvars > env variables.
+
+Resource Attribute reference:
+    In general 1 resource attribute depends on another resource attribute
+    syntax: ${provider_type.resourcename.attribute}     # This is called implicit dependency.
+
+    time_static resource type does not take any attributes.
+
+
+    >terraform show # will show all the attributes of resource.
+    example:
+    terraform show
+    # local_file.time:
+    resource "local_file" "time" {
+        content              = "Time stamp of this file is 2022-12-29T07:18:49Z"
+        directory_permission = "0777"
+        file_permission      = "0777"
+        filename             = "/root/time.txt"
+        id                   = "5359e72ca3a9682ddfa4859b7823c67ae4f7c7fb"
+    }
+
+    # time_static.time_update:
+    resource "time_static" "time_update" {
+        day     = 29
+        hour    = 7
+        id      = "2022-12-29T07:18:49Z"
+        minute  = 18
+        month   = 12
+        rfc3339 = "2022-12-29T07:18:49Z"
+        second  = 49
+        unix    = 1672298329
+        year    = 2022
+    }
+
+
+Resource dependencies:
+    Explicit dependency:
+        depends_on = [resource_provider_type.resource_name] should be used in depending resource.
+
+    explicit dependency does not access any of the attributes of dependent resource.
+
+Output variables:
+    we can record the output in the configuration files itself.
+    syntax:
+        output "<variable_name>"{
+            value = "<variable_value>"
+            <arguments>
+        }
+
+    once >terraform apply is run. variable_name and value is printed in output.
+
+    OR
+    > terraform output # will display just the output.
+    > terraform output abcd
+
+    This output is generally given to ansible and shell scripts.
+
+
+terraform state:
+    It is single source of truth for terraform to understand
+    .tfstate file maintains the state of configuration.
+    This file is stored in configuration directory. It is stored in json format.
+    After every "terraform apply" a tfstate file is created or updated.
+    terraform get back to desired state based on the tfstate file.
+
+    Also performance is improved with tfstate file since during update only changes are applied, unchanged config remains as is.
+    >terraform plan -refresh=false (does not refresh the state.)
+
+    state helps in collaboration within a team.
+    If a person tf file, tfstate is saved locally. Then if other person runs, the tfstate will be different.
+    In order to avoid this, tfstate are saved in aws s3 bucket or hashicorp consul, terraform cloud etc.
+
+    state files should be stored securely since it contains sensitive information.
+
+Terraform commands:
+    >terraform validate # to validate the file. # just syntax
+    >terraform fmt # or terraform format
+    >terraform show # prints current state of resources.
+    >terraform show -json # prints in json format.
+    >terraform providers # display providers
+    >terraform providers mirror /root # copies plugins to /root directory.
+    >terraform output
+    >terraform output petname
+    >terraform refresh # a manual update made on server/db is picked up my terraform using this command.
+    >terraform graph # displays the dependencies in raw format.
+    > apt update -> > apt install graphviz -y  -> > terraform grapth | dot -Tsvg > graph.svg # displays nicely.
+
+
+mutable and immutable infrastructure:
+    mutable: If servers is upgraded from x to y inplace, it is called mutable. In this case, some of the upgrades will have problem.
+    immutable: A new version of servers are brought and are replaced with the one ones. This is called immutable.
+    immutable is beneficial in IAC.
+    By default, terraform destroys the resource before creating the new resource.
+    If we want to skip the deletion or first create and they destroy, we need to this using lifecycle rules.
+
+Lifecycle rules:
+    In the resource we can have below code to create a resource before destroying.
+    lifecycle {
+        create_before_destroy = true
+    }
+
+    We can prevent destroy using. example db deletion can be prevented.
+    lifecycle {
+        prevent_destroy = true
+    }
+
+    To ignore the changes of resouce attributes.
+    tags {
+        Name = "ProjectA_server"
+    }
+    lifecycle {
+        ignore_changes = [
+        tags
+        ]
+    }
+
+Datasources:
+    The contents created externally if we manually create db or an app. we can still manage using terraform using datasources.
+
+    To read from the file that is manually created:
+
+    data "local_file" "dog"{
+        filename = "/root/dog.txt"
+    }
+
+    Differences between resources and datasources:
+    - keyword: resouce will have resource while datasources will have data.
+    - resouces creates, updates and destroys a resouce. While datasource only reads the resource.
+
+Meta Arguments:
+    To create multiple files, for loop a type of meta argument is used.
+    - for each
+
+    variables.tf
+
+
+Version constraints:
+    version executed is shown using terraform init.
+    To use specific version
+
+    terraform{
+        required_providers {
+            local = {
+                source = "hashicorp/local"
+                version = "1.4.0"
+            }
+        }
+    }
+
+    Other variations:
+    version = "!= 2.4.0"
+    version = "< 2.4.0"
+    version = ">1.2.0, < 2.4.0, != 1.4.0"
+    version = "~> 1.2" if 1.2 present then install, else 1.3, 1.4 ... 1.9
+    version = "~> 1.2.0" if 1.2.0 present then install else 1.2.1, 1.2.2, 1.2.3 ... 1.2.9
+
+# https://www.youtube.com/watch?v=YcJ9IeukJL8

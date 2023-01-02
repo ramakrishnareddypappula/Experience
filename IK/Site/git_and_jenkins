@@ -1,0 +1,58 @@
+How to reset the added files:
+> git add abcd.txt
+> git reset abcd.txt # removes from changes.
+> git reset COMMITID # get commit id from >git log # removes the changes after commit.
+OR
+> git reset --hard HEAD~1  # last commit will be reset.
+OR
+>git reset --hard COMMITID
+
+3 times you commit from same branch, then go to master and merge the branch changes.
+> git merge branch_name # master will have a chnages.
+
+To add code remote host(GitHUB):
+> git remote add origin https://github.com/abcd.git
+> git push origin master # pushes master code to the origin(GITHUB)
+
+A text file that contains the definition of jenkins pipeline and is checked into source control.
+
+Jenkins pipeline can be created using pipeline or multibranch pipeline projects. Both will give Pipeline script.
+using which we can create a pipeline.
+
+Pipeline Syntax:
+
+pipeline {
+agent any             # It can run on any node.
+tools{
+maven 'Maven 3.6.1'  # use 1 or more tools.
+}
+stages{
+stage('one:build'){
+steps{
+echo 'step 1'
+dir('worker'){
+sh 'mvn compile'
+}
+}
+
+}
+stage('two:test'){
+steps{
+echo 'step 2'
+}
+
+}
+stage('three:deploy'){
+steps{
+echo 'step 3'
+}
+
+}
+}
+post{
+always{
+echo 'This post will always run. There are other options like changed/fixed/aborted/failure etc.'
+}
+}
+
+}

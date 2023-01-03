@@ -1,0 +1,12 @@
+Bastion host provides remote access to private networks from an external network.
+Bastion host acts a bridge between public internet and private hosts.
+Used as SSH proxy servers to support system/network administration and for monitoring servers.
+Bastion host is placed outside the firewall or DMZ, it becomes the only ingress path to access internal resources.
+ACL, allowlists and other network level access controls limit access from the bastion to its protected subnets.
+
+Bastion hosts can become target of cyber attacks.
+ssh security weakness include:
+- private ssh keys does not expire automatically.
+- old vulnerable ssh hashing algorithms are still in use.
+- ssh has no built-in integration with identity providers.
+

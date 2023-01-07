@@ -1,5 +1,5 @@
 
-# Given a base a and an exponent b. Your task is to find ab. The value could be large enough. So, calculate ab % 1000000007.
+# Given a base a and an exponent b. Your task is to find a^b. The value could be large enough. So, calculate ab % 1000000007.
 
 # Brute force:
 # Time complexity = O(b)

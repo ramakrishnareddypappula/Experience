@@ -5,19 +5,19 @@
 # l = 1, 0, 1
 # l = 2 , 00, 01, 10, 11
 
-def bshelper(num, slate):
-    # import pdb
-    # pdb.set_trace()
+def bshelper(num, slate, result):
     if num == 0:
-        print(slate)
+        result.append(slate)
+        return
     else:
-        bshelper(num - 1, slate + "0") #
-        bshelper(num - 1, slate + "1")
+        bshelper(num - 1, slate + "0", result)
+        bshelper(num - 1, slate + "1", result)
+    return result
 
 
-def print_binary_strings(n): #
-    bshelper(n, "")
+def print_binary_strings(n):
+    return bshelper(n, "", [])
 
 
 
-print_binary_strings(2)
+print(print_binary_strings(2))

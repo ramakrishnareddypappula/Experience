@@ -54,17 +54,33 @@
 #
 #     return result
 
+# def helper(n, k, i, slate, result):
+#     if k == len(slate):
+#         result.append(slate[:])
+#         return
+#     if n + 1 == i:
+#         return
+#     slate.append(i)
+#     helper(n, k, i + 1, slate, result)
+#     slate.pop()
+#     helper(n, k, i + 1, slate, result)
+#
+#     return result
+#
+# def find_combinations(n, k):
+#     return helper(n, k, 1, [], [])
+#
+# print(find_combinations(6, 6))
+
 def helper(n, k, i, slate, result):
-    if k == len(slate):
+    if k == 0:
         result.append(slate[:])
         return
-    if n + 1 == i:
-        return
-    slate.append(i)
-    helper(n, k, i + 1, slate, result)
-    slate.pop()
-    helper(n, k, i + 1, slate, result)
-
+    else:
+        for j in range(i, n+ 1):
+            slate.append(j)
+            helper(n, k - 1, j + 1, slate, result)
+            slate.pop()
     return result
 
 def find_combinations(n, k):
@@ -76,4 +92,5 @@ x = []
 for i in range(1, 5 + 1):
     for j in range( i + 1 , 5 + 1):
       x.append([i, j])
-print(x)
+#print(x)
+#[[1, 2], [1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5], [3, 4], [3, 5], [4, 5]]

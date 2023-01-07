@@ -1,0 +1,59 @@
+
+
+# Tree
+# binary search tree:
+    - The tree has exactly 2 children at every node.
+    - Every node's left child is smaller
+    - Every node's right child is larger.
+             60    ---> height 2
+            /  \
+           40   70  --> height 1
+            \  / \
+            45 69 71 --> height 0
+
+
+        The above is unbalanced binary tree. It is not balanced.
+
+    Worst case complexity for search = O(n)
+    Worst case complexity for insert = O(n)
+
+Complete binary tree:
+    It has all the levels completely filled, except possibly the last.
+
+Balanced Binary search tree:
+    A binary tree is balanced, if for every node, the height of its left and right children differ by at most 1.
+
+    Worst case complexity for search = O(height) = O(log n)
+    Worst case complexity for insert = O(log n)
+
+Self Balancing binary search tree:
+
+             60
+            /  \
+           40   70
+           / \    \      ----->
+         39  45    75
+                    \
+                    80
+
+
+             60
+            /  \
+           40   75     # BST balances itself by making parent node as grandparent and moving the grandparent as left child/
+           / \  /  \
+         39  45 70 80
+
+         Some of types of self balancing binary search trees:
+         - Red black tree
+         - AVL tree
+         - 2-3 tree
+         - scapegoat tree
+         - splay tree.
+
+
+dictionary vs binary tree:
+    In binary tree, nodes are present in some kind order, to get max, min values O(log n) is time complexity.
+    In dictionary, keys are not ordered, to get max, min value, we need to do brute force, which takes O(n) time complexity.
+
+    So binary search tree are examples of dictionaries which maintain some kind of order. Hence BST are ordered dictionary.
+

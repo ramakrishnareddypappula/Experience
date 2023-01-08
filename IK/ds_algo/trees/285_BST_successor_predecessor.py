@@ -1,4 +1,7 @@
 
+# For a given node, find the successor(value next to node) and predecessor(value previous to node).
+# eg: for node with value 4 , successor is 5 and predecessor is 3.
+
         #     5
         #    / \
         #   3   6

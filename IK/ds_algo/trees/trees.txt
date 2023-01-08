@@ -57,3 +57,21 @@ dictionary vs binary tree:
 
     So binary search tree are examples of dictionaries which maintain some kind of order. Hence BST are ordered dictionary.
 
+
+Inorder, preorder, postorder:
+
+    inorder:
+        It traverses Left, prints root and right.
+        inorder traversal of BST always prints in ascending order.
+
+         1   --> no left, prints 1 , right
+          \
+           2  --> no left, prints 2, right
+            \
+             5 --> left goes to 3 --> no left, prints 3, goes right 4 ---> no left, prints4, no right
+            / \ --> prints 5, right
+            3  6 --> no left, prints 6, no right
+             \
+              4
+          [1, 2, 3, 4, 5, 6]
+          

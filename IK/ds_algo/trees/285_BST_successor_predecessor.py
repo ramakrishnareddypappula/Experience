@@ -74,3 +74,9 @@ def predecessor(root, p):
         else:
             current = current.left
     return predecess
+
+
+# using inorder traversal we can find successor or predecessor.
+# In inorder traversal for a given key, we will know what is its previous value is and next value is
+# previous value is predecessor and next value is successor.
+

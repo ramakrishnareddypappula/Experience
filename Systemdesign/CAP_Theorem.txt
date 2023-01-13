@@ -1,0 +1,22 @@
+C = consistency
+A = Availability
+P = Partition tolerance
+
+Consistency:
+    All nodes will have same consistent view of data.
+    All clients see same data at same time no matter which node they connect to.
+
+Availability:
+    Respond to users requests at all times.
+
+Partition Tolerance:
+    Even with network partition, it network continues to operate.
+
+When there is network partition, either Consistency or availability must be choosen.
+
+If consistency is priority during network partition, then few of the nodes will be unavailable.
+If availability is priority, then data inconsistency will happen until network partition is resolved.
+
+If a banking system opts for consistency, then few nodes will be unavailable during network partition and if
+it opts for high availablity, then data may not be consistent across the nodes.
+

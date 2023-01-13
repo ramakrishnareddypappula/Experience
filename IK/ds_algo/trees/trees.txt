@@ -57,12 +57,19 @@ dictionary vs binary tree:
 
     So binary search tree are examples of dictionaries which maintain some kind of order. Hence BST are ordered dictionary.
 
+Depth First Search:
+    nodes from traversed from top to bottom.
+    If we add peg to node. There can be 3 pegs for each node(left, bottom and right).
+    If we use left pegs for traversing, then it is called pre order.
+    If we use bottom pegs for traversing, then it is called in order.
+    If we use right pegs for traversing, then it is called post order.
 
-Inorder, preorder, postorder:
+Inorder, preorder, postorder: O(n)
 
     inorder:
         It traverses Left, prints root and right.
         inorder traversal of BST always prints in ascending order.
+
 
          1   --> no left, prints 1 , right
           \
@@ -74,4 +81,76 @@ Inorder, preorder, postorder:
              \
               4
           [1, 2, 3, 4, 5, 6]
+
+          def dfs(root):
+            if root:
+                --------------> preorder
+                dfs(root.left)
+                --------------> innorder
+                dfs(root.right)
+                --------------> postorder
+
+          for n-ary tree:
+          def dfs(root):
+            if root:
+                  ---------------------------> preorder print(root.key)
+                for child in root.children:
+                    dfs(child)
+                  ---------------------------> postorder print(root.key)
+
+          time complexity above both = O(n)
+          auxiliary space: O(height)
+
+TREESORT:
+        in order traversal always return ascending order for binary trees.
+        For n numbers, If binary tree is balanced after insert, delete. Each insertion will take O(log n) for insert and
+        O(n log n) for n elements.
+        We can do in order traversal in O(n).
+        This type of sorting algorithm is called TREESORT.
+
+
+If we have Tree instead of binary search tree, it can be represented by class
+
+class Tree:
+    int key
+    list children --> instead of left and right child.
+
+    Then we can iterate through the children.
+    for child in node.children: # then we can do any operation.
+        print(child.key)
+
+Breadth First Search: Or Level Order Traversal.
+
+         1  --> level 0
+        / \
+        2  3  --> level 1
+
+      [1, 2, 3] --> Traversed level by level.
+
+For binary tree level order is:
+    def levelorder(root):
+        if root is None: return None
+        q = []
+        q.append(root)
+        while q is not None:
+            node = q.pop()
+            print(node)
+            if node.left is not None:
+                q.append(node.left)
+            if node.right is not None:
+                q.append(node.right)
+
+In n-ary tree: remove both if conditions and add
+     for child in node.children:
+        q.append(child)
+
+Time complexity = O(N) each node is traversed 1 time.
+Auxiliary space = O(N) , for queue, at the bottom level queue will be of size O(n/2) max.
+                        But also in n-ary tree there can be 1 parent and n child. So queue size can be max O(n).
+
+
+
+
+
+
           

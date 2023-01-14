@@ -94,3 +94,25 @@ def overall_function(s):
 Backtracking : Sometimes a recursive problem has branches that wont give the valid solutions.
                If you determine this early on in branch, you shouldn't keep recursing to all leaf cases from where you are.
                This leads to exponnential improvement in combinatorial search.
+
+result[:]
+    In most base cases we have [:] to list because is list is mutating and it expands and shrinks.
+    When we get the right values, we take the copy of list.
+    Hence we add [:] to copy that list.
+
+def rec():
+    #base condition
+        result.append(1)
+        return
+    #recursive condition
+
+    return result # if the recursive is not hit and function returns from base condition, then this return will not hit.
+    # if recursive condition is hit then only this return makes sense.
+
+Manager <--> subordinate
+
+2 # vertex
+- # edge
+
+In dfs , many problems have top down approach which is pre order in broad way.
+        Other problems have bottom approach which is post order in broad way.

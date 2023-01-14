@@ -1,0 +1,20 @@
+
+import re
+
+def extract_ips(filepath):
+    with open(filepath, 'r') as f:
+        data = f.read()
+        ips = re.findall(r'(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)', data)
+    return ips
+
+filepath = 'file.txt'
+ips = extract_ips(filepath)
+print(ips)
+
+
+# ? indicates preceding character is optional.
+eg: "ab?c" can be "ac" or "abc".
+
+# "?:" is called non-capturing group. A captured group can be caputured for later use with backreferences.
+    All "?:" start with ( . example (?:abc) matches "abc" but it wont be captured(saved) for future use.
+

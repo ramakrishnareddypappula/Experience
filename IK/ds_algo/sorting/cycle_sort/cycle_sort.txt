@@ -1,0 +1,31 @@
+
+input = [8, 9, 6, 3, 0, 2, 7, 5, 4, 1, 10]
+index = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+let's take index 0:
+    8 which is at index 0 should to go 8 and 4 should go to 4 index and 0 should to 0 index.
+    This is a cycle.
+
+    number 9 should go to index 9 and number 1 should go to index 1.
+    This is cycle.
+
+It is a decrease and conquer algorithm. Similar to selection or bubble sort.
+
+
+General template of cycle sort:
+
+    for i in range 0 to n - 1:
+        while nums[i] != i :  # example 0 is not present at 0th index or 1 at 1st index .. so on.
+            d = nums[i] # d is the value at that index. 9 is at index 0.  d = nums[0] = 9
+            if d < len(nums):
+                swap nums[i], nums[d] # nums[0], nums[9]
+
+After cyclic sort, repeated numbers will settle down at elements not present.
+
+Best: O(n)
+worst: O(n^2)
+average: O(n^2)
+Wost and average is O(N ^ 2) because algorithm may have to traverse through all the elements in the array multiple times
+before sorting it.
+
+It is unstable algorithm(order is not preserved).

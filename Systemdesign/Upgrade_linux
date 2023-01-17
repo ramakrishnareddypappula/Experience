@@ -1,0 +1,57 @@
+
+Upgrade linux:
+    Linux upgrade depends on the distribution.
+    before upgrading:
+        - Backing up your data is important before upgrading.
+        - Make sure you have enough space.
+        - Expect there will be down time.
+        - Best to do upgrade over console instead of ssh.
+        - If the current version does not support upgrade to latest, then it's not possible.
+    - ubuntu/debian : sudo apt-get update && sudo apt-get upgrade
+    - Red hat/centOS: sudo yum update.
+    - Arch Linux : sudo pacman -Syu
+
+
+Upgrade ubuntu to latest version:
+    steps
+    - sudo apt-get update && sudo apt-get upgrade
+    - sudo do-release-upgrade -c  # To check the availability.
+    - sudo do-release-upgrade  # If available, run this command.
+    - Follow the prompts(yes/no) to complete the upgrade.
+
+Ways to upgrade:
+    through
+    - Package manager: packager managers such as apt, yum can be used.
+    - ISO file: If available, we can download ISO and do a fresh install or upgrade to version.
+    - Live CD/USB: using this we can upgrade.
+    - upgrade scripts: many distributions provide upgrade scripts which we can download and upgrade.
+    - Distribution upgrade: many distributions provide tools like "sudo do-release-upgrade" to upgrade.
+    - Automation tools: Tools like ansible/puppet/chef can be used to automate the upgrades.
+
+NFS upgrade:
+    NFS is distributed file system that allows you to share files/directories between multiple systems.
+    It allows user on client computer to access files over a network as if they are stored locally on client's own hard drive.
+    It allows easy sharing of files between multiple computers.
+    Supported in windows, mac and linux.
+    we can upgrade through:
+    - in place upgrade : upgrade on same system without losing data/config.
+    - migration: moving data/config from old server to new one. Using rsync or tar we can move data.
+    - virtualization: it involves running NFS on vm.
+    - Cluster upgrade: If using NFS cluster, we can move data/config to upgraded node. This minimizes the downtime.
+
+Upgrade 10 million servers:
+    - Rolling updates: small number of servers to upgrade while load balancer route the traffic to other servers. This allows minimum impact.
+    - Blue-green deployment: Create new set of servers with new version and redirect the traffic. This allows minimum downtime.
+    - canary release: upgrade small set of servers and closely monitor them. once stable, upgrade the remaining servers.
+    - traffic shifting: this method involves routing percentage of traffic to new servers and remaining to old servers. we can
+        validate traffic on old and new servers.
+    - Multi tier load balancer: we use multiple load balancers to upgrade the servers. This allows you to upgrade the servers while the
+        servers continue to handle traffic.
+
+    we should have a roll back if there are issues in upgrading the servers.
+
+
+
+
+
+

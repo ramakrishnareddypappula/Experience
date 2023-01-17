@@ -116,3 +116,16 @@ Manager <--> subordinate
 
 In dfs , many problems have top down approach which is pre order in broad way.
         Other problems have bottom approach which is post order in broad way.
+
+Head recursion:
+{
+    recursive call
+    //work to be done
+
+}
+
+Tail recursion:
+{
+    //work to be done
+    recursive call
+}

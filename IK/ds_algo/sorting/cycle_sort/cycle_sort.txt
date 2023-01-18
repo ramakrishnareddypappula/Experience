@@ -29,3 +29,10 @@ Wost and average is O(N ^ 2) because algorithm may have to traverse through all 
 before sorting it.
 
 It is unstable algorithm(order is not preserved).
+
+
+Useful:
+1) It does in-place sorting. Hence if memory constraint is there, use cycle sort.
+2) If most of the array is sorted and only few elements are not. Then cycle sort performs well.
+3) If array has many duplicate elements then use cycle sort as it can count and place at correct locations.
+

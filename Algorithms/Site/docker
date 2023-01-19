@@ -1,0 +1,240 @@
+docker vs VM:
+    - In vm, hypervisor is installed over infrastructire which manges multiple virtual machines.
+    - In VM, if we want to run an app, dependencies and libraries must be present in vm.
+    - In docker, container engine abstract the host os and manages multiple containers.
+    - Each vm needs its own OS, while containers shares host os.
+    - Vm takes more time to boot up. containers come up quickly.
+
+
+For running a containerized application, docker enginer needs to be installed.
+> sudo systemctl start docker # to start the docker.
+> sudo systemctl status docker # to check the status.
+
+> docker -v # version.
+> docker info # system wide information including kernel version, number of containers and images.
+
+Docker Terminologies:
+    - Dockerfile: A text file. The contains specifics about base image, env variables, add files & dirs into the image and specify the
+                   process to start when container comes up.
+      example:
+        FROM ubuntu #  Dockerfile always starts with FROM. It says I want to use python3 as base image and top of which I want build additional stuff.
+                    # If I dont need any base image, then say "FROM scratch"
+        MAINTAINER RK # optional . who maintains this.
+        RUN apt-get update # to update.
+        ADD ./target/a.py /opt/a.py # Add from host machine to docker container image
+        WORKDIR /opt/app # specify the working directory from where the subsequent instructions are executed.
+        ENV PATH="$PATH:${PYTHONPATH}" # used for setting env variables.
+        ENTRYPOINT ["python", "a.py"] # command to be executed when docker container is started.
+        CMD ["echo", "hello world"] # to execute a command. RUN is executed during building of the image and CMD is executed after creating container.
+
+      > docker build -t myimage1:1.0 /path/of/Dockerfile   # 1.0 is the tag.
+      > docker images # it will have above generated build.
+      > docker run <imageid> # hello world is output.
+      > docker run --name userapp -d -p 4459:8080 myimage1 # host port is 4459 and container port is 8080. traffic received on port 4459 on host machine
+                                                        is directed to 8080.
+
+    - docker image: Using "docker build" command we can build docker image looking local repository. If not present, it looks at docker registry to pull the image.
+
+    - Docker Container: runtime instance of docker image is container.
+
+    - Docker engine: Tool installed on host os. It helps containerizing apps and helps running in multiple envs.
+
+    - Registry Service: repository. It is used to store docker images.
+
+Docker Architecture:
+    - Docker Daemon: A background process that creates and manages docker images, networks and volumes.
+    - Docker CLI: Its a client which interacts with docker daemon using REST APIs
+    - Docker objects: Images, containers, volumes and networks are all examples of docker objects.
+    - Docker registry: Its a repository for storing docker images.
+
+
+Docker Images:
+    By looking at the Dockerfile instructions, using "docker build" command we create an image.
+    "docker run" command is used to create and run docker container using docker image.
+
+
+
+------- my exp -------
+
+Docker:
+Install docker using the latest documentation in https://docs.docker.com
+
+
+#docker version # shows both the client and server version.
+
+#docker run hello-world
+
+1. Docker client will contact docker deamon.
+2. Docker deamon will go and pull the "hello-world" image from the docker hub.
+3. From that image docker hub creates new container which runs the executable.
+4. This executable produces the which is sent to docker client which we will see.
+
+Docker images are present in Docker hub.
+# docker images # OR #docker image ls # to see the images downloaded.
+
+# docker container <cmd> # To get and see more information on docker commands.
+
+# https://hub.docker.com # To get the docker images.
+
+# docker run ubuntu uptime # to execute uptime in ubuntu image and come back to command prompt.
+
+# docker run -it ubuntu  # to enter into ubuntu and execute bash.
+(bash)# uptime
+
+# docker system events  # to see the events going on. Ideally execute this and in another terminal execute docker run ubuntu uptime.
+
+# docker ps # running container will be shown
+# docker ps -l # last started container will be shown.
+
+#docker ps -n 5 # last 5 container started will be shown.
+
+# docker ps -a  # list all containers started so far.
+
+Docker run command consists of below commands run in a sequence.
+# docker image pull <imagename>
+# docker create <imagename>
+# docker start <imagename>
+
+
+DOCKER IMAGES:
+# docker run centos ps
+# this centos has   hub.docker.com/docker/centos:latest . Except docker all are default
+hub.docker.com: registry
+docker: namespace
+centos: image
+latest: tag
+
+Check the history of the image: Changes that were made to image.
+#docker image history <imageid which you get from docker imagels> OR <image name>
+
+-DOCKER RUN OPTIONS:
+All parameters must be before the image name except the command you want to run on the container.
+
+# docker run -it ubuntu bash # -i: interactive -t: terminal
+# docker run -itd ubuntu # d: detach, as deamon, image runs in the background and prompt is shown.
+# docker run -it --rm alpine sh  # --rm removes the image once it is stopped. Alpine is general linux version.
+
+# docker run -itd --name redis redis:alpine   # --name will give name to container.#docker ps will show this name.
+
+Containers does not have their own cpu, memory. They will share from host machine(i.e container machine has same cpu, memory as hostname.)
+
+# docker logs <container id> # to get the logs. Get container from #docker ps . Follow using -f
+
+-PORT MAPPING:
+#docker run -itd -p 8080:80 nginx  # from outside we can use 8080 port of the VM which is translated to 80 port of container. d = deamon.
+We can open nginx with VM_ip:8080 in browser.
+# docker run -itd -P nginx # random port is selected by container which we can see using #docker ps.
+
+
+-TROUBLESHOOT USING LOGS AND EXEC:
+Logs: prints the logs of the  container
+# docker logs -f -n 5 <container id or first 3 unique chars of container id or container name of docker ps>
+# docker logs -f b9f1ff54df47
+
+Exec: execute the commands inside the container
+# docker exec -it b9f1ff54df47 bash ( Get the container id using docker ps).
+
+-PAUSE, STOP, REMOVE, PRUNE A CONTAINER:
+
+# docker pause f57ea69d1979 (uptime and other commands execution will throw error.)
+# docker unpause f57ea69d1979
+
+# docker stop f57ea69d1979 f57ea69d1970
+# docker start f57ea69d1979      # to start a stopped container.
+
+# docker stop f57ea69d1979
+# docker rm f57ea69d1979
+OR
+# docker rm -f f57ea69d1979     # Force remove.
+
+# docker container prune # this will remove all the stopped containers. Stopped containers we can see using #docker ps -a
+
+# docker system prune # This removes stopped containers, networks not used, dangling images, dangling build cache.
+
+# docker image rm -f 328eacc79b1c (To remove the images.)
+
+# docker system info # shows images, containers running, paused, stopped.
+
+-DOCKER VOLUMES:
+
+Docker volumes are directories and files that exist on host file system outside of the docker container. These volumes are used to persist data and share data between docker containers. Docker supports the mounting of one or more volumes on host OS.
+
+# docker volume create portainer # To create volume.
+# docker volume ls # list the volumes present in the local machine.
+
+# docker run -itd -P  -v nextcloud:/var/www/html nextcloud
+
+Above command will create a volume called nextcloud with path /var/www/html in the local machine.
+
+# docker volume inspect portainer  # This mounpoint is on the container and not on local machine.
+
+
+DOCKER COMPOSE:
+It is used to help define and share multi-container applications. With compose, we can create a YAML file to define the services with a single command, spin everything up and tear down all.
+
+docker run instructions is same as docker compose file.
+
+Docker compose would create customised images.
+
+The setup folder contains docker-compose.yaml and Dockerfile.
+> docker-compose build    # To download the custom image.
+> docker image ls # will contain the image that is mentioned in the docker-compose.yaml file.
+
+> docker-compose up -d # will create a container of the above image.
+> docker-compose ps
+> docker ps # both commands show containers.
+
+Once the jenkins container is run, login via ui using localhost:8080, get the adminpassword using
+> docker-compose  logs jenkins  #
+
+Dockerfile: Its a blue print for building the images.
+Image: Its a template for running the containers.
+Container: Its the actual running process where the package project is present.
+
+HELLO WORLD PROGRAM USING DOCKER:
+
+>mkdir test
+>cd test
+>main.py
+ print("Hello World")
+>Dockerfile
+ FROM python:3.8
+ ADD main.py .
+ CMD ["python", "./main.py"]
+
+> docker build -t hello_world .   # . is required. build the image. After this >docker image ls will contain hello_world image.
+> docker run hello_world          # Runs the image and displays the Hello World.
+
+
+OR ANOTHER program Docker file:
+FROM python:3.8
+WORKDIR /fastapi-app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY main.py .
+
+CMD ["python", "./main.py"]
+
+> docker build -t new_program .
+> docker run -it -p 8000:8000  new_program  # since the program by default runs on 8000 port. We map using 8000.
+> docker exec -it 588943dd9030 /bin/sh  # In another terminal, we can open bash and check files other linux tools.
+
+Docker Swarm
+
+Its a group of machines(physical or virtual) running docker and joined to become a cluster.
+Swarm manager will manage all the nodes(machines) in the cluster.
+
+Swarm manager can run docker containers in "emptiest node" which is use the least utilised node or "global" which is keeping each instance of container in the specified container.
+In swarm mode, docker commands can be executed on swarm manger and it will be reflected in the host machine.
+
+Swarm setup:
+> docker swarm init (enables and makes current machine as swarm manager).
+> docket swarm join (To join other machines as workers).
+
+
+It helps in
+1. Running containers on multiple machines.
+2. Adding and removing the containers with the demand.
+3. Distributing load between containers.
+4. launching new containers on different machines if something failes.

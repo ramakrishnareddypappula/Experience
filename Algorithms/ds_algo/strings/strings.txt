@@ -1,0 +1,36 @@
+
+
+mutable vs immutable:
+    In immutable, modification of string creates a copy while in mutable, modification is done inplace.
+    Some languages support mutable strings as well. Stringbuilder is example of mutable string.
+
+Kadane's Algorithm: Maximum subarray sum.
+    eg: [1, -3, 2, 1, -1]
+
+    Brute force solution:
+        - for 1st element, add first 2 elements, first 3 elements, first 4 elements etc.
+        - for 2nd element, add second third, second third fourth so on elements.
+        Get the maximum out of all elements. Order is O(n ^ 2)
+
+
+    Kadane's solution:
+        intuition:
+            For example, for 3rd index, max subarray is max(3rd index , 0 - 2nd max + 3rd index)
+                     lly, for 4th index, max subarray is max(4th index, 0-3rd max + 4th index)
+
+        Solution:
+            - initialize 0th index to local_max and global_max.
+            - local_max(3rd index, 0-2 max + 3rd index)
+            - global_max = max(global_max, local_max)
+
+
+Rabin Karp algorithm: String matching algorithm. match substr in found string.
+
+
+
+
+
+
+
+
+

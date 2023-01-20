@@ -1,32 +1,45 @@
 
+
+# 1052. Grumpy Bookstore Owner
+
+
+# There is a bookstore owner that has a store open for n minutes.
+# Every minute, some number of customers enter the store.
+# You are given an integer array customers of length n where customers[i] is the number of the customer that enters the
+# store at the start of the ith minute and all those customers leave after the end of that minute.
+#
+# On some minutes, the bookstore owner is grumpy.
+# You are given a binary array grumpy where grumpy[i] is 1 if the bookstore owner is grumpy during the ith minute, and is 0 otherwise.
+#
+# When the bookstore owner is grumpy, the customers of that minute are not satisfied, otherwise, they are satisfied.
+#
+# The bookstore owner knows a secret technique to keep themselves not grumpy for minutes consecutive minutes, but can only use it once.
+#
+# Return the maximum number of customers that can be satisfied throughout the day.
+
+# Input: customers = [1,0,1,2,1,1,7,5], grumpy = [0,1,0,1,0,1,0,1], minutes = 3
+# Output: 16
+# Explanation: The bookstore owner keeps themselves not grumpy for the last 3 minutes.
+# The maximum number of customers that can be satisfied = 1 + 1 + 1 + 1 + 7 + 5 = 16.
+
+
 class Solution:
     def maxSatisfied(self, customers, grumpy, minutes):
-        max_val = sum(customers[:minutes])
-        total_max = max_val
-        low = 0
-        high = minutes
+        totalsatisfied = 0
+        for i in range(len(customers)):
+            if grumpy[i] == 0:
+                totalsatisfied += customers[i]
+
+        notsatisfied = 0
+        for i in range(minutes):
+            if grumpy[i] == 1:
+                notsatisfied += customers[i]
+
+        globalmax = notsatisfied
         for i in range(minutes, len(customers)):
-            max_val = max_val + customers[i] - customers[i - minutes]
-            if max_val > total_max:
-                total_max = max_val
-                low = i - minutes
-                high = i
-        print(total_max)
-        print(low)
-        print(high)
-        print("*****")
-        total_sum = 0
-        for j in range(0, low):
-            if grumpy[j] == 0:
-                total_sum = total_sum + customers[j]
-        print(total_sum)
-        for m in range(high , len(customers)):
-            if grumpy[m] == 0:
-                total_sum = total_sum + customers[m]
-        return total_sum + total_max
-
-
-
-s = Solution()
-#print(s.maxSatisfied([1,0,1,2,1,1,7,5], [0,1,0,1,0,1,0,1], 3))
-print(s.maxSatisfied([1], [0], 1))
+            if grumpy[i] == 1:
+                notsatisfied += customers[i]
+            if grumpy[i - minutes] == 1:
+                notsatisfied -= customers[i - minutes]
+            globalmax = max(globalmax, notsatisfied)
+        return totalsatisfied + globalmax

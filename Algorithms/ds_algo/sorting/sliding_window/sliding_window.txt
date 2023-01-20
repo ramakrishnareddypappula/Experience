@@ -3,5 +3,8 @@ There are 2 types of sliding windows:
 1) Fixed length : maintain their size.
 2) Variable length : Size can shrink and grow.
 
-
+General syntax for fixed length sliding window:
+        first_k = arr[:k] # sublist of first k elements.
+        for i in range(k, len(arr)): # iterate from k to length of array.
+            total_sum = total_sum + arr[i] - arr[i - k] # every time delete from left and add from right.
 

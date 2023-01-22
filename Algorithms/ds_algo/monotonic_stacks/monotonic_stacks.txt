@@ -1,0 +1,21 @@
+
+
+Stack is implemented using arrays under the hood.
+Since the values are monotonically increasing/decreasing we call it monotonic stack.
+
+Use to perform insertions. LIFO deletions->O(1) time.
+
+stack = [|, , , , , , , , , , , ,| ]
+        bottom                  top of stack(operations are performed here.insert, delete)
+
+
+General syntax of stack:
+    # Time complexity is O(n). Because at each point(building) we do insertion or deletion which is constant and we do
+    # for n buildings. So O(n).
+    for i in range(0, n):
+        while stack is not empty and stack[-1] <= heights[i]:
+            stack.pop()
+        # all values smaller than heights[i] will be popped.
+        stack.append(heights[i])
+
+

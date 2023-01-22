@@ -8,3 +8,12 @@ General syntax for fixed length sliding window:
         for i in range(k, len(arr)): # iterate from k to length of array.
             total_sum = total_sum + arr[i] - arr[i - k] # every time delete from left and add from right.
 
+
+General syntax for variable length sliding window:
+        window_sum = 0
+        left = 0
+        for i in range(len(nums)):
+            window_sum += nums[i]
+            while window_sum >= target and left <= i:
+                window_sum -= nums[left]
+                left += 1

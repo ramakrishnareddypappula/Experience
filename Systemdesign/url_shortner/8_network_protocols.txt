@@ -1,0 +1,26 @@
+
+from example www.urlshortner.com is the name of website. So using the DNS, we get the ip address of the server.
+
+If server is running and serving multiple services. To retrieve a particular service, apart from ip, port number
+is also needed. port number will say the service running on the host.
+
+So a packet contains
+
+-> Request, ip+port of source(client) , ip+port of destination(server).
+<- Response, ip+port of source(server) , ip+port of destination(client).
+
+Client and server must follow rules(protocol) to communicate with each other.
+IP - Internet Protocol for ip addresses format related.
+http - For delivering the web pages.
+
+> curl(Client url) -v http://bit.ly/Ipaddr
+
+This displays request using > and response using <.
+This returns 301(permanently moved) as this is the short url.
+returns the html content and bit.ly ip.
+
+
+
+
+
+

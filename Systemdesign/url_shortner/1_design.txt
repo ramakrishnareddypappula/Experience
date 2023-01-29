@@ -1,0 +1,24 @@
+
+
+Url shortner uses client server architecture where for each long url requested by client, server returns shorter form of that url.
+
+Short names:
+
+CTR = Click Through Rate
+    = no. of people clicked the ad/ no.of people saw the ad * 100
+
+if there are 5 clicks, then CTR is 5%.
+
+URL = Uniform Resource Locator.
+TTL = Time To Live
+
+Throughput = Amount of time that an application takes to respond to an app = measured in data/sec. like bytes/sec, MB/sec
+Latency = Is the actual time of request + response = measured in time.
+
+Latency and throughput are inverse of each other.
+More throughput is better but less latency is better.
+
+10k = 10,000
+100k = 100,000
+1 million = 1,000,000
+1 billion = 1,000,000,000

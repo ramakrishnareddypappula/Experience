@@ -1,0 +1,34 @@
+
+
+encode function(long_url) --> return short_url
+insert              key                value
+
+decode function(short_url) --> return long_url
+search for key
+
+
+data structure that we can use dictionary with keys and values.
+dictionary implements search, insert and delete in O(1) time complexity. So it is really fast.
+
+To create a short url for long url, naively we can use increment starting from 1 or 0. For every new key, this value is incremented.
+eg: https://tinyurl.com/1 , https://tinyurl.com/2 so on.
+
+function decode(string shorturl):
+    return hashmap[int(shorturl[10:])]
+
+
+function encode(string longurl):
+    counter += 1
+    hashmap[counter] = longurl
+    return "https://tinyurl.com/" + str(counter)
+
+
+Pros : very fast as hashmap is fast
+        No collisions as each key(number) is unique
+
+Cons : short url counter can increment to billion or more and maintaince will be hard.
+       number can be easily predictable as if latest number 590, we can predict next number as 591.
+
+
+
+

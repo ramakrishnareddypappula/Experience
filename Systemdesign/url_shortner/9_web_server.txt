@@ -1,0 +1,5 @@
+
+
+- On web server, we want multiple copies of running program(process). Is called parallelism.
+That way if a process in busy(waiting for disk IO or network IO), another can be used.
+TBD

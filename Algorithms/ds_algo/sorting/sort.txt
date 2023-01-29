@@ -350,5 +350,5 @@ Transform and conquer: heap sort.
 
 Any algorithm can be made stable using extra space(hash table).
 
-
+order to use in interview:
 brute force -> decrease and conquer -> decrease and trannsform -> divide and conquer

@@ -46,4 +46,6 @@ def find_intersection(arr1, arr2, arr3):
     return out1 if out1 else [-1]
 
 print(find_intersection([1, 2, 2, 2, 9],[1, 1, 2, 2],[1, 1, 1, 2, 2, 2]))
+print(find_intersection([1,2,3,4,5],[1,2,5,7,9],[1,3,4,5,8])) # [1,5]
+
 

@@ -1,0 +1,22 @@
+
+After functional requirements, draw the architecture diagram, This will help in depth vs breadth analysis.
+
+- Given a long url, return the short url.
+- If someone hits short url, translate and give back long url.
+
+There is a leetcode problem as well. problem 535.
+In interview we should write program as well, if applicable.
+
+After doing analysis, if short question is asked like "Design a url shortner" etc then depth oriented(deep dive) approach is required.
+If there are multiple microservices, then breadth oriented(over view of each component) approach is required.
+
+Draw a diagram with components. Then you will know depth oriented or breadth oriented.
+If there are multiple microservices, ask interview which componenets to focus on. budget your time.
+If only 1 micro service, then there might be program as well.
+
+Scale implementation should be done last as we dont know how many users will use. scaling during
+implementation is waste of money and impractical as well.
+
+
+below depth oriented approach is used.
+System stores the user information and validates whether the credentials entered by the user in any of its client servers are correct.

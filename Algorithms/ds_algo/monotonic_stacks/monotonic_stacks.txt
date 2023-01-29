@@ -8,6 +8,8 @@ Use to perform insertions. LIFO deletions->O(1) time.
 stack = [|, , , , , , , , , , , ,| ]
         bottom                  top of stack(operations are performed here.insert, delete)
 
+It is used in array problems only.
+The order of the stack is strictly increasing or decreasing.
 
 General syntax of stack:
     # Time complexity is O(n). Because at each point(building) we do insertion or deletion which is constant and we do

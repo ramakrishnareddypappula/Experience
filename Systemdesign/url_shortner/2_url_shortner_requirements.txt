@@ -1,0 +1,53 @@
+
+Actual urls : tinyurl.com, bit.ly, youtu.be, goo.gl(deprecated)
+URL = Uniform Resource Locator
+example: http://www.computer.com/page
+
+http = protocol, which protocol to communicate with server.
+www.computer.com = web server name
+page = web page name.
+
+URL can be very long as well.
+
+bit.ly creates short urls(nicknames) for long urls.
+
+Why we require:
+    - many urls are long. eg: google maps urls
+    - some media does not allow long urls. eg: twitter, SMS does not allow
+    - many urls are unnecessary long. short urls can be meaningful. eg: https://bit.ly/superbowl or https://es.pn/superbowl
+
+Functional requirements:
+    - Given a long url, return the short url.
+    - If someone hits short url, translate and give back long url.
+    - If the same logn url is provided multiple times, return different short urls each time.
+
+    optional requirements:
+    - customize short urls. eg instead of https://bit.ly/AweEfE, https://bit.ly/superbowl is meaningful.
+    - TTL. eg: After 30 days the short urls can be destroyed and used for different purpose.
+    - Login before creating url.
+    - payment for the urls created.
+
+    If the interview did not ask, Dont go for optional requirements.
+    Don't deviate from functional requirements.
+
+
+- MAIN GOALS HERE - 1) explain in detail 2) explain user's point 3) design minimum viable product.
+- Example: in instagram design , main func requirements are 1) account creation
+                                                       2) follow other people
+                                                       3) posting photos and feed generation
+                                      non functional requirements:1) faster page load.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

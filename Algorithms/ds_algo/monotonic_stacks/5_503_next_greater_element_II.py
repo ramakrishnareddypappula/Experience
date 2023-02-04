@@ -29,7 +29,7 @@ class Solution:
             while stack and values[i] >= stack[-1]:
                 stack.pop()
             stack.append(values[i])
-
+        # monotonically decreasing list.
         # next greater_value program
         for i in range(len(values) - 1, -1, -1):
             while stack and values[i] >= stack[-1]:

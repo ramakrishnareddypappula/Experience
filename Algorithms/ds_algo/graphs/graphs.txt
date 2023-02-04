@@ -1,0 +1,229 @@
+
+
+ A ------ B(Node or Vertex)
+    edge
+
+graph:
+    Diagram of vertices and edges is called graph.
+
+Directed graph:
+    A ---> B
+
+undirected graph:
+    Edges dont have direction on them
+    A ---- B
+
+Degree of vertex:
+
+    A ---- B    , vertex A has 2 edges, hence degree 2.
+    |              vertex B has 1 edge, hence degree 1.
+    |             Vertex C has 1 , hence 1.
+    C
+
+Multi graph:
+    Graph which has self loops for a vertex or vertices A and B has 2 paths are called multi graphs.
+
+
+In undirected graph, edge has pair of vertices. If there are V vertices, then degree is each vertex is V-1
+
+Graph is represented by G.
+Vertex is represented by V.
+Edge is represented by E
+
+General representation G = (V, E)
+
+The sum of degrees of all vertices in an undirected graph G = (V, E) is = 2|E|
+
+    A - C  , Vertex A has 2 edges, B has 2 edges, C has 2 edges = sum of degrees of all vertices = Total 6
+     \/
+      B
+
+In a directed graph, sum of degrees of out going edge(out-degree) is |E| which is same as in coming edge(in-degree).
+
+connected graph:
+    A connected graph is a graph in which there exists a path between every two vertices.
+
+Eulerian cycle:
+    in graph theory, The Euler cycle is a path in the graph that visits every edge exactly.
+
+Eulerian path:
+    Eulerian Path is a path in the graph that visits every edge exactly once (allowing for revisiting vertices) and start and end vertex are not necessarily same.
+
+Every Eulerian cycle is also Eulerian path.
+
+If the connected graph has eulerian cycle, then the degree of every vertex must be even.
+vice - verse is also true. If the degree of vertex is even, then it must have eulerian cycle.
+If the degree of any vertex is odd then it cannot be eulerian cycle.
+
+Hamiltonian cycle:
+    in graph theory, if we visit every vertex exactly once, then its called Hamiltonian cycle.
+
+Every Hamiltonian cycle is Hamiltonian path.
+
+In graph theory, a tree is a connected, undirected graph without any cycles in it.
+The trees you have looked at before are just special cases of a general tree in which one vertex is designated as the root.
+In a general tree with n vertices, the number of edges is: n - 1
+
+A forest is a collection of trees, even in graph theory.
+An Eulerian cycle can also exist in a directed graph. If a directed graph has an Eulerian cycle, it must be that:
+The in-degree of every vertex is equal to its out-degree.
+
+It is impossible for a graph to have a single vertex with odd degree.
+Since sum of vertices = 2|E|
+odd degree + sum(other vertices) is never equal to 2|E| which is even.
+
+# of vertices with odd degree
+0 -> eulerian cycle
+2 -> eulerian path (start and end vertices are different).
+4 --
+6 ---> no eulerian path or cycle.
+8 --
+
+
+Edge List:
+    we have vertices and edges. We use Edgelist to determine the complexity.
+    vertexlist = [u,v,w,x]
+    edgelist = [e,f,g,h]
+    Out of n vertices, if we choose 2 vertices to draw an edge = n C 2 = n (n - 1)/2 = O(n^2)
+    Max complexity of edge list is O(n ^ 2)
+
+Adjacency list:
+
+    In undirected graph:
+    0 --- 1
+    |
+    |
+    2
+
+    0 -points-> 1, 2
+    1 -points-> 0
+    2 -points-> 0
+
+    In directed graph:
+    0 ---> 1
+    |
+    |
+    arrow
+    2
+
+    0 -points -> 1 , 2
+    There will no 1 --> 0 since its directed.
+
+    So Adjacency list will be like [[1,2], [0], [0]]. Here index 0 is the vertex and [1,2] are neighbours. index 1 is the vertex
+    [0] is the neighbour and 2 is the vertex and [0] is the neighbour.
+
+
+Adjacency matrix:
+
+    In undirected graph:
+    0 --- 1
+    |
+    |
+    2
+                0  1  2
+    Vertices 0  0  1  1
+
+             1   1  0  0
+
+             2   1  0  0
+
+    [0, 1] has 1 [1, 0] has 1, [2, 0] has 1 and [0, 2] has 1
+
+    neighbours time complexity = O(n)
+    neighbours space complexity = O(n ^ 2), even with no edges, we need to build matrix.
+
+    dense graph: A graph which has lots of edges. Edges is double the vertices. In this, Matrix will be filled with 1's.
+
+
+Since most of the real world problems are sparse matrix. Majority use Adjacency list.
+
+If we want to quickly tell if there is an edge between 2 vertices, then use adjacency matrix. Adj_matrix[u][v] = 1.
+
+If there is weight associated to each edge, then we use Adjacency list. if SFO to SJC is 50 miles: {SFO : [SJC, 50 miles]}
+
+Adjacency Map:
+
+    Every vertex neighbors as keys and their weight as values.
+
+        Y
+     A ---- B
+     |
+     |X
+     |
+     C
+
+    {A : {B: Y, C: X}, B: {A: Y}, C: {A: X}}
+
+    {vertex: {neighbour vertex: weight}}
+
+    Adjacency Map combines advantages of Adjacency list in space and Adjacency matrix in time.
+
+"Is vertex i directly connected to vertex j” in O(1) time Adjacency matrix and Adjacency map.
+“Get all neighbors of vertex i” in O(degree(i)) time" Adjacency map and Adjacency list.
+
+Edge list, Adjacency list and Adjacency map use O(m+n) space for a graph with n vertices and m edges.
+
+If space is small, use Adjacency list.
+
+Mostly Adjacency lists are used.
+
+If there are 2 graphs(triangles) not connected, then there cannot be euler cycle/path in it, Even if degree of every vertex is even.
+
+Search Algorithms:
+
+1. Breadth First Search: BFS Tree search
+    policy: Choose the fringe edge that was seen first.
+
+2. Depth Frist Search: DFS Tree search
+    Policy: Choose the fringe edge that was seen last(most recently).
+
+3. Dijkstra's: Shortest Path First search
+    Policy: Choose the fringe edge whose RHS vertex that has the smallest numerical label.
+
+4. Prim : Minimum Spanning Tree.
+    Policy: Choose the fringe edge whose RHS vertex that has the smallest numerical label.
+
+5. Best First search : Best First search tree
+    Policy: Choose the fringe edge whose RHS vertex that has the smallest numerical label.
+
+6. A* : A* tree
+    Policy: Similar to Dijkstra/Prim/Best first except that vertices have labels which need to be added.
+
+
+Breadth First Search:
+    Explore the graph in increasing order of distance from s.
+    - First capture the immediate neighbours of s(1 hop away).
+    - Then capture their neighbours(2 hops away).
+    - and so on.
+
+    Similar to tree, initialize queue to an empty list. Add parent to the queue, then add its childs and remove parent from queue.
+    Then add childs childs to the queue and remove childs from queue. This should be in FIFO order.
+
+    If a graph is diamond shaped, from 2 parent path will be there to child. Therefore we should maintain visited list, we should
+    add visited to the list and then check if not visited then visit.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

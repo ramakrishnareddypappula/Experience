@@ -352,3 +352,15 @@ Any algorithm can be made stable using extra space(hash table).
 
 order to use in interview:
 brute force -> decrease and conquer -> decrease and trannsform -> divide and conquer
+
+IN INTERVIEW:
+- Selection/Bubble sort - dont use them.
+- Insertion sort
+    - If given list is huge(1 million) and most are almost sorted, then use this.
+      If only 5 elements are out of place, then 5n insertions .For others we dont do any operations, Total O(n)
+    - very small as well, insertion is very fast.
+- Merge sort - divide and conquer - O(n log n) - Worst - stable. Order is not changed. duplicate elements are in order after sorting.
+- Quick sort - divide and conquer - O(n log n) - avg(use randomised pivot) - in place - Uses recursion - stack space of O(log n)
+- heap sort - transform and conquer - O(n log n) - Worst - in place.
+- Radix sort - O(N).
+- Counting sort - array is in narrow range.

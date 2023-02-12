@@ -1,0 +1,55 @@
+
+Instead of naive solution(0-9 chars) we can use Base 16[0-9 and A-F].
+Every time we increment the value, calculate the base 64 of it and return short url.
+This is used short encoded url.
+
+Base 2 : 0-1 are present
+Base 10 : 0-9 are present
+Base 16 : 0-9 A-F
+Base 62 : 0-9 A-Z a-z
+Base 64 : 0-9 A-Z a-z - _ .. because its easier than 62.
+
+How do you convert a number n to base x? program
+
+map = {0:"0", 1:"1" .... 10:"A", 11:"B"... 63:"_"}
+OR
+string = "0123456789ABCDEF........."
+currval = n
+output = ""
+while currval >= x: # 23
+    quotient = currval // x
+    remainder = curral % x
+    # map remainder to digit in base x and append it to growing list of digits.
+    output =  map[remainder] + output
+    currval = quotient
+
+output = map[currval] + output
+
+So Encode program looks like
+
+def encode(longurl):
+    counter += 1
+    map = {0:"0", 1:"1" .... 10:"A", 11:"B"... 63:"_"}
+    OR
+    string = "0123456789ABCDEF........."
+    currval = counter
+    output = ""
+    while currval >= 64:
+        quotient = currval // x
+        remainder = curral % x
+        # map remainder to digit in base x and append it to growing list of digits.
+        output =  map[remainder] + output
+        currval = quotient
+
+    output = map[currval] + output
+    shorturl = output
+
+    hashmap[shorturl] = longurl
+    return "http://bit.ly/" + str(shorturl)
+
+Pros: No collisions
+      short url is truly short
+
+Cons: Predictable still
+
+

@@ -1,0 +1,27 @@
+
+How to store hash table in disk?
+key: value
+{shorturl: longurl} -----> record
+{myAddr: maps.google.com}
+
+We can use hash table in file called data file. We can do insert and search operations on this file.
+This is Append-only file. In DBs terms its called log.
+
+This can be stored in memory or disk.
+But disk seek(getting data from disk) is very expensive.
+So we will have HASH INDEX in RAM(in memory). In DBs terms, it is called index.
+{key: Value} => {short_url: offset_in_data_file(address of record in file)}
+
+and record will be disk which contains
+{shorturl: longurl}. This way disk seek will be faster.
+
+offset size will very small compared to longurl(2048 chars).
+
+This is a constant time operation.
+
+    App -----> Cache ------> DB
+    nothin      k:v in       k:v pairs of short:longurls
+    here        memory
+                hash table
+
+

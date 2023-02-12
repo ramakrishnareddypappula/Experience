@@ -31,8 +31,7 @@
 #
 # output = False
 
-# as per graphs.txt, if vertices with odd degree are 0 or 2, then its eulerian path.
-
+#Eulerian path exists if and only if the number of vertices with odd degrees is two (or zero, in the case of the existence of a Eulerian cycle).
 # T = O(n + e) = n = vertices and e = edges
 # Auxiliary space: O(n)
 # input space = O(n + e)
@@ -46,6 +45,8 @@ def check_if_eulerian_path_exists(n, edges):
     """
     # Write your code here.
     #return False
+
+    # calculate the degree at each vertex.
     vertex_edges = [0 for _ in range(n)] # initialize all vertices with 0.
     for i, j in edges: # for every edge start point and end point, incrment by 1.
         vertex_edges[i] += 1

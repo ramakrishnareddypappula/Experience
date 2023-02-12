@@ -1,40 +1,43 @@
 #
+# 1. Edge list to Adjacency list:
 #
+#     graph = [[] for _ in range(n)]
+#
+#     for src, dst in edge_list:
+#         graph[src] = dst
+#         graph[dst] = src  --> if undirected, this is also coded, else no.
+#     visited = [False for i in range(n)] # If Adjacency map is created instead on adjacency list, then visited will be set instead of list.
+#
+#
+#2.
 # BFS
 #
-# def bfs(s):
-#     #visited, captured and parent are initialized to [], [] and null.
-#     captured[s] = 1
-#     visited[s] = 1
-#     q = Queue()
-#     q.push()
+# def BFS(source):
+#     q = deque()
+#     q.append(source)
+#     visited[source] = True
 #     while q:
-#         v = q.popleft()
-#         captured[v] = 1
-#         for w in ajlist[v]:
-#             if visited[w] == 0:
-#                 visited[w] = 1
-#                 parent[w] = v
-#                 q.append(w)
+#         node = q.pop()
+#         for neighbour in graph[node]:
+#             if not visited[neighbour]: # In trees, we will not have this.
+#                 visited[neighbour] = True
+#                 q.append(neighbour)
 #
 #
 #
-# DFS:
+# DFS
+# def DFS(source):
+#     visited[source] = True   # In trees, we will not have this.
+#     for neighbour in graph[source]:
+#         if not visited[neighbour]:
+#             DFS(neighbour)
 #
-# In DFS, replace queue with stack and do last in first out.
 #
 #
-# def dfs(s):
-#     # visited, captured and parent are initialized to [], [] and null.
-#     captured[s] = 1
-#     visited[s] = 1
-#     q = [] # change here
-#     q.push()
-#     while q:
-#         v = q.pop() # here.
-#         captured[v] = 1
-#         for w in ajlist[v]:
-#             if visited[w] == 0:
-#                 visited[w] = 1
-#                 parent[w] = v
-#                 q.append(w)
+#3. outer loop
+# for i in range(n):
+#     if not visited[i]:
+#         DFS(i) or BFS(i)
+
+
+# Space complexity is Size of queue for BFS vs hieght of the tree in DFS.

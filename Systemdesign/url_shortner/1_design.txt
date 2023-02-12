@@ -22,3 +22,9 @@ More throughput is better but less latency is better.
 100k = 100,000
 1 million = 1,000,000
 1 billion = 1,000,000,000
+
+System design steps:
+1. Gather functional requirements.
+2. Cluster them into collection of microservices.
+3. Draw architecture diagram connecting them.
+4. Dive into each microservice.

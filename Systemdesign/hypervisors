@@ -1,0 +1,18 @@
+
+
+Hypervisor:
+    Its a virtual machine monitor or VMM. A software the creates and runs VMs.
+    Hypervisor allows 1 host computer to support multiple guest VMs by virtually sharing CPU, memory etc.
+    It interacts with kernel.
+
+    Types:
+    Type 1(Baremetal):
+        hardware -> hypervisor -> guest os
+
+    Type 2(Hosted):
+        hardware -> Host OS -> hypervisor -> guest os
+
+
+VMs vs Containers:
+    Containers run on host OS while VMs have their own OS and subsequently its own kernel.
+

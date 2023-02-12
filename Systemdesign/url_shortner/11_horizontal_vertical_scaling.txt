@@ -1,0 +1,40 @@
+
+Distributed system:
+
+1. If the data size is huge we need to db or cache.
+2. If the request per second is too huge, need to scale for throughput(rpm).
+3. response time is to too high, need to parallelize the computation.
+4. Availability/Reliability in face of faults(server should not go down).
+5. geolocation: minimize network latency by using multiple servers at diff locations.
+6. Hotspots: Disproportionaltely high load on piece of data(celebrity data has higher rpm).
+
+
+Vertical scale:
+This is called Scaling up or Shared Memory architecture.
+1 more powerful machine(with Many disk, RAM, Many CPUs)
+
+Single point of failure. Point 4, 5 above will not be applicable here.
+
+
+
+Horizontal scaling:
+THis is called Scaling out or shared nothing architecture.
+Many machines with each machine having disk, RAM and CPU.
+
+
+Stateful vs stateless horizontal scaling:
+
+    Stateless:
+        No data is saved on server side.
+        Data is stored on separate db.
+        Even if new servers are added, they immediately serve the requests  and share load with existing servers.
+        eg of stateless systems are web servers serving static requests and API servers.
+
+
+    Stateful:
+        Store data on server side and have specific state associated with them.
+        Its more challenging as the state needs to be replicated across multiple servers.
+        This involves techniques like load balancing, data replication.
+        eg of stateful systems are DBs and caching systems.
+
+    Stateless horizontal scaling is more easier to implement.

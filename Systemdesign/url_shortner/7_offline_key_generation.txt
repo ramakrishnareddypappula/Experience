@@ -1,0 +1,11 @@
+
+Generation of short url does not depend on long url(for timestamp/ counter value).
+So we can pregenerate short urls and store them in advance.
+We can have a seperate program for this. we can keep in urls in set(so that duplicates are removed).
+We can call this job as "key generation service".
+
+
+Cons: Lot of space is required to save.
+
+
+

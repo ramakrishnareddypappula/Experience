@@ -1,0 +1,15 @@
+
+Exponential backoff:
+    It is used for handling network errors and congestion.
+    The idea is the gradually increase amount of time between subsequent retries of failed request.
+    It reduces the risk of overloading the server with too many requests.
+
+    Working:
+    - Client sends request to server.
+    - If it fails, client waits for short period of time(100 ms) and retries the request.
+    - If it fails again, client waits for longer period of time(200 ms) and retries again.
+
+    If dealing with temporary network outages or large number of clients sends requests which overwhelms the server, we can avoid
+    this using exponential backoff.
+
+    python lib: tenacity

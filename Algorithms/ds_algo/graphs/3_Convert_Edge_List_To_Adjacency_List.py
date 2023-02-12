@@ -72,3 +72,22 @@ def convert_edge_list_to_adjacency_list(n, edges):
         each.sort()
     return output
 
+# * Time: O(n * log(e)).
+# * Auxiliary space: O(1).
+# * Total space: O(n + e).
+def convert_edge_list_to_adjacency_list(n, edges):
+    """
+    Args:
+     n(int32)
+     edges(list_list_int32)
+    Returns:
+     list_list_int32
+    """
+    # Write your code here.
+    adj_list = [[] for i in range(n)]
+    for i, j in edges:
+        adj_list[i].append(j)
+        adj_list[j].append(i)
+    for each in adj_list:
+        each.sort()
+    return adj_list

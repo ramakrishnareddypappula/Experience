@@ -1,0 +1,16 @@
+
+Difference between Web server, API server and APP server?
+    Web server:
+        Responsible for serving static content like HTML, CSS and Javascript files to the client.
+        Client's browser then renders them.
+        Eg: Apache and Nginx.
+
+    API server:
+        It is responsible for exposing the APIs that allows client apps to communicate with the server.
+        API servers are typically built on microservices based architectures.
+
+    App server:
+        It is responsible for executing server side application code and returning the results to the client.
+        App server typically runs a framework like flask, django etc.
+        App server runs the business logic and handles the db and other services.
+

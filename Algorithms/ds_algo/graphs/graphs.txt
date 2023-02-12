@@ -44,7 +44,7 @@ connected graph:
     A connected graph is a graph in which there exists a path between every two vertices.
 
 Eulerian cycle:
-    in graph theory, The Euler cycle is a path in the graph that visits every edge exactly.
+    in graph theory, The Euler cycle is a path in the graph that visits every edge exactly once and starts and finishes at the same vertex.
 
 Eulerian path:
     Eulerian Path is a path in the graph that visits every edge exactly once (allowing for revisiting vertices) and start and end vertex are not necessarily same.
@@ -202,6 +202,15 @@ Breadth First Search:
     If a graph is diamond shaped, from 2 parent path will be there to child. Therefore we should maintain visited list, we should
     add visited to the list and then check if not visited then visit.
 
+
+Search for
+    - direct relationship : Adjacency map or matrix
+    - indirect relationship : BFS/DFS.
+
+
+# A tree is a connected graph with no cycles.
+
+# A graph in general is unrooted.
 
 
 

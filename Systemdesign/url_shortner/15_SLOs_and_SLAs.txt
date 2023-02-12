@@ -1,0 +1,20 @@
+
+SLIs(Service Level Indicators):
+Correctness, Availability, Throughput, Response time etc.
+
+SLO(Service Level Objective):
+A target value/range for an SLI.(Eg: SLI <= target).
+
+eg: p50 < 200 ms , p99 < 1 sec and Availabilty >= 99.9%.
+
+Functional SLO are correctness
+non functional SLO can be availability, throughput, response time.
+
+SLA(Service Level Agreement):
+Explicit contract with users on what the SLOs are including consequences
+of meeting/missing the SLOs(eg: rebate/penalty).
+eg: Google search has no SLA. Internally they might of SLO, that will be effected if they dont meet.
+
+G suite has SLA for premium users. If availability is < 95%, then customers get 15 days of free service.
+
+

@@ -3,11 +3,11 @@
 # BFS Traversal Of A Graph
 # Given an undirected graph, perform a Breadth-First Search Traversal on it.
 #
-#         1
-#        /
+#
+#
 #       0            5
-#      / \
-#     2  4
+#    / / \
+#   1  2  4
 #    /
 #   3
 
@@ -30,6 +30,9 @@
 # * Auxiliary space: O(v + e).
 # * Total space: O(v + e).
 # */
+# Time complexity = O(n)(push pop vertices) + O(m)(looking at adj_list of each vertex)
+# Aux space = O(degree(u)) = 2m(look graph.txt) = O(m)
+# space = O(n) # if node is connected to all other nodes. queue size.
 from collections import deque
 def bfs_traversal(n, edges):
     """
@@ -45,19 +48,13 @@ def bfs_traversal(n, edges):
     is_visited = [False for _ in range(n)]
     answer = []
     # making a graph from input edges.
-    for i in range(len(edges)):
-        u = edges[i][0]
-        v = edges[i][1]
+    for u,v in edges:
         graph[u].append(v)
         graph[v].append(u)
     print(graph)
     for i in range(n):
-        # import pdb
-        # pdb.set_trace()
         if not is_visited[i]:
-            print(i)
             bfs_traversal_helper(i, graph, answer, is_visited)
-
     return answer
 
 
@@ -67,7 +64,7 @@ def bfs_traversal_helper(start_node, graph, answer, is_visited):
     q_list = deque()
     q_list.append(start_node)
     while q_list:
-        u = q_list.popleft()
+        u = q_list.popleft() # FIFO
         for v in graph[u]:
             if not is_visited[v]:
                 answer.append(v)

@@ -4,9 +4,6 @@ datatypes in ansible: scalar, sequence, map and files with variables.
 
 Ansible version is 2.5.1
 
-ip = 10.5.132.91
-
-
 Machine were anisble is running is called ansible engine or controller or master.
 Machine which are accessed by ansible engine is called ansible node or client.
 

@@ -1,0 +1,44 @@
+
+what is the importance .dockerignore?
+
+    While building the docker image, we can make docker to ignore files and folders present in current directory using
+    .dockerignore. This significantly reduces the size of the image.
+
+    eg: if foldername(new_folder) is present. we can specify (new_folder) in .dockerignore and that will be ignored during building.
+
+how to map docker ports?
+    using -p option when docker run.
+
+    eg: > docker run -p 8080:80 httpd   # here 8080 is the host_port from where we are connecting. 80 is the container port.
+    in other terminal , curl http://localhost:8080 will return a response.
+
+docker VOLUME vs docker -v ?
+    We can specify dirs and files to be included docker volume using VOLUME or >docker -v command.
+    We can create a mount point to the docker.
+
+    > docker run -it -v /path/in/hostname:/path/in/docker --entrypoint bash myapp
+
+    This will show files and dirs of localhost in docker.
+    If a file is deleted in localhost or docker, the same will be done on docker or localhost.
+
+    in Dockerfile
+    VOLUME <pathname>
+
+    VOLUME sets up dirs as volume in container image while "docker -v" creates volume at runtime.
+    It is important to note that "docker -v" data stores in volume is persisted even if
+    container is removed whereas if you use VOLUME in dockerfile, the data is not persisted
+    if the container is removed.
+
+How to troubleshoot issues with a Docker container?
+    1. >docker logs <container id>
+    2. >docker ps # if container is not running, > docker start to start.
+    3. >docker inspect <container id>
+    4. Check the host system has enough resources.
+    5. Check docker version, docker engine and docker client.
+    6. Check container conflicts: check multiple containers for network settings etc.
+
+
+
+
+
+

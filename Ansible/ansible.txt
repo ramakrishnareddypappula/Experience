@@ -1,0 +1,736 @@
+Ansible: Using ansible, work is done in parallel. Example: installing yum on 1000 servers in done in parallel instead of serial using shell or python script.
+
+datatypes in ansible: scalar, sequence, map and files with variables.
+
+Ansible version is 2.5.1
+
+ip = 10.5.132.91
+
+
+Machine were anisble is running is called ansible engine or controller or master.
+Machine which are accessed by ansible engine is called ansible node or client.
+
+Inventory file: The file that contains ip or fqdn information of remote ansible nodes or clients. It present in master.
+
+Ansible.cfg file: It contains location of inventory file. It also contains usernames/passwords of clients.
+
+ansible uses ssh to connect and execute on clients.
+
+ansible is agent-less architecture(no software is installed on clients).
+
+Anisble uses python and yaml.
+
+COMMAND TO INSTALL ANSIBLE:
+> sudo apt install ansible
+
+In ubuntu, by default ansible hosts and ansible.cfg files will be present in /etc/ansible path.
+
+METHODS TO SETUP SSH LOGIN TO REMOTE HOSTS AND PING:
+
+method 1) USING ANSADMIN USER:
+
+Make sure that all usernames and passwords across master and clients.
+> useradd ansadmin # useradd -m ansadmin for ubuntu since /home/ansadmin needs to be created.
+> passwd ansadmin
+Ansadmin@123
+
+Make sure to add root permissions to user(ansadmin) in all master and clients:
+>sudo su -
+>visudo
+ansadmin  ALL=(ALL)  NOPASSWD: ALL
+
+Make PasswordAuthentication yes in all master and clients:
+>sudo su -
+>vi /etc/ssh/sshd_config
+PasswordAuthentication yes
+
+>service sshd restart
+
+Change from root user to ansadmin user:
+> sudo su ansadmin
+
+generate ssh-key under ansadmin:
+> ssh-keygen
+
+We can setup password less authentication using SSH-keys with remote clients.
+> ssh-copy-id <remote-host-name>
+
+next time password will not be asked.
+> ssh <remote-ip>
+
+To test whether all hosts are reachable:
+>ansible all -m ping
+
+method 2) USING ROOT USER:
+
+Generate ssh key in master for remote host:
+> ssh-keygen -t rsa -C <remote-host-ip>
+
+Copy ssh key to remote host:
+> ssh-copy-id <remote-host-ip>
+
+ADD REMOTE CLIENT TO HOST FILE:
+hosts == inventory file.
+> sudo vi /etc/ansible/hosts
+x.x.x.x ansible_user=<username of remote host>
+
+
+To test whether all hosts are reachable:
+>ansible all -m ping
+sample output:
+machine:/etc/ansible$ ansible all  -m ping
+x.x.x.x | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+
+method 3) USING SSH USER and PASSWORD IN INVENTORY: BEST and EASY
+> sudo vi /etc/ansible/hosts ansible_ssh_user=username ansible_ssh_pass=password
+> sudo apt-get install sshpass # only on server
+> ansible all -m ping
+
+PYTHON SHOULD BE RUNNING ON ALL ANSIBLE NODES.
+
+Hosts file:
+
+Hosts ip or fqdn is added to this file.
+example:
+1) x.x.x.x
+2) x.x.x.x ansible_user=username
+3) x.x.x.x ansible_ssh_user=username ansible_ssh_pass=password
+4) [server]
+x.x.x.x ansible_ssh_user=username ansible_ssh_pass=password
+
+CHANGE HOSTS FILE PATH:
+By default, ansible.cfg file contains inventory path as /etc/ansible/hosts. By changing this path we can modify the hosts file path.
+
+DIRECTORY CHANGE:
+The whole ansible directory can be moved to another path. Change the inventory path in ansible.cfg file. In that case ansible.cfg will check the current hosts file instead of default hosts file. But dont change the ansible.cfg filename because ping will take default ansible.cfg if its not there in current directory.
+
+FORCEFULLY USE ANOTHER INVENTORY FILE:
+>ansible all -m ping -i inventory # this will allow to forcefully this inventory instead of default inventory.
+
+-m = module
+
+DISABLE HOST KEY CHECKING:
+
+Initially when you try to ping client for the from time using ansible, It will ask for host key check. To disable it.
+
+method 1:
+> export ANSIBLE_HOST_KEY_CHECKING=False
+
+method 2:
+In ansible.cfg
+host_key_checking = False
+
+INVENTORY GROUPING:
+
+If the host(x.x.x.x) is present in hosts file.
+> ansible x.x.x.x -m ping # should work
+
+For multiple
+> ansible x.x.x.x:y.y.y.y -m ping # should work
+
+For all:
+> ansible all -m ping
+
+We can create inventory group using:
+[webservers]
+x.x.x.x
+y.y.y.y
+
+[db]
+z.z.z.z
+
+> ansible webservers -m ping #  1 group
+> ansible webservers:db -m ping # multiple groups
+
+To create groups within groups.
+[kairosdb]
+a.a.a.a
+b.b.b.b
+
+[postgres]
+c.c.c.c
+d.d.d.d
+
+[db.children]
+kairosdb
+postgres
+
+ANSIBLE.CFG location PRIORITIES:
+If we move the ansible folder, ansible.cfg file is executed from top to down priorities:
+1. export ANSIBLE_CONFIG path
+2. ./ansible.cfg in current directory.
+3. ./ansible.cfg in home directory.
+4. ./ansible.cfg in /etc/ansible directory.
+
+Adhoc commands:
+simple Linux commands execution on remote hosts is done using adhoc commands.
+
+command "uname -r" will be executed in db groups of servers.
+>ansible db  -m shell -a "uname -r"
+
+command "uname -r" will be excuted in db groups of servers which are in different inventory filename.
+>ansible -i diff_host_file db  -m shell -a "uname"
+
+Provides lists of default modules in ansible.
+>ansible-doc -l # similar in https://docs.ansible.com/ansible/latest/modules/list_of_network_modules.html
+>ansible-doc <module_name> # to get more information.
+
+If you want more andoc commands to be executed then use playbook.
+
+module: A program that is able to execute tasks on managed nodes.
+
+ANSIBLE WORKING:
+
+ansible will copy the python files to remote hosts which will execute and return the output.
+
+ansible will copy to by default to
+> ~/.ansible/tmp  folder.
+
+we can see which python files are copied using the command:
+> ANSIBLE_KEEP_REMOTE_FILES=1 ansible vm -m shell -a "uptime"
+
+By default env variable ANSIBLE_KEEP_REMOTE_FILES=1 is disabled.
+
+ANSIBLE is going to push to remote hosts to execute commands. Where as in CHEF, remote hosts will pull.
+For pull the data, agent is required. But for pushing agent is not required. Agent-less architecture.
+
+
+ANSIBLE PARALLEL EXECUTION:
+
+by default ansible will run on 5 machines parallely. If you want to change this
+# forks = 5 in ansible.cfg
+
+COPY USING ADHOC OPERATION:
+> ansible x.x.x.x -m copy -a "src=/opt/abc dest=/opt/"
+
+CREATE A FILE WITH CONTENT:
+>ansible x.x.x.x -m copy -a "content='my name is new_user' dest=~/file.txt"
+
+CREATE AN ANOTHER FILE WITH DIFFERENT CONTENT:
+>ansible x.x.x.x -m copy -a "content='new file name.' dest=~/file.txt backup=yes"
+
+ANSIBLE FOLLOWS IDEMPOTENCY:
+If there is no change then ansible wont do the task.
+
+USING FETCH MODULE WE CAN DOWNLOAD FROM NODES TO ANSIBLE SERVER:
+> ansible x.x.x.x -m fetch -a "src=/opt/abc dest=~/" # This will create file keeping samr folder structure as source file folder structure.
+
+> ansible x.x.x.x -m fetch -a "src=/opt/abc dest=~/ flat=yes" # recommended. This will correctly copy to ~/ folder.
+
+including hostname in the file.
+
+> ansible 10.2.34.235 -m fetch -a "src=~/file.txt dest=~/{{inventory_hostname}}_demo.txt flat=yes"
+
+CREATE A FILE:
+> ansible vm -m file -a "path=~/file.txt state=touch"
+
+CREATE A FILE WITH 777 PERMISSIONS:
+> ansible vm -m file -a "path=~/file.txt state=touch mode=0777"
+
+DELETE THE FILE:
+> ansible vm -m file -a "path=~/file1.txt state=absent"
+
+CREATE A FILE WITH SUDO:
+> ansible vm -m file -a "path=/etc/file.txt state=touch" -b
+
+INSTALL GIT:
+> ansible vm -m apt -a "name=git state=latest" -b
+
+ANSIBLE FACTS:
+Information about managed nodes. Like version, os, processor, python version, hostname, ip etc.
+Ansible by default will run "setup" module to gather the facts.
+These are also called default facts.
+
+Custom facts: Other than default facts, if we want extra information from managed nodes then we use custom facts.
+user defined facts.
+example: git current version.
+
+> ansible server  -m shell  -a "git --version"
+
+HOW TO CREATE CUSTOM FACTS:
+1) Under /etc/ansible create facts.d folder(use sudo su if required).
+2) Under facts.d, create custom fact files with extension .fact.
+3) Then return value should be json of that file.
+4) Give the file 777 permission.
+
+sample fact file: it get git version and returns in json format.
+cat git_v.fact
+#!/usr/bin/env bash
+git_ver=$(git --version | awk '{print $3}')
+cat << EOF
+{
+"git_version": "$git_ver"
+}
+EOF
+
+> ansible localhost  -m setup  | grep -i git_version
+OR
+> ansible localhost  -m setup  -a "filter=ansible_local"
+
+From the above create adhoc commands create files with .fact in all nodes and transfer the code. Then get the git version on all the nodes.
+
+DYNAMIC INVENTORIES:
+When an aws machine goes down and comes up, a new ip will be generated which is different from inventory ip. Hence ping will fail. To overcome this, dynamic inventories are used.
+
+dynamic inventories are scripts like shell/python for dynamic inventories.
+Ansible has dynamic inventory scripts for aws, GCP, openstack etc.
+
+For AWS:
+download ec2.py and ec2.ini from internet to /etc/ansible path.
+
+-------
+
+DEBUG MODULE:
+debug module prints the statements during the execution.
+accepts 3 params.
+- msg
+- var
+- verbosity
+
+- represents 1 play.
+
+SAMPLE PRINT:
+#!/usr/bin/ansible-playbook
+---
+ - hosts: server
+   tasks:
+   - name: priting using debug module.
+     debug:
+       msg:
+       - "welcome to ansible playbooks."
+       - "This is playbook 1."
+
+  #- debug: msg="welcome to ansible playbooks."
+
+PRINT THE HOSTNAMES:
+       - "The hostname is: {{inventory_hostname}}"
+
+
+EXECUTION OF PLAYBOOK:
+> ansible-playbook sample1.yaml or ansible-playbook sample1.yml
+OR
+> ./sample1.yml # if  #!/usr/bin/ansible-playbook is present in file.
+
+INITIALISING A VARIABLE:
+- var: inventory_hostname
+
+VERBOSITY:
+   - name: verbosity is 2
+     debug:
+      msg: "Verbosity is 2"
+      verbosity: 2
+
+since verbosity is 2 we need to mention -v 2 or more times, otherwise that task will be skipped.
+If more than 2, then all the debug logs will be shown.
+
+> ansible-playbook sample1.yaml -vvv
+
+INPUT AND OUTPUT:
+
+#!/usr/bin/ansible
+---
+ - hosts: server
+   gather_facts: false
+   vars:
+     x: 45
+     my_name: "kris"
+   vars_prompt:
+     name: y
+     prompt: "Enter the value of y"
+     private: false # input will not be displayed if true. for password keep true
+   tasks:
+   - debug:
+      msg:
+       - "The value of x is: {{x}}"
+       - "My name is {{my_name}}"
+       - "The value of y is: {{y}}"
+
+
+COMMAND LINE ARGUMENTS:
+
+#!/usr/bin/ansible
+---
+ - hosts: server
+   gather_facts: false
+   tasks:
+    - debug: var=x  # value of x is UNDEFINED. To avoid this pass value from cmd line.
+
+> ansible-playbook abc.yml -e "x=10"   this will print value of x as 10. -e = --extra-var.
+OR
+> ansible-playbook abc.yml -e "{'x': 10}"
+
+# 2 variables passing.
+> ansible-playbook abc.yml -e "x=10 y=20"
+OR
+> ansible-playbook abc.yml -e "{'x': 10, 'y': 20}"
+OR
+> ansible-playbook abc.yml -e "x=10 y='ansible playbooks'"
+
+# passing list:
+> ansible-playbook abc.yml -e "{'x': [10,20, 30]}"
+
+# passing map:
+> ansible-playbook abc.yml -e "{'x': {'one': 1, 'two': 2}"
+
+
+INPUT FROM YML OR JSON FILE:
+
+FROM yml file:
+---
+ x: 45 # scalar
+ y:    # list
+  - 4
+  - 5
+  - 6
+
+> ansible-playbook abc.yml -e "@var_inputs.yml"
+
+FROM JSON file:
+
+{
+"x": 10,
+"y": [20, 30, 40]
+}
+
+> ansible-playbook abc.yml -e "@var_inputs.json"
+
+INSTALLING AND UNINSTALLING PACKAGE FROM COMMAND LINES:
+
+---
+ - hosts: server
+   gather_facts: false
+   become: true
+   tasks:
+   - name: "working with {{pkg}}"
+     apt:
+      name: "{{pkg}}"
+      state: "{{req_state}}"
+
+> ansible-playbook abc.yml -e "{"pkg": vsftpd, "req_state": present}"
+
+COMPARISON OPERATOR:
+
+---
+ - name: working with comparison operators
+   hosts: server
+   gather_facts: false
+   vars:
+    x: 6
+    y: 10
+   tasks:
+    - debug:
+        msg:
+        - "x is equal to y : {{x==y}}"      # False
+        - "x != y: {{x!=y}}"      # True
+        - "x <= y: {{x <= y}}"    # True
+
+
+BLOCK:
+Ansible stops playbook execution on task failure and we can choose to ignore errors to continue with remaining tasks.
+
+IGNORE ERRORS:
+---
+ - hosts: server
+   gather_facts: false # by default, gather_facts is true.
+   tasks:
+    - command: "ls /home/ubuntu/modules"
+      register: modules_ls
+    - debug: var=modules_ls
+    - command: "ls /home/ubuntu/abcd"
+      register: modules_abcd       # if abcd folder is not present, then this command will throw error.
+      ignore_errors: yes          # ignore_errors is used so that it will continue to next command.
+    - debug: var=modules_abcd
+    - command: "ls /home/ubuntu/ae"
+      register: modules_ae
+    - debug: var=modules_ae
+
+
+Better is:
+
+---
+ - hosts: server
+   gather_facts: false
+   tasks:
+    block:
+      - command: "ls /home/ubuntu/modules"
+        register: modules_ls
+      - debug: var=modules_ls
+      - command: "ls /home/ubuntu/abcd"
+        register: modules_abcd
+      - debug: var=modules_abcd
+      - command: "ls /home/ubuntu/ae"
+        register: modules_ae
+      - debug: var=modules_ae
+    ignore_errors: yes    # ignoring errors at block level so that any error will be ignored and task will continue.
+
+EXCEPTION HANDLING:
+
+python , yaml
+try ,  block
+except, rescue
+finally , always
+
+---
+ - hosts: server
+   gather_facts: false
+   tasks:
+    - block:
+      - name: finding invalid path
+        command: "ls /home/ubuntu/abcd"
+        register: abcd_out
+      rescue:
+       - debug:
+          msg: "Given path is invalid."
+      always:
+        - debug:
+           msg: "This will always execute."
+
+
+INSTALLING AND STARTING XINETD IN DEBIAN SYSTEMS USING BLOCK STATEMENT:
+
+---
+ - hosts: server
+   gather_facts: true # by default script will gather facts.
+   tasks:
+    - block:
+      - name: installing xinetd in debian os family
+        apt:
+         name: xinetd
+         state: present # sudo apt install xinetd
+      - name: starting xinetd in debian os family
+        service:
+         name: xinetd
+         state: started # sudo service xinetd start.
+      when: ansible_os_family=="Debian"
+      become: yes # become sudo user.
+    - debug:  # optional, just for printing
+       msg: "successfully completed all the tasks."
+
+
+IMPORT AND INCLUDE STATEMENTS:
+
+
+IMPORT STATEMENT:
+
+MODULE:
+---
+ - name: simple way to install multiple pkgs
+   hosts: server
+   gather_facts: true # by default script will gather facts.
+   become: yes
+   tasks:
+    - import_tasks: install_pkg.yml    # SUBMODULE WHICH NEEDS TO BE IMPORTED.
+      when: ansible_os_family=="Debian"
+
+SUB MODULE: install_pkg.yml
+
+---
+  - name: installing a pkg on debain family.
+    apt:
+     name: vsftpd
+     state: present
+
+INCLUDE STATEMENT:
+MODULE:
+---
+ - name: simple way to install multiple pkgs
+   hosts: server
+   gather_facts: true # by default script will gather facts.
+   become: yes
+   tasks:
+    - include_tasks: install_pkg.yml    # SUBMODULE WHICH NEEDS TO BE IMPORTED.
+      when: ansible_os_family=="Debian"
+
+
+SUB MODULE: install_pkg.yml
+
+---
+  - name: installing a pkg on debain family.
+    apt:
+     name: vsftpd
+     state: present
+
+instead of import replace with include.
+
+Differences:
+import tasks are static.
+include tasks are dynamic.
+
+imported statements are preprocessed at the playbooks are parsed.
+include statements are processed as they are encountered during playbook execution.
+
+import: import_playbook, import_tasks, import_vars, import_role.
+include: include_playbook, include_tasks, include_vars, include_role.
+
+
+---
+ - name: simple way to install multiple pkgs
+   hosts: clite
+   gather_facts: true # by default script will gather facts.
+   become: yes
+   tasks:
+    - include_vars: import_vars.yml.  # if import is present then error is thrown.
+    - debug:
+        msg: "pkg name={{pkg}}"
+
+import_vars.yml
+---
+  pkg: httpd
+
+
+DOWNLOADING TAR BALL:
+get_url module is used.
+
+tasks:
+ - name: downloading required module.
+   get_url:
+     url: download tar ball link
+     dest: /usr/local
+
+UNTARING:
+tasks:
+ - name: extracting the tar file.
+   unarchieve:
+     src: "/usr/bin/tar file"
+     dest: usr/local
+     remote_src: yes # by default, unarchieve module will be executed on local host. To execute on rmote.
+
+RENAME:
+tasks:
+  -name: renameing the file
+   command: mv /usr/local/bin/abc ~/abc
+
+EXECUTE SHELL SCRIPT:
+tasks:
+ - name: executing the shell script
+   shell: nohup /usr/bin/abc.sh & # so that process is running in background.
+
+XML ACCESS AS TEMPLETES:
+tasks:
+ - name: templete access
+   template:
+     src: server.xml.j2 # convert xml as xml.j2(jinja templete).
+     dest: /etc/server.xml
+
+
+_______________________________________________________________________________________
+EXECUTE PYTHON SCRIPT AS MODULE FROM YAML:
+
+Ansible in general supports writing modules in any language like python, c, ruby, shell etc.
+There requirements are:
+ - language needs to implement File I/0.
+ - Language needs to write json to STDOUT.
+
+ Besides python, shell is second often used for ansible.
+
+In the package(/etc/ansible in this case), create "library" folder and create py for shell files under it.
+
+Or also use "--module-path" in command line.
+
+BOILER PLATE in python module.
+
+#!/usr/bin/python
+def main():
+    module = AnsibleModule(
+            argument_spec=dict(
+                variable1=dict(required=True),
+                ),
+            supports_check_mode=False
+            )
+
+from ansible.module_utils.basic import *
+main()
+
+ARGUMENT TYPES:
+        module = AnsibleModule(
+            argument_spec=dict(
+                variable1=dict(required=True),
+                variable2=dict(required=True, no_log=True), # for passwords
+                opt_var1=dict(),
+                opt_var_with_default=dict(default="hpe"),
+                opt_var_with_type_check=dict(type=bool)
+                opt_var_with_alias=dict(aliases=['new_input'])
+            ),
+            supports_check_mode=False
+            )
+
+
+TO RETURN THE TAKEN INPUT AFTER CHANGE:
+
+my_local_input = module.params['variable1']
+output = fun_that_changes_input(my_local_input)
+module.exit_json(changed=True, decision=output)
+
+RUN THE COMMANDS ON SHELL:
+module.run_command will execute command on shell and provide the output.
+
+input3 = module.run_command(['uname']) # returns a tuple.
+
+input3[0] == 0 # for success, else failure
+input3[1] # actual response. #LINUX
+
+DEBUGGING MODULE:
+print is not applicable in ansible python module. Hence use a list and return that list in module.exit_json and print yaml file using debug field.
+
+python file:
+debug_output = []
+debug_output.append("input3 : {0}".format(input3))
+module.exit_json(changed=True, decision=output, debug_out=debug_output)
+
+yaml file:
+- debug: var=test_module.debug_out
+
+COMPLETE FILES:
+
+Yaml file:
+
+---
+ - name: using python module
+   hosts: lhost
+   gather_facts: false
+   tasks:
+    - name: Test Module
+      test_module:
+        variable1: "xyz"
+        opt_var_with_type_check: True
+        #opt_var_with_default: "abcd"
+      register: test_module
+    - debug: var=test_module.decision # catching output.
+    - debug: var=test_module.debug_out # catching print stmts
+
+
+Python file:
+
+#!/usr/bin/env python
+import os
+
+def hello_world(input1, input2, input3, input4, module):
+    try:
+        input1 = input1.upper()
+        return "hello " + input1 + " and " + input2 + " and " + str(input4) + " is it " + str(input3) + "?"
+    except Exception as e:
+        module.fail_json(msg=e)
+
+def main():
+    module = AnsibleModule(
+            argument_spec=dict(
+                variable1=dict(required=True),
+                opt_var_with_default=dict(default="ijkl"),
+                opt_var_with_type_check=dict(type=bool)
+                ),
+            #supports_check_mode=False
+            )
+    debug_output = [] # print initialize
+    my_local_input = module.params['variable1']
+    my_local_input1 = module.params['opt_var_with_default']
+    my_local_input2 = module.params['opt_var_with_type_check']
+    input3 = module.run_command(['uname'])  # execute shell commands.
+    debug_output.append("input3 : {0}".format(input3)). # acts as print
+    output = hello_world(my_local_input, my_local_input1, my_local_input2, input3[1],  module)
+    module.exit_json(changed=True, decision=output, debug_out=debug_output)
+
+from ansible.module_utils.basic import *
+main()

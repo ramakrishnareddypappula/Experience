@@ -1,0 +1,65 @@
+
+
+AWS Lambda comes under compute service type. AWS EC2 and Elastic beanstalk also come under compute service type.
+
+
+
+What is a compute service?
+
+It is also known as Infrastructure As A Code(IAAS).  AWS Compute service provide cpu, memory, I/O to run our code.
+
+
+
+What is AWS lambda?
+
+AWS lambda allows us to run the code in response to an event. Event can be change in state or an update.
+
+AWS lambda is a simple function.
+
+Either is it triggered in response to an event or periodic like cronjob.
+
+Bill is paid only for lambda function runtime and memory consumed.
+
+Lambda function max execution time is 15 min and memory is 128 mb to 10240 mb.
+
+Monthly 1 million requests free and 400k gb seconds free.
+
+AWS lambda is serverless.
+
+Serverless: It allows developers to build and run applications without having to manage servers. It is cloud native.
+
+Lambda is supported in java, python etc.
+
+AWS lambda function can be triggered in response to events from S3 bucket, cloud watch,API gateway etc and logs are stored in cloud watch.
+
+1 Scenario:
+Whenever a file is uploaded to S3, an event is triggered in Lambda function to parse the data and produce the meaningful output and send it to DB.
+
+2 Scenario:
+In cloud watch, schedulers are present. Using this we can trigger aws functions periodically.
+
+lambda concurrency: Number of requests lambda function is serving at any given time. default quota for concurrent executions is 1000.
+
+Sample function:
+We can choose runtime as python.
+
+What is aws lambda layer?
+It is a zip file which contains packages and libraries to make the deployment faster.
+To use s3 bucket, we need to import s3 package. That we will keep in layers.
+
+destination: When lambda function passed or failed, email or log generation config is added here.
+
+
+ AWS lambda function to read json file from s3:
+
+import json
+import boto3
+
+s3 = boto3.client('s3')
+
+def lambda_handler(event, context):
+    bucket = 'bucket_name'
+    key = 'filename.json'
+    response = s3.get_object(Bucket=bucket, Key=key)
+    content = response['body']
+    jsonobj = json.loads(content.read())

@@ -1,0 +1,37 @@
+
+There are 3 networks by default
+1) bridge
+    bridge is a private internal network created by docker.
+    All containers attach to this network.
+    usually 172 network.
+    containers access each other using this.
+    To reach from outside, map to the port of host to port of container.
+2) none
+    does not have access to any network.
+
+3) host
+    if container exposed 5000 port, host machine can access it via 5000.
+    Another container should not have 5000 port exposed.
+
+
+To create a network:
+    > docker network create --driver bridge --subnet 172.18.0.0/16 custom-isolated
+
+To attach a network to container:
+    >docker run --name mycon --network none alpine
+
+To display networks:
+    > docker network ls # ALL bridge, host and null networks are seen.
+
+To inspect a particular network:
+    > docker network inspect custom-isolated
+
+
+
+
+DNS:
+    Docker has built-in DNS.
+    Container can reach each-other using name of the container instead of ip.
+
+
+

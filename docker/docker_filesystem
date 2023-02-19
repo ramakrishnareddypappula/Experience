@@ -1,0 +1,54 @@
+
+docker contents are stored in:
+> cd /var/lib/docker
+
+Layered architecture:
+    If 2 dockerfile are present with just different entrypoint, Then docker reuses the code for creating second image out of first image.
+    This saves disk space.
+
+    docker build command is read-only and hence Image layer is read-only.
+    docker run command is read-write and hence container layer is read-write.
+    every time we create multiple containers with same image and copy of the image is used.
+    This is called copy-on-write mechanism.
+
+Volumes:
+    If we remove the container, all the data in that container is lost.
+    To avoid this, volumes are used.
+
+    >docker volume create data_volume # under /var/lib/docker a data_volume is created.
+
+    > docker run -v data_volume:/var/lib/mysql mysql
+    OR
+    > docker run -v /folder/file/on/filesystem:/var/lib/mysql mysql
+
+    There are 2 types of mounts:
+    1) volume mount : mounts a volume from volume folder.
+    2) bind mount : mounts a directory from any folder on docker host.
+
+    So another way is
+    > docker run --mount type=bind,source=/data/mysql,target=/var/lib/mysql mysql
+
+
+docker storage drivers does all the layered architecture, copy-on-write etc.
+common storage drivers are AUFS, ZFS, BTRFS, device mapper.
+Based on OS, docker will choose the best storage driver.
+
+# docker mysql command to get users from table.
+> docker exec mysql-db mysql -pdb_pass123 -e 'use foo; select * from myTable'
+
+mysql data is stored in /var/lib/mysql folder in container.
+
+> docker run -d --name mysql-db -v /opt/data:/var/lib/mysql  -e MYSQL_ROOT_PASSWORD=db_pass123 mysql
+
+Data will be stored in /opt/data in host.
+
+If container is stored. we can get the data from /opt/data.
+
+
+
+
+
+
+
+
+

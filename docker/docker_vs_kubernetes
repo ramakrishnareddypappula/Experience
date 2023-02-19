@@ -1,0 +1,4 @@
+both Kubernetes & Docker compose are frameworks for container orchestration. The main difference is that Kubernetes runs containers across multiple computers, whether virtual or physical,
+whereas Docker Compose runs containers on a single host machine.
+
+Docker Swarm is different in that it is a container orchestration tool. This means that Docker Swarm lets you connect containers to multiple hosts similar to Kubernetes.

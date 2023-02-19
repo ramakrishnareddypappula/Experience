@@ -13,6 +13,28 @@ For running a containerized application, docker enginer needs to be installed.
 > docker -v # version.
 > docker info # system wide information including kernel version, number of containers and images.
 
+DOCKER:
+
+Unlike OS, docker performs a task and exits like db, app-server.
+Container lives as long as the process inside it is alive.
+
+To keep the container alive we need to append a like
+# docker run ubuntu sleep 5 # container sleeps for 5 sec before exiting.
+
+We can also create a docker file
+FROM Ubuntu
+CMD 5
+
+CMD Command:
+# CMD command param1 # CMD sleep 5
+
+OR
+
+# CMD ["command", "param1"]  # CMD ["sleep", "5"]
+
+
+
+
 Docker Terminologies:
     - Dockerfile: A text file. The contains specifics about base image, env variables, add files & dirs into the image and specify the
                    process to start when container comes up.
@@ -38,8 +60,44 @@ Docker Terminologies:
     - Docker Container: runtime instance of docker image is container.
 
     - Docker engine: Tool installed on host os. It helps containerizing apps and helps running in multiple envs.
+        It consists of 1) Docker Deamon: manages images, containers, volumes, networks etc.
+                        2) REST API : Api interface to talk to deamon.
+                        3) Docker CLI: CLI to interact with REST API.
+
+    All containers share the same cpu and RAM.
+    By default, there is no restriction on resource usage.
+    Docker uses cgroups to control a container can use cpu, RAM.
+    CPUs:
+    > docker run --cpus=0.5 nginx   # this ensures more than 50% of cpu is not used by container.
+    > docker update --cpus=value nginx # to update the cpus
+    Memory:
+    > docker run -m <value> nginx# RAM is controlled. value in MB, GB etc. '-m 1g' mean 1 GB RAM.
+    #OR
+    > docker run -memory=100m nginx
+    > docker update -m <value> nginx # To update the RAM.
+
 
     - Registry Service: repository. It is used to store docker images.
+        eg: image=  nginx:nginx
+                    useraccount:image/repo
+
+                if user account is not provided
+            docker hub dns name is docker.io. Its the registry.
+            image = docker.io/nginx/nginx
+
+            google's registry is gcr.io
+            image= gcr.io/k8s_images/dnsutils.
+
+           AWS, Azure, GCP provide private registry by default.
+           >docker login private_registry.io
+           > docker run private_registry.io/apps/internal-app
+
+        To create your own private registry docker exposes port 5000.
+        > docker run -d -p 5000:5000 --name registry registry:2
+        > docker image tag my-image localhost:5000/my-image
+        > docker push localhost:5000/my-image
+        > docker pull localhost:5000/my-image
+
 
 Docker Architecture:
     - Docker Daemon: A background process that creates and manages docker images, networks and volumes.
@@ -69,6 +127,9 @@ Install docker using the latest documentation in https://docs.docker.com
 3. From that image docker hub creates new container which runs the executable.
 4. This executable produces the which is sent to docker client which we will see.
 
+docker run will pull the image from docker hub and runs as container for the first time. from next time docker run reuses the image.
+
+
 Docker images are present in Docker hub.
 # docker images # OR #docker image ls # to see the images downloaded.
 
@@ -83,18 +144,21 @@ Docker images are present in Docker hub.
 
 # docker system events  # to see the events going on. Ideally execute this and in another terminal execute docker run ubuntu uptime.
 
-# docker ps # running container will be shown
+# docker ps # running containers will be shown. Name of the image, container id will be shown.
 # docker ps -l # last started container will be shown.
 
 #docker ps -n 5 # last 5 container started will be shown.
 
-# docker ps -a  # list all containers started so far.
+# docker ps -a  # list all containers ran so far. previously stopped and exited containers will also be shown.
+
+# docker pull <imagename> # to pull the image.
 
 Docker run command consists of below commands run in a sequence.
 # docker image pull <imagename>
 # docker create <imagename>
 # docker start <imagename>
 
+# docker run ubuntu sleep 5 # container will be run, sleep for 5 sec and will be stopped.
 
 DOCKER IMAGES:
 # docker run centos ps
@@ -110,20 +174,35 @@ Check the history of the image: Changes that were made to image.
 -DOCKER RUN OPTIONS:
 All parameters must be before the image name except the command you want to run on the container.
 
+# docker run redis # to run redis container
+# docker run redis:4.0 # to run a particular version. This is called tag. Docker hub will contain all versions.
 # docker run -it ubuntu bash # -i: interactive -t: terminal
 # docker run -itd ubuntu # d: detach, as deamon, image runs in the background and prompt is shown.
 # docker run -it --rm alpine sh  # --rm removes the image once it is stopped. Alpine is general linux version.
+# docker run -d <image name> # to run in a detached mode.
+# docker attach <container id> # if you want to attach back.
+
+# docker run --name <name> <imagename> # to run with a name
 
 # docker run -itd --name redis redis:alpine   # --name will give name to container.#docker ps will show this name.
 
 Containers does not have their own cpu, memory. They will share from host machine(i.e container machine has same cpu, memory as hostname.)
 
-# docker logs <container id> # to get the logs. Get container from #docker ps . Follow using -f
+# docker logs <container id or name> # to get the logs. Get container from #docker ps . Follow using -f
+
 
 -PORT MAPPING:
-#docker run -itd -p 8080:80 nginx  # from outside we can use 8080 port of the VM which is translated to 80 port of container. d = deamon.
-We can open nginx with VM_ip:8080 in browser.
+Every docker container will have an ip, an internal ip which is accessible within docker host.
+#docker run -itd -p 8080:80 nginx  # from outside we can use 8080 port of the VM which is translated to 80 port of container.
+We can open nginx with http://VM_ip:8080 in browser.
+This way multiple containers can be run on docker host and can be mapped via port mapping.
+#docker run -itd -p 8081:80 redis
+#docker run -itd -p 8082:80 postgres
+#docker run -itd -p 3306:3306 mysql
+#docker run -itd -p 8306:8306 mysql # mysql uses 3306 and 8306 ports.
 # docker run -itd -P nginx # random port is selected by container which we can see using #docker ps.
+
+There can be multiple ports attached to a container. 8080:8080 and 3456:80
 
 
 -TROUBLESHOOT USING LOGS AND EXEC:
@@ -134,18 +213,27 @@ Logs: prints the logs of the  container
 Exec: execute the commands inside the container
 # docker exec -it b9f1ff54df47 bash ( Get the container id using docker ps).
 
+# docker exec <container name or id > cat /etc/hosts  # To execute commands on a running container.
+
 -PAUSE, STOP, REMOVE, PRUNE A CONTAINER:
 
 # docker pause f57ea69d1979 (uptime and other commands execution will throw error.)
 # docker unpause f57ea69d1979
 
-# docker stop f57ea69d1979 f57ea69d1970
+# docker stop f57ea69d1979 f57ea69d1970 # we can give container id or name.
+# docker ps # will not show the stopped container.
+# docker ps -a # will show the stopped container. status will be exited.
+
+# docker rm f57ea69d1979 # to remove a container permanently.
+# docker ps -a # will not show this. space is saved.
+OR
+# docker rm -f f57ea69d1979
+
+# docker rmi <name of the image>  # to remove the image itself.
+
 # docker start f57ea69d1979      # to start a stopped container.
 
-# docker stop f57ea69d1979
-# docker rm f57ea69d1979
-OR
-# docker rm -f f57ea69d1979     # Force remove.
+
 
 # docker container prune # this will remove all the stopped containers. Stopped containers we can see using #docker ps -a
 
@@ -157,7 +245,16 @@ OR
 
 -DOCKER VOLUMES:
 
-Docker volumes are directories and files that exist on host file system outside of the docker container. These volumes are used to persist data and share data between docker containers. Docker supports the mounting of one or more volumes on host OS.
+Docker volumes are directories and files that exist on host file system outside of the docker container.
+This is mapped to a file/dir inside the container.
+# docker run mysql # data is present in /var/lib/mysql folder inside container.
+Once you stop a container or rm container, data is lost.
+# docker run -v /opt/datadir:/var/lib/mysql mysql
+                  dockerhost: container
+
+This way docker container will mount external folder inside container.
+Data will be stored in external volume.
+
 
 # docker volume create portainer # To create volume.
 # docker volume ls # list the volumes present in the local machine.
@@ -167,6 +264,9 @@ Docker volumes are directories and files that exist on host file system outside 
 Above command will create a volume called nextcloud with path /var/www/html in the local machine.
 
 # docker volume inspect portainer  # This mounpoint is on the container and not on local machine.
+
+DOCKER INSPECT:
+# docker inspect <name or id> # very useful for debugging.
 
 
 DOCKER COMPOSE:
@@ -238,3 +338,37 @@ It helps in
 2. Adding and removing the containers with the demand.
 3. Distributing load between containers.
 4. launching new containers on different machines if something failes.
+
+Docker host: Underlying host where docker container(where docker installed) is running is called docker host.
+
+Docker ccontainer states 1) Running 2) stopped 3) started 4) exited 5) completed.
+
+
+#docker history  python:3.6 # to view the layers associated that were used to build the image.
+
+TO BUILD A LIGHT WEIGHT IMAGE
+
+FROM python:3.6-alpine
+>docker build -t webapp:lite .  # lite is the tag.
+>docker run -p 8383:8080 webapp-color:lite    # tag=lite 8383: docker host port, 8080= container port.
+
+ENV VARIABLES:
+
+COLOR="BLUE"
+instead use
+COLOR=os.environ.get("APP_COLOR")  # in code
+#docker run -e APP_COLOR=red simple-app-color
+
+# docker inspect <container name> # to check the list of env variables.
+
+#docker run -e APP_COLOR=blue --name blue-app kodekloud/simple-webapp  # runs with name blue-app with env variable APP_COLOR=blue
+
+# docker run -e APP_COLOR=blue --name blue-app -p 38282:8080 kodekloud/simple-webapp  # with port 38282 mapped to 8080.
+
+First execute the command with out port mapping. Get the port where the container is running on. Stop and remove the container.
+Then run again with mapped port.
+
+$ docker run --name mysql-db  -e MYSQL_ROOT_PASSWORD=db_pass123  mysql   # docker run mysql with mysql-db name password as env variable.
+
+
+

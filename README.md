@@ -1,2 +1,19 @@
-# data_structures_using_python
-Implementation of data structures using python
+AWS Lambda
+Algorithms:
+  sorting
+  searching
+  strings
+  Trees
+  graphs
+  stacks
+  recursion
+Ansible
+Terraform
+Jenkins
+docker
+SRE
+System design
+
+  
+  
+  

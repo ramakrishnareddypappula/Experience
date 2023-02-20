@@ -1,0 +1,43 @@
+
+- SSH setup is required for ansible to connect to servers.
+  If not already installed, use below command to install ssh on servers:
+    > sudo apt install openssh-server
+
+- Make initial connection as "yes" only first time.
+
+- Create ssh key pair
+    > ssh-keygen    # OR
+    > ssh-keygen -t ed25519  -C "abc_default"   # more complex algorithm than rsa.  -C is comment.
+      use passphrase while generating.
+
+    > ls -l .ssh   # .pub and private keys will be generated.
+
+- Copy ssh key pair to each server from local ansible host.
+    > ssh-copy-id -i ~/.ssh/id_ed25519.pub <server ip>
+
+- Enter the passphrase
+    > ssh x.y.z.a
+        enter the passphrase: (instead of password)
+
+- Creating ansible key in ansible server.
+    >  ssh-keygen -t ed25519  -C "ansible"
+    provide ~/.ssh/ansible.pub
+
+- Copy Ansible key to servers.
+    > ssh-copy-id -i ~/.ssh/ansible.pub <server ip>
+
+- Using Ansible key
+    > ssh -i ~/.ssh/ansible.pub <server ip> # no password will be asked.
+
+- ssh agent
+    > eval $(ssh-agent)   # agent will be running in the background. No password will be asked instead of passphrase.
+    > ssh-add # provide passphrase 1 time so that it will be cached.
+    If terminal is closed, above 2 commands will be gone. So
+    > alias ssha='eval $(ssh-agent) && ssh-add'
+    > vi /.bashrc # to add ssha.
+
+
+
+
+
+

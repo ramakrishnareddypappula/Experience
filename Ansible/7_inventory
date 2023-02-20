@@ -1,0 +1,4 @@
+x1.y1.z1.a1 apache_package=apache2 php_package=libapache2-mod-php
+x2.y2.z2.a2 apache_package=apache2 php_package=libapache2-mod-php
+x3.y3.z3.a3 apache_package=apache2 php_package=libapache2-mod-php
+x4.y4.z4.a4 apache_package=httpd php_package=php

@@ -1,0 +1,33 @@
+
+---
+
+- hosts: all     # Get the ips from inventory file.
+  become: true   # becomes sudo
+  tasks:
+
+  # This is a Ubuntu related play
+  - name: remove apache2 package  # any string
+    apt:                        # use package manager
+      name: apache2             #  package.
+    when ansible_distribution == "Ubuntu"  # If 1 of the os in the inventory ips is centos instead of ubuntu, then it will be skipped.
+    #when ansible_distribution in ["Debian", "Ubuntu"] # another way
+    #When ansible_distribution == "CentOS" and  ansible_distribution_version == "8.2"
+
+  # This is a CentOS related play : apt is not present centos
+  - name: remove apache2 package  # any string
+    dnf:                        # use package manager
+      name: httpd             #  apache name on centos package.
+    when ansible_distribution == "CentOS"
+    # still apache will not run on centos. Use
+    # > sudo systemctl start httpd
+    # > sudo firewall-cmd --add-port=80/tcp
+
+
+
+
+# > ansible all -m gather_facts --limit x.y.z.a
+# This displays all the information that can be used ansible playbook. which OS, version, ansible_distribution etc.
+
+
+
+

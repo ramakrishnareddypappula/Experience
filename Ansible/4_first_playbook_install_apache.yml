@@ -1,0 +1,30 @@
+
+# For playbook files .yml is the standard extension.
+# indentation is mandatory
+# 3 dashes are used first.
+# module is package in ansible
+---
+
+- hosts: all     # Get the ips from inventory file.
+  become: true   # becomes sudo
+  tasks:
+
+  # under name, everything is called play
+  - name: update repository index
+    apt:
+      update_cache: yes
+
+  # This is a play
+  - name: install apache2 package  # any string
+    apt:                        # use package manager
+      name: apache2             # install package.
+      state: latest
+
+
+# > ansible-playbook --ask-become-pass 4_first_playbook_install_apache.yml
+# This will display on which ips changes are made.
+# ansible is idempotent, means if there are any changes, then only  changes are executed, else it will not be executed.
+
+
+
+

@@ -1,0 +1,29 @@
+
+- Update indices
+    > sudo apt update
+
+- install ansible
+    > sudo apt install ansible
+
+- Ansible command
+    > ansible all --key-file ~/.ssh/ansible -i inventory -m ping
+    # i = inventory file path
+    # m = module. to ping the servers in inventory.
+
+- Create ansible file
+    > vi ansible.cfg  # same folder as inventory.
+        [defaults]
+        inventory = inventory # inventory file
+        private_key_file = ~/.ssh/ansible
+
+    > ansible all -m ping  # all will be pinged.
+
+    > ansible all --list-hosts # displays all hosts
+
+    > ansible all -m gather_facts   # runs for all hosts
+    > ansible all -m gather_facts --limit 172.16.250.132  # to 1 host.
+
+    > ls /etc/ansible # ansible.cfg and hosts file are here as well.
+
+
+# documentation: https://docs.ansible.com/ansible/latest/getting_started/index.html

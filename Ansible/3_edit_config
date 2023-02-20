@@ -1,0 +1,31 @@
+
+- edit config without sudo:
+    > ansible all -m apt -a update_cache=true # it will fail since is not utilized.
+
+    > ansible all -m apt -a update_cache=true --become --ask-become-pass  # it will pass
+    BECOME PASS: <enter sudo pass>
+
+    # below packages will be installed in all of the servers.
+    vim install
+    > ansible all -m apt -a name=vim-nox --become --ask-become-pass # vim is installed.
+    BECOME PASS: <enter sudo pass>
+
+    tmux install
+    > ansible all -m apt -a name=tmux --become --ask-become-pass
+    BECOME PASS: <enter sudo pass>
+
+    snap latest packages install
+    > ansible all -m apt -a "name=snap state=latest" --become --ask-become-pass # if multiple params, use "".
+    BECOME PASS: <enter sudo pass>
+
+    > sudo apt update && sudo sudo dist-upgrade # to update and upgrade.
+    # sudo apt update: updates the local package index with latest information from repos.
+    # sudo apt upgrade: upgrades all installed packages to the latest versions.
+
+
+
+
+
+
+
+

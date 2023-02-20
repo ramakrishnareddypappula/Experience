@@ -1,0 +1,125 @@
+
+Git setup:
+- Check git
+    > which git
+
+- if not installed
+    > sudo apt update
+    > sudo apt install git
+
+- To make current dir as git dir
+    > git init .
+
+- signup/login to github
+    - Create a github repo.
+    - Add ssh key.
+    - clone repo
+        > git clone abc.git
+
+- Add users
+    > git config --global user.name "abc xyz"
+    > git config --global user.email "abc@xyz.net"
+    > cat ~/.gitconfig
+
+- Adding file to git
+    > git add filename
+    > git commit -m "new changes"
+    > git push origin master
+
+- Creating a branch and commit that branch
+    > git clone <master>.git
+    > git checkout <remote branch name>
+    > git checkout -b <create your own branch name>
+    > git branch # in mainline
+    > git pull
+    > git checkout -b mybranch
+    > git add filename
+    > git reset <filename>
+    > git commit -m "new changes"
+    > git push --set-upstream origin mybranch
+
+How to reset the added files:
+    > git add abcd.txt
+    > git reset abcd.txt # removes from changes.
+    > git reset COMMITID # get commit id from >git log # removes the changes after commit.
+    OR
+    > git reset --hard HEAD~1  # last commit will be reset.
+    OR
+    >git reset --hard COMMITID
+
+3 times you commit from same branch, then go to master and merge the branch changes.
+> git merge branch_name # master will have a chnages.
+
+To add code remote host(GitHUB):
+    > git init
+    > git remote add origin https://github.com/abcd.git
+    > git push origin master # pushes master code to the origin(GITHUB)
+
+Already commited. Add 1 more file
+    > git pull
+    > git add new_file_name
+    > git commit --amend --no-edit
+    > git push -f origin branch
+
+Some changes are not commited, but want to move to another branch
+    > git status # check the changes
+    > git stash  # save the changes to the stack
+    > git stash list # to view list of stashed changes.
+    > git stash pop # get back changes.
+
+Cherry pick from 1 branch to another:
+    > git log  # on A branch
+    > git checkout B # move to branch B
+    > git cherry-pick <hash from log> # cherry picked to current branch.
+    > git push -u origin
+
+Remove added file:
+    > git add abcd.txt
+    > git reset abcd.txt # removes from add.
+
+
+
+Jenkins file is pipeline as a code.
+A text file that contains the definition of jenkins pipeline and is checked into source control.
+Install the pipeline plug in in jenkins.
+Jenkins pipeline can be created using pipeline or multibranch pipeline projects. Both will give Pipeline script.
+using which we can create a pipeline.
+
+Pipeline Syntax:
+
+pipeline {
+	agent any # It can run on any node.
+	tools {
+		maven 'Maven 3.6.1'
+		# use 1 or more tools.
+	}
+	stages {
+		stage('one:build') {
+			steps {
+				echo 'step 1'
+				dir('worker') {
+					sh 'mvn compile'
+				}
+			}
+
+		}
+		stage('two:test') {
+			steps {
+				echo 'step 2'
+			}
+
+		}
+		stage('three:deploy') {
+			steps {
+				echo 'step 3'
+			}
+
+		}
+	}
+	post {
+		always {
+			echo 'This post will always run. There are other options like changed/fixed/aborted/failure etc.'
+		}
+	}
+
+}

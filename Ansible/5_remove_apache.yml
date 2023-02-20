@@ -1,0 +1,17 @@
+
+
+---
+
+- hosts: all     # Get the ips from inventory file.
+  become: true   # becomes sudo
+  tasks:
+
+  # This is a play
+  - name: remove apache2 package  # any string
+    apt:                        # use package manager
+      name: apache2             #  package.
+      state: absent           # absent will remove the package.
+
+
+# > ansible-playbook --ask-become-pass 5_remove_apache.yml
+

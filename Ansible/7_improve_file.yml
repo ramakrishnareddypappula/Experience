@@ -1,0 +1,40 @@
+
+---
+
+- hosts: all
+  become: true   # becomes sudo
+  tasks:
+
+#   These 2 plays are trimmed down to 1.
+#  # Ubuntu related
+#  - name: install apache2 and php lib of apache2.
+#    apt:
+#      name:
+#        - apache2
+#        - libapache2-mod-php
+#      state: latest
+#      update_cache: yes  # The whole play from previous is removed.
+#    when ansible_distribution == "Ubuntu"
+#
+#  # Centos related
+#  - name: install apache2 and php lib of apache2.
+#    dnf:
+#      name:
+#        - httpd
+#        - php
+#      state: latest
+#      update_cache: yes  # The whole play from previous is removed.
+#    when ansible_distribution == "CentOS"
+#
+#
+#
+  # Above 2 plays are replaced with 1.
+  - name: install apache and php
+    pacakge:     # Generic package manager in ansible. If ubuntu, then apt, if centos, then dns
+      name:
+        - "{{ apache_package }}"   # taken from inventory file
+        - "{{ php_package }}"
+      state: latest
+      update_cache: yes
+
+# >  ansible-playbook --ask-become-pass 7_improve_file.yml

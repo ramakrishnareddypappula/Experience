@@ -1,0 +1,83 @@
+
+---
+
+- hosts: all
+  become: true   # becomes sudo
+  pre_tasks:     # run before any tasks are run.
+
+  - name: install updates(CentOS)
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when ansible_distribution == "CentOS"
+
+  - name: install updates(Ubuntu)
+    tags: always
+    apt:
+      update_only: dist          # apt dist-upgrade
+      update_cache: yes
+    when ansible_distribution == "Ubuntu"
+
+- hosts: web_servers
+  become: true
+
+  - name: install apache2 and php lib for ubuntu servers.
+    tags: apache,apache2,ubuntu
+    apt:
+      name:
+        - apache2
+        - libapache2-mod-php
+      state: latest
+    when ansible_distribution == "Ubuntu"
+
+  - name: install apache2 and php lib for CentOS servers.
+    tags: apache, centos, httpd
+    dnf:
+      name:
+        - httpd
+        - php
+      state: latest
+    when ansible_distribution == "CentOS"
+
+
+
+- hosts: db_servers
+  become: true   # becomes sudo
+  tasks:
+
+  - name: install mariadb for CentOS servers.
+    tags: centos, db, mariadb
+    dnf:
+      name: mariadb
+      state: latest
+    when ansible_distribution == "CentOS"
+
+  - name: install mariadb for Ubuntu servers.
+    tags: ubuntu, db, mariadb
+    apt:
+      name: mariadb-server
+      state: latest
+    when ansible_distribution == "Ubuntu"
+
+
+- hosts: file_servers
+  become: true   # becomes sudo
+  tasks:
+
+  - name: install samba package
+    tags: samba
+    package:
+      name: samba
+      state: latest
+
+# > ansible-playbook --list-tags 9_tags.yml
+#  Displays all tags for all plays.
+
+# > ansible-playbook --tags centos --ask-become-pass 9_tags.yml
+# only tags=centos plays will be run.
+
+# > ansible-playbook --tags "centos,db" --ask-become-pass 9_tags.yml
+# only tags=centos and tags=db plays will be run.
+
+

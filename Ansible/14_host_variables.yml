@@ -1,0 +1,32 @@
+- hosts: all
+  become: true   # becomes sudo
+  pre_tasks:     # run before any tasks are run.
+
+  - name: install updates(CentOS)
+    tags: always
+    dnf:
+  #    update_only: yes bootstrap will take care
+      update_cache: yes
+    changed_when: false
+    when ansible_distribution == "CentOS"
+
+  - name: install updates(Ubuntu)
+    tags: always
+    apt:
+     # update_only: dist     bootstrap will take care     # apt dist-upgrade
+      update_cache: yes
+    changed_when: false
+    when ansible_distribution == "Ubuntu"
+
+# Using from host variables.
+- hosts: web_servers
+  become: true
+
+  - name: install apache2 and php lib for ubuntu servers.
+    tags: apache,apache2,ubuntu
+    package:
+      name:
+        - "{{ apache_package_name }}"      # got it from 1.1.1.1.yml
+        - "{{ php_package_name }}"         # got it from 1.1.1.1.yml
+      state: latest
+    when ansible_distribution == "Ubuntu"

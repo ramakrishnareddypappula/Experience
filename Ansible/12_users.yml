@@ -1,0 +1,68 @@
+
+---
+
+- hosts: all
+  become: true   # becomes sudo
+  pre_tasks:     # run before any tasks are run.
+
+  - name: install updates(CentOS)
+    tags: always
+    dnf:
+  #    update_only: yes bootstrap will take care
+      update_cache: yes
+    changed_when: false
+    when ansible_distribution == "CentOS"
+
+  - name: install updates(Ubuntu)
+    tags: always
+    apt:
+     # update_only: dist     bootstrap will take care     # apt dist-upgrade
+      update_cache: yes
+    changed_when: false
+    when ansible_distribution == "Ubuntu"
+
+- hosts: web_servers
+  become: true
+
+  - name: install apache2 and php lib for ubuntu servers.
+    tags: apache,apache2,ubuntu
+    apt:
+      name:
+        - apache2
+        - libapache2-mod-php
+      state: latest
+    when ansible_distribution == "Ubuntu"
+
+  - name: install apache2 and php lib for CentOS servers.
+    tags: apache, centos, httpd
+    dnf:
+      name:
+        - httpd
+        - php
+      state: latest
+    when ansible_distribution == "CentOS"
+
+# Bootstrap will take care of adding users.
+- hosts: all
+  become: true
+  tasks:
+
+  # This is like placeholder. If any public key changed, instead of adding to bootstrap
+  # we can add here.
+  - name: add ssh key for simone
+    tags: always
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 copy public key"
+
+
+# cat sudoer_simone
+# simone ALL=(ALL) NOPASSWD: ALL
+
+# ssh -i /.ssh/pubkey simone@ip     # This will work without password.
+
+
+# ansible-playbook 12_users.yml
+# this will work even if we remove --ask-become-pass since user is added.
+# its present in ansible.cfg too.
+

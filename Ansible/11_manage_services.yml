@@ -1,0 +1,72 @@
+
+---
+
+- hosts: all
+  become: true   # becomes sudo
+  pre_tasks:     # run before any tasks are run.
+
+  - name: install updates(CentOS)
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when ansible_distribution == "CentOS"
+
+  - name: install updates(Ubuntu)
+    tags: always
+    apt:
+      update_only: dist          # apt dist-upgrade
+      update_cache: yes
+    when ansible_distribution == "Ubuntu"
+
+- hosts: web_servers
+  become: true
+
+  - name: install apache2 and php lib for ubuntu servers.
+    tags: apache,apache2,ubuntu
+    apt:
+      name:
+        - apache2
+        - libapache2-mod-php
+      state: latest
+    when ansible_distribution == "Ubuntu"
+
+  - name: install apache2 and php lib for CentOS servers.
+    tags: apache, centos, httpd
+    dnf:
+      name:
+        - httpd
+        - php
+      state: latest
+    when ansible_distribution == "CentOS"
+
+
+  # MANAGE SERVICES.
+
+  # In centos, when services are installed, it will not be started automatically.
+  - name: start httpd (CentOS)
+    tags: apache, centos, httpd
+    service:
+      name: httpd
+      state: started
+      enabled: yes             # After every reboot, it will be started.
+    when: ansible_distribution == "CentOS"
+
+  # Change line in a file.
+  - name: change email address for admin
+    tags: apache, centos, httpd
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin' # If a line starts with ServerAdmin, That entire line changes to below.
+      line: ServerAdmin somebody@someemail.net
+    when: ansible_distribution == "CentOS"
+    register: httpd     # any variable name. It can be pizza or anything instead of httpd.
+
+  - name: restart httpd(CentOS)
+    tags: apache, centos, httpd
+    service:
+      name: httpd
+      state: restarted
+    when: httpd.changed  # httpd variable is changed, then only trigger this play.
+
+

@@ -22,7 +22,7 @@ person:      # object
   movies: ["alt", "del"]
   friends:
     - name: "rob"
-      age: 22
+      age: 22             # below and this is same.
     - {name: "Adam", age: 22}
 
 description: >     # This > will keep everything in 1 line

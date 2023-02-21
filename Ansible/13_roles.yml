@@ -1,0 +1,59 @@
+
+---
+
+- hosts: all
+  become: true   # becomes sudo
+  pre_tasks:     # run before any tasks are run.
+
+  - name: install updates(CentOS)
+    tags: always
+    dnf:
+  #    update_only: yes bootstrap will take care
+      update_cache: yes
+    changed_when: false
+    when ansible_distribution == "CentOS"
+
+  - name: install updates(Ubuntu)
+    tags: always
+    apt:
+     # update_only: dist     bootstrap will take care     # apt dist-upgrade
+      update_cache: yes
+    changed_when: false
+    when ansible_distribution == "Ubuntu"
+
+- hosts: all
+  become: true
+  roles:
+    - base
+
+# For base, it will check roles folder, then base, under which  tasks and then main.yml
+
+- hosts: workstations
+  become: true
+  roles:
+    - workstations
+
+# Similar to base, we need to create workstation dir under roles folder and then tasks and main.yml.
+# main.yml will be different for workstations.
+
+- hosts: webservers
+  become: true
+  roles:
+    - webservers
+
+# similar to above.
+
+- hosts: db_servers
+  become: true
+  roles:
+    - db_servers
+
+# similar to above.
+
+- hosts: file_servers
+  become: true
+  roles:
+    - file_servers
+
+# similar to above.
+

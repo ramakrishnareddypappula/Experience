@@ -1,0 +1,74 @@
+
+---
+
+- hosts: all
+  become: true   # becomes sudo
+  pre_tasks:     # run before any tasks are run.
+
+  - name: install updates(CentOS)
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when ansible_distribution == "CentOS"
+
+  - name: install updates(Ubuntu)
+    tags: always
+    apt:
+      update_only: dist          # apt dist-upgrade
+      update_cache: yes
+    when ansible_distribution == "Ubuntu"
+
+- hosts: web_servers
+  become: true
+
+  - name: install apache2 and php lib for ubuntu servers.
+    tags: apache,apache2,ubuntu
+    apt:
+      name:
+        - apache2
+        - libapache2-mod-php
+      state: latest
+    when ansible_distribution == "Ubuntu"
+
+  - name: install apache2 and php lib for CentOS servers.
+    tags: apache, centos, httpd
+    dnf:
+      name:
+        - httpd
+        - php
+      state: latest
+    when ansible_distribution == "CentOS"
+
+  # COPY FILES
+  - name: Copy default html file for site
+    tags: apache, apache2, httpd
+    copy:
+      src: 10_default_site.html
+      dst: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
+
+# INSTALL TERRAFORM.
+- hosts: file_servers
+  become: true
+  tasks:
+
+  - name: install unzip
+    package:
+      name: unzip
+
+
+  - name: install terraform
+    unarchive:
+      src: https://wrong_url_of_hashicorp.com/file
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: 0755
+      owner: root
+      group: root
+
+# we can copy file to servers or to work stations.
+
+

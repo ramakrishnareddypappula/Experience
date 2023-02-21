@@ -35,6 +35,7 @@
     If terminal is closed, above 2 commands will be gone. So
     > alias ssha='eval $(ssh-agent) && ssh-add'
     > vi /.bashrc # to add ssha.
+https://www.youtube.com/watch?v=3RiVKs8GHYQ&list=PLT98CRl2KxKEUHie1m24-wkyHpEsa4Y70&index=1
 
 
 

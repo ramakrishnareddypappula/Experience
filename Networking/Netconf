@@ -1,0 +1,392 @@
+Netconf is network management protocol. Used XML for retrieving and querying the configuration.
+Contents of request and response are described using XML schema.
+xml is case-sensitive. Its a markup language, we cannot execute it. Its for transporting and storing the data. Tag name, attribute, values are present. Its open standard.
+Html is for displaying the data,  xml tags are predefined.
+SSH is used as transport layer for netconf agent.
+
+Netconf uses RPC(Remote Procedure Call) standard.
+Netconf is tcp and uses port number 830.
+Netconf manager: acts as client in the network
+netconf agent : acts as server in the network(router)
+
+Netconf Protocol structure:
+content                                 configuration data
+operations                            get-config, edit-config
+RPC                                     rpc, rpc-reply
+transport protocol                SSH
+
+Databases: 1.running: active configuration that is currently running on the device.<get/> operation is performed on running to retrieve status information, statistics and configuration parameters.
+<lock> operation is done on running.
+2.candidate: Any changes made does not directly effect the device, <commit/> operation is required.</discard changes> can be done when we dont want any effect.
+3.startup: Used for the purpose of starting up the device. from <running> we can do <copy-config/> to <startup> to copy the configuration.
+<copy-config>: Create or replace an entire data store with another complete configuration data store.
+<confirm-commit>: Within particular time(default-10 min), commit should be sent for configuration, otherwise configuration will be removed.
+
+Protocol operations:
+close-session: To terminate own session.
+delete-config: delete the configuration database.
+edit-config: modify the database.
+get: retrieve running database and device statistics
+get-config: retrieve data from running data-store
+kill session: terminate another session
+lock: lock the database so only my data can write
+unlock: unlock the database
+
+commit: commit without update: changes from candidate database to running database
+commit with update: if there is any conflict during commit opration, updates candidate datastore before committing the configuration.
+copy-config; copy the configuration datastore.
+discard-changes: discard uncommited configuration.
+
+capabilities: Functionality that is supported apart from base. They are identified by uri.
+capabilities are advertised during session establishment.With hello packet these capabilities are advertised.
+Each peer must have atleast base capability.
+writable running capability: This means <edit-config><copy-config> are supported.
+candidate: This means device can hold configuration data to be manipulated without impacting the device current configuration.
+distinct startup : supports </startup>
+rollback on error: when error occurs during processing, the whole process is reverted back to the old.
+sync capability: manager sends the netconf update to local data store. CFG updates and data and netconf agent send this data to netconf manager to synchronize.
+exchange capability: When data is huge, agent notifies the manager to send <get-next> request. within particular time, if the manager does not send get-next,
+its timed out and data is not retrieved.
+active capability: If the processing takes long time. Agent notifies manager that the link is active.
+Action capability: <action>, ftp action schema
+preview capability: manager can view the difference between candidate data store and latest running data store at any time.
+
+State and configuration data:
+state: Its read only data. it is for status information and statistics collection.
+Configuration: It is writable data that is used to change the system.
+
+mandatory attribute in case of rpc is the messge-id.
+rpc-errors can have error-tag, error-message, error-severity(warning, error), error-info.
+error-options: stop-on-error, continue-on-error, rollback-on-error
+
+Hello packet request:
+sample hello message and response: base capability should be there.
+<?xml version="1.0" encoding="UTF-8"?>
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+<capabilities>
+<capability>urn:ietf:params:netconf:base:1.0</capability>
+<capability>http://www.huawei.com/netconf/capability/active/1.0</capability>
+</capabilities>
+</hello>
+
+hello packet response:
+<?xml version="1.0" encoding="UTF-8"?>
+<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+<capabilities>
+<capability>urn:ietf:params:netconf:base:1.0</capability>
+</capabilities>
+<session-id>1149</session-id>
+</hello>
+
+get-config request:
+<xml version='1.0'>
+  <rpc message-id='1' xmlns="urn:ietf:xml:ns:netconf:base:1.0">
+    <get-config>
+      <acl>
+     </acl>
+   </get-config>
+  </rpc>
+
+edit sample response:
+  <rpc-reply message-id='1' xmlns="urn:ietf:xml:ns:netconf:base:1.0">
+  <ok/>
+  </rpc-reply>
+
+Syncfull Feature:
+Using this feature, the data for particular application like(acl, ospf, cspf, snmp) can be send to a linux directory in the form of zip file. While this operation is in progress, the data base should not be changed. For transferring the data from router to linux, ftp or sftp protocol is used. username, password, protocol(ftp or sftp) server should be enabled, port number, path of linux directory where we want to keep file and filename. sysname_cp(flow-id).zip this is the file that is created in the target path. when unzip it, it will contain xml files.
+
+test cases for syncfull:
+send xmls with wrong tags.
+wrong username, password etc
+file with applications data.
+with more than 60 applications. memory leak testing using valgrind. cpu and memory usage checking with all applications file transfer.
+modifying the configuration of the router during the file transfer.
+reliability testing when the operation is in progress.
+lock the db and try to do the sync-full operation.
+
+What is SDN?
+A physical separation between control plane(Decision where traffic needs to be sent) and forwarding plane(System that forwards traffic) where a control plane controls several devices.
+
+SDN controller:
+These are brains of network.Its the core of SDN network.
+It lies between applications and network devices.
+SDN controller manages from to switch/routers(southbound interfaces) and applications and business logic(northbound interfaces).
+It uses openflow protocol which will allow servers to tell switches where to send packets.
+Other protocols that can be used in SDN controller is YANG or NetConf.
+
+OPEN FLOW: Its a protocol for interacting with the forwarding behaviors of switches from multiple vendors.
+
+Why YANG:
+Its a Domain Specific language, used for configuration and state data and used in netconf.
+RFC6020
+Yang Data Model:
+Data model describes how data is represented and accessed.
+Yang data model defines hierarchy of data that can be used for netconf based operations, including configuration, state data, RPCs and notifications.
+Yang models data in the form of tree where each node has a name with a value or a child node.
+YIN(YANG Independent Notation): It is used to transfer Yang module to equivalent xml syntax.
+Yang Data model maintains compatibility with SNMP SMI v2 (Structure of Management Information).
+SMIv2 mibs are automatically converted to Yang modules with read-only access.
+Module: A module defines hierarchy of nodes that are used for netconf based operations. In general we can think of module as python module.
+Submodule: Module is constrcuted on number of submodules. It contains derived types, grouping, data nodes, RPCs and notification.
+
+Module contains 1) Module header stmts: Describe and give information about module itself.
+2) revision stmts: history of module. (yyyy-mm-dd) format.
+3) Definition stmts: Body of the module.
+"include" stmt allows a module or submodule to reference material in submodules.
+"import " stmt allows a module to reference material in other modules.
+
+Nodes:
+leaf node: It contains simple data like integer or string. It has only 1 value and no child nodes.
+flag called enabled defaults to true.
+leaf enabled{
+             type boolean ;
+    default true;
+               }
+<enabled>true</enabled>
+
+list of cipher names
+leaf-list cipher{
+            type string;
+}
+
+State data and config data are differentiated based on "config" stmt. if "config false" is present for a node in the heirarchy, then netconf get-operation is used instead of get-config operation to retrieve. we cannot manipulate the state data with edit-config operation.
+list interface {
+         key "name";
+
+         leaf name {
+             type string;
+         }
+        leaf observed-speed {
+             type uint32;
+             config false;
+         }
+     }
+Builtin data type: int8, int16, int32, int64, uint8, uint16, uint32, uint64, binary, bits, boolean,
+empty(leaf that does not have any value).
+Derived types: yang can define derived types from base types using "typedef" stmt.
+typedef percent {
+         type uint8 {
+             range "0 .. 100";
+         }
+         description "Percentage";
+     }
+
+     leaf completed {
+         type percent;
+     }
+Choices:
+Yang allows distinct choices using "choice" stmt and choose from the set of "case" stmt.
+General, This is similar to switch case stmt is many languages.
+Augment: Yang allows
+module to insert additional nodes into data models both into current module and external module.
+This is very useful for vendors to add vendor specific parameters.
+"augment" stmt defines in which path to insert and "when" stmt defines condition when to add.
+
+augment /system/login/user {
+         when "class != 'wheel'";
+         leaf uid {
+             type uint16 {
+                 range "1000 .. 30000";
+             }
+         }
+     }
+File names: module or submodule name[@revision date]['.yang'/'.yin']
+Features: Features are defined using the "feature" stmt. "if-feature" and name of the
+feature as argument.
+Comments: single line comments"//" and multiline comments /* */.
+token: A token can be keyword, string , semi colon(;) or {curly braces}.
+general stmts = keyword [0-more arguments] then (;) for block of subsmts in {}
+
+keywords are case-sensitive.
+
+if a string contains space or tab or semi colon or braces or comments, then they must be
+enclosed in "" or ''.
+
+yang version: "1" default is 1.
+
+organization: Which company developed this module. It contains organization name(string) as
+
+the parameter.
+
+
+contact: To whom to contact for this module. Contains name, postal address, telephone number,
+
+mail address.
+
+
+---------------------------------------------------------------------------------------
+
+MODULE EXAMPLE:
+
+module ram { ----------------> module name should me same as file name
+
+namespace "http://www.google.com/x"; --> unique id that distinguishes from other modules.
+
+prefix anywhere;  --> like alias of namespace, it can be used anywhere within the module.
+
+import 'ietf-yang-types'{ --> from external module, get the definitions(grouping,typedef)
+
+prefix yang
+
+}
+
+include 'rama-krishna' --> Get the data from submodule.
+
+organization 'abc';
+
+contact ram
+
+phone
+
+description 'This is sample yang module'
+
+revision '2016-09-03'{
+
+description 'initial revision';
+
+}
+
+Typical module contains:
+
+header information
+
+imports and includes
+
+type definitions
+
+configuration and operations data declarartions
+
+
+RPCs and notifications
+
+SUBMODULE EXAMPLE:
+submodule submod{
+belongs-to ram { --> this sub module belongs to
+prefix sss;
+}
+imoprt 'ietf-yang-types'{
+prefix yang;
+}
+typedef base_type{
+type int32{
+    range "1..4 | 10..20"; --> defined a base type with integer range from 0-4 or 10-20.
+}
+typedef derived_type{
+typdef base_type{
+ range "11..max"  --->defined a derived type with integer range from 11 to 20.
+union: If we want to have number(1-255) or string(enabled) depending on data, we can use union.
+Grouping: group of nodes are assembled using "grouping" stmt. They are instantiated using
+ "uses" stmt. General, Similar to Function definition(grouping) and declaration(uses).
+
+grouping target {
+         leaf address {
+             type inet:ip-address;
+             description "Target IP address";
+         }
+         leaf port {
+             type inet:port-number;
+             description "Target port number";
+         }
+     }
+
+     container peer {
+         container destination {
+             uses target;
+         }
+     }
+
+
+
+
+
+Refine : we can give default values using refine statement.
+
+
+container peer {
+         container destination {
+             uses target{
+
+                  refine port{
+
+                    define 80;
+         }
+     }
+
+
+leaf : It holds single value of particular type. Has no children.
+
+leaf host-name{
+
+type string;
+
+mandatory true; --> must be present
+
+config true; --> Its configurable, get-config default true.If false, then readoly and get
+
+description "This is hostname";
+
+}
+
+
+Container : It is used to group related nodes in a subtree. It has only child nodes and no value. A container may conatiner any number of child nodes of any type.
+In container, presence is present which is optional, may or may not be present.
+
+
+container system {
+         container login {
+             leaf message {
+                 type string;
+                 description
+                     "Message given at start of login session";
+             }
+         }
+     }
+
+
+
+In list and leaf-list, max-elements(max-elements that can be present in list),
+
+min-elements(min-elements that can be present in list) and ordered-by(below) keywords
+
+are present.
+
+
+
+
+
+leaf-list: multiple values of particular type. Has no children.
+leaf-list domain-search{
+type search;
+ordered-by user;   --> ordered-by user(return values as given by user), system(system can return values is different order)
+description 'this is leaf-list'
+List:It defines sequence of list entries. It is identified uniquely by values of its key leafs. multiple key leafs can be present in list.
+
+list user {
+         key "name";
+         leaf name {
+             type string;
+         }
+         leaf full-name {
+             type string;
+         }
+         leaf class {
+             type string;
+         }
+     }
+
+
+
+
+
+unique keyword: non-key fields can be declared unique. syntax: unique name
+
+
+
+RPC stamt: administrative actions with input and output parameters.
+
+
+Notifications: Notification with output parameters.
+
+must stmt: must  "x < y"
+deviate stmt: some deviation from the standard yang
+modelling can be defined using the deviate stmt.

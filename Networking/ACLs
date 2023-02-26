@@ -1,0 +1,109 @@
+ACL: Access Control Lists.
+ACLs perform packet filtering to control which packets move through the network.
+Entries are processed in the order of sequence numbers.
+implicit deny at the end of list.
+Apply to inbound and outbound.
+
+Inbound: While coming inside the router.
+Outbound: While foing out of the router.
+
+Standard:
+Based on source.
+Permit or deny entire TCP/IP suite.
+Range is 1-99 and 1300-1999
+
+Extended:
+Based on source and destination.
+Specify a specific protocol or port number.
+Range is 100-199 and 2000-2699.
+
+standard ACL:
+#config#ip access-list standard <name or number>
+#config-std-nacl# deny 1.1.1.0 0.0.0.255
+#config-std-nacl# permit any # default is deny any.
+
+#config-intf# ip access-group <name or number> out
+
+ACL standard lab:
+
+1.1.1.1 R1 .1 <-192.168.12.-> .2 R2 2.2.2.2
+
+Goal is not to ping 2.2.2.2 from R1 loopback interface.
+
+Configure ospf so that loopbacks are pinging.
+
+in R2
+##config#ip access-list standard 1
+#config-std-nacl#10 deny 1.1.1.1 0.0.0.0
+#config-std-nacl#11 permit any
+
+#config# interface gigabitethernet0/0
+#config# ip access-group 1 in
+
+R1
+> ping 2.2.2.2 is destination unreachable shown.
+
+Extended ACL:
+#config# access-list <num> {permit|deny} protocol source-add wildcard destin-add wildcard
+
+#config# access-list 100 permit <protocol> 1.1.1.1 0.0.0.0 2.2.2.2 0.0.0.0 eq telnet
+config# interface fa0/0
+config# ip access-group 1 out
+
+Extended ACL lab:
+
+R1 .1<-192.168.12->.2 R2
+
+R1
+#config#access-list 100 deny tcp 192.168.12.0 0.0.0.255 any eq telnet
+#config# access-list 100 permit tcp any any
+#config# interface fa0/0
+#config# ip access-group 1 out
+
+R2:
+>telnet 192.168.12.1 #destination unreachable.
+
+Time based ACLs:
+For a particular time acl rule is applied. It is applicable for ipv4 and ipv6.
+
+R1 .1<-192.168.12->.2 R2
+
+R1(config)#time-range WEEK_DAYS
+R1(config-time-range)#PERiodic weekdays  17:45 to 17:50
+R1(config-time-range)#
+R1(config)#ip access-list extended TIME_BASED
+R1(config-ext-nacl)#deny tcp 192.168.12.0 0.0.0.255 any  eq 23  time-range WEEK_DAYS
+R1(config-ext-nacl)#permit tcp  any  any
+R1(config)#inter gigabitEthernet 0/0
+R1(config-if)#ip access-group TIME_BASED in
+
+R2:
+>telnet 192.168.12.1
+
+
+IPV6 Access-lists:
+
+R1(config)#ipv6 access-list  IPV6_ACL  # only name
+R1(config-ipv6-acl)#deny tcp host 100::1 host  12::1 eq telnet
+R1(config-ipv6-acl)#permit tcp any any
+R1(config)#inter gigabitEthernet 0/0
+R1(config-if)#ipv6 traffic-filter IPV6_ACL in
+
+Q&A:
+> process switching is slowest > fast switching > CEF
+> "debug ip packet" along with "extended acl" limit the amount of output data.
+> Time based filters have "periodic" keyword and time is set like 23:59 and not 11:59.
+> established keyword = ACK or RST control bit set in TCP.
+> Reflexive access list provides more granular session filtering for upper-level protocols.
+  They are nested within extended and named ip acls. Typically used at border routers and firewalls.
+  They do not end with implicit deny statements since they are nested and acls to come.
+> "ipv6 traffic-filter access-list-name {in | out}" enables ipv6 access list.
+> ip acl entries are applied to traffic in the order they appear.
+> ip acl entries support wild card masks to limit address bits.
+> minimum log level 6 is applied to display log message when acl drops an incoming packets.
+> With vty username, autocommand can be used so that particular command can be executed after loggging in.
+> "enable secret 5 xxxx" can be copy pasted from another configuration.
+> if enable secret and enable password are missing are in global configuration, vty lines console password.
+> enable secret overrides enable password.
+> ip access-list support wild card masks to limit the address bits to which entries are applied.
+> ip access-list entries are applied to traffic in order which they appear.

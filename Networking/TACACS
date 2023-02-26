@@ -1,0 +1,10 @@
+Terminal Access Controller Access-Control System
+Xtacacs(cisco proprietry) and Tacacs+(open standard) are both released by cisco and both are derieved from tacacs.
+Its TCP and uses port 49. Users will send request to client which are forwarded to Tacacs Deamon or Tacacs Authentication server.
+Username, password, authorization and accounting are all encrypted in Tacacs.
+
+Differences between Radius and Tacacs:
+
+1)Tacacs is more secure since it encrypts the entire authentication process. Radius encrypts just user's password of the packet, remainder is unencrypted.
+2)Radius uses UDP(1812 and 1813) while Tacacs uses TCP(49).
+3)Radius combines authentication and authorization while Tacacs separates authentication and authorization.

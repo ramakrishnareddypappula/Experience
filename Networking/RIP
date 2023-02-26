@@ -1,0 +1,53 @@
+ROUTING INFORMATION PROTOCOL(RIP):
+Its a routing protocol for small and medium networks. It uses distance-vector algorithm to calculate routes.
+
+RIP v1 is classful. RIPv2 is classless.
+RIP v1 supports no VLSM. RIPv2 supports VLSM.
+AD(120) is same for RIP v1, v2.
+RIP V2 uses UDP port 520.
+multicast is 224.0.0.9.
+
+#config# router rip
+#config-router# version 2 # version 1 is default.
+#config-router# network x.x.x.x
+#config-router# no auto-summary # default it auto-summarizes
+
+RIPng: RIP next generation
+successor to v2.
+RIP for IPV6.
+RIPng uses UDP port 521.
+no-autosummarization.
+multicast address FF02::9
+
+Configuration:
+#config#ipv6 unicast-routing
+#config# ipv6 router rip <name>
+#config# ipv6 rip <name> enable
+
+If you want to enable on interface.
+#config-intf# ipv6 rip <name> enable
+
+Ripv1 and v2 timers are same:
+update: 30 seconds
+invalid: 180 sec. route becomes invalid since valid update.
+holddown timer: 180 seconds.
+flush timer: 240 seconds. from valid to becoing valid and flushing out the route.
+
+Q&A:
+> Maximum hop count for RIP and RIPng is 15.
+> RIP cannot receives updates scenario: firewall blocked UDP port 520.
+> Unlike ospf and eigrp, RIP cannot be enabled on interface level. Only in #config-router# it can be enabled.
+> hop count of 16 is treat as unreachable.
+> RIP v2 supports only classful supernet networks.
+> ripng timer can be modified in #router(config-rtr)# mode.
+> ipv4 rip timer can be modified in #config-router# mode.
+> Default authentication mode in rip v2 is plain text.
+> Rip v1 does not support authentication.
+> To form neighbors, for ripng uses UDP 521 ported must be permitted.
+> ripv1, v2 use UDP port 520.
+> To support ripng, "ipv6 unicast-routing" must be configured.
+> ripng on new customer link is enabled on interface mode.
+> ripng is enabled on global configuration mode.
+> global - config#ipv6 router rip "RIPNG" RIPng is ocnfigured on new link to partner using RIPng.
+> 240 seconds needs to waited before removing from routing table after ripv2 router loses its connectivity with neighbor.
+> RIpng neighbor adjacencies are shown in "show ipv6 rip next-hops"

@@ -1,0 +1,51 @@
+Syslog is a way for network devices to send event messages to logging server usually called syslog server.
+It logs different types of events like when an AP is connected, when a controller is connected, disconnected etc.
+Syslog server needs to consolidate logs from multiple sources.
+A syslog listener needs to gather data sent over UDP port 514.
+So some may not arrive as UDP. So some use TCP 1468 to ensure delivery.
+General syslog format has ip address, timestamp and actual message log.
+
+facility: syslog has concept called "facility" to identify the source of the message on any given machine.
+example:
+facility 0 = kernel message.
+facility 1  = user level messages
+facility 2 = mail system
+facility 11 = FTP deamon etc.
+facility 16 = local use 0(local0)
+... local1 to local6
+facility 23 = local use 7(local7)
+
+severity: Syslog messages also have severity field called which indicates how much message is important.
+0 = emergency
+1 = alert,
+2 = critical
+3 = error
+4 = warning
+5 = notice
+6 = informational
+7 = debug
+
+Each syslog message has priority value which is at the beginning of text. It is enclosed <priority>.
+Priority value = 8 * facility + severity.
+
+RFC specify log should contain timestamp.
+
+Hostname: Hostname can either be FQDN, hostname, static ip address, dynamic ip address of the machine which generated the messages.
+
+Kiwi syslog server I have used.
+
+-> CEF format?
+Common Event Format.
+It allows for interoperability. Which means when 1 company sends syslogs other companies can receive and understand it.
+
+Python module: SocketServer module is used to implement syslog server.
+
+All the latest linux systems comes with syslogd.
+It provides an API for logging to standard library.
+
+The main configuration file is:
+> cat /etc/syslog.conf
+> cat /etc/asl.conf ( or for mac systems)
+
+To get the pid of syslog that is running.
+>cat /etc/run/syslog.pid

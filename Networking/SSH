@@ -1,0 +1,34 @@
+
+To generate SSH keys:
+> ssh-keygen  (generate ssh keys on linux or mac)
+> cd ~/.ssh/
+id_rsa(private) and id_rsa.pub(public)
+> ssh-keygen -R <hostname> (when ssh to remote device is failing. Deletes ssh public key in host.)
+
+4 important files
+1. known_hosts:
+cat ~/.ssh/known_hosts: This will contain the fingerprints of all the machines you logged into.
+When we try to connect to remote host first time. Remote server will send its public key. It is stored on known_hosts. Next time when logging in client uses this and it is successful.
+2. authorized_keys:
+cat ~/.ssh/authorized_keys : This will contain public keys of all the clients that were logged in on a remote server.
+For every login from client, server will get public keys from clients.
+3. ssh_config:
+cat /etc/ssh/ssh_config. Used for system wide client configuration for ssh. when connecting to client this file is used. Dont edit.
+4.  sshd_config:
+This is a configuration file for ssh daemon. It contains default port, x11 forwarding, public key athentication etc information.
+
+SSL(Secure Socket Layer) and TLS(Transport Layer Security) are both cryptographic protocol
+used for authentication. SSL uses public and private key concept which is shared between client and server.
+It is mainly used web servers and client server architecture.
+TLS and SSL are NOT interoperable.
+TLS is the latest version of SSL.
+HTTPS appears on the website url when secured by SSL certificate.
+It contains the details of the certificate, issuing authority.
+
+Using the alias we can login from CLI.
+Steps
+1) Download sshpass utility from internet
+2) Provide the below command in bash_profile
+>cat ~/.bash_profile
+alias host_any_name="sshpass -p password123 ssh username@ipaddress"
+

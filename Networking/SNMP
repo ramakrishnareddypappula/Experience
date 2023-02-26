@@ -1,0 +1,293 @@
+
+
+SNMP or Simple Network Management Protocol
+
+EMS(Element management system)/NMS(Network management system):
+EMS manages single node or group of similar nodes in a network. Sit inside a network and manages the network. Like EMS manages only huawei routers in the network. Communication between 2 network elements is not possible. snmp, cli, xml protocols are used.
+NMS manages entire network or multiple networks. Sit inside or outside the network and monitoring all nodes and connections between them. NMS is used for checking Fault management, Configuration mgmt, Accounting, Performance and Security management(FCAPS).
+
+Agent:Agent is the management software which runs inside the managed device. Involves querying/editing and asynchronous trap generation.
+managed device:device which runs snmp agent on it.
+
+
+Event: It is the information or status of an element.  They are not critical and do require immediate attention.
+Alarm: An event that requires immediate attention and resolve it.
+
+MIB(Management Information Base):set of managed objects which are organised lexicographically. Each managed object is identified using unique OID.
+
+SMI(Structure of management information): Set of rules to define the mib objects. It can define ID, type, accesslevel, status. Two versions are present , SMI v1 and SMI v2. Its a subset of ASN.1.
+
+ASN.1(Abstract syntax notation): Its a standard and notation that describes rules and structures for representing, encoding, transmitting and decoding data in telecom.
+
+snmp engine id is the unique id for an agent. It is used with the hashing function to generate the authentication and encryption keys for snmp v3 messages. when snmp engine reboots, it retrieves, increments and stores in snmp engineboots and snmpenginetime is reset to 0.
+when snmpenginetime reaches the max value, snmpengineboots increments as if snmp engine has rebooted and snmp engine time is reset to 0 and starts again.
+
+commands:get(read),get-next(retrieve next element),get-bulk(retrive large amount of data),set(write operation), trap(asynchronous notification) and inform(notification + ACK).
+
+1.3.6.1.4.1.2011 - huawei mib
+1.3.6.1.4.1- private mib
+
+By using proxy agent and bilingual manager we can support interoperability between snmp v1 and snmp v2.
+
+Non-repitition:Number of OIDs that will return only 1 get-next instance.
+Max-repitition: Number of times the remaining OIDs should be repeated
+
+storage types:
+volatile - row is lost upon reboot
+nonVolatile, readonly , permanent— row is not lost upon reboot
+permanent - can be changed but not deleted.
+read-only - cannot be changed or deleted.
+other
+
+ROWSTATUS:
+Entrystatus is same rowstatus But it is SMIv1.
+Valid(1): Valid and available for use
+createrequest(2): request sent by manager to create a row. Until it is configured, it remains in this state then valid.
+undercreation(3): Indicated row is being created.
+invalid(4): request sent by manager to invalidate the entry.
+Example is RMON mib.
+SMIv2(structure of management information):
+active(1):row with all columns is ready for use by NMS.
+notInservice(2): Exists in agent, but not available to be used by NMS.
+NotReady(3): exist in agent, 1 or more columns in row are not instantiated.
+createandgo(4): request sent by NMS wish to create a record in database.
+createandwait(5): request sent by NMS wish to create a record in database but not making available for use.
+destroy(6): request sent by NMS wish to delete a record in database
+Example is Snmpcommunitymib.
+
+Differences between snmp v1 and v2:
+1)Get-bulk feature is present in v2
+2)informs is supported in v2.
+3)Counter 64 datatype is supported in SNMP v2c.
+4)community was there, so security is same.
+
+Difference between traps and informs:
+1)snmp v1, v2c, and v3 supports traps. no ack is sent. No reliability.
+2) In informs, for snmp v2c informs no restriction, but for snmp v3 traps, user should be configured and have a group with notify-view.
+and the username should be mapped to the security name of the targethosts.Also engine id is used while sending traps and informs in v3.
+
+
+Manager: Polls and collects information.
+Agent: store information.
+MIB: Management Information Base. A database.
+OID: Object Identifier. This OIDs are part of MIB.
+UDP port 161 for get, getnext, set and 162 port for notifications.
+
+#agent# snmp-server community ccna RW
+#agent# snmp-server community ccnp RO
+#agent# snmp-server host 1.1.1.2 version 2c ccna
+
+SNMP v3:
+
+3 security levels:
+noAuthNoPriv: no authentication and no privacy.
+AuthNoPriv: authentication but no encryption.
+AuthPriv: authentication and encryption.
+
+#agent# snmp-server group g1 v3 priv notify n1
+#agent# snmp-server  user  u1 g1 v3 auth md5 password@123 priv aes 256 Pass@123w
+
+Q&A:
+> manager sends GET and set messages.
+> during SNMP v3 noAuthNoPriv, string matched during authentication is username.
+> snmp-server manager command send and receive snmp requests and responses.
+> noauthnopriv security feature is supported across all SNMP version.
+> SNMP enabled proactive monitoring solution to ensure jitter levels remain within boundaries is threshold.
+> manager polls agent using UDP port 161.
+> "show snmp user" shows V3 authentication and encryption protocols used.
+
+
+-Augemented table:Where there is a picture of 1-to-1 dependency between rows of 1 table and rows of another table. 1 is base table and another is augemented table
+example: IF-MIB imports group interfaces defined in RFC1213 MIB.
+-Implied Index: It can be present only for variable length string.It cannot be used if string length is 0.
+example: localengineid is used as key and length is taken first.
+SNMPUsmUserStatus.3.97.12.23 ----------> 3 length of the subidentifiers.
+
+trap pdu format:
+
+v1 targethost:
+version:
+community name;
+pdu type: trap
+enterprise name:
+network address:
+trap type: authentication failure, linkdown, link up
+specfic trap type: enterprise specific
+time stamp:
+variable binding list:
+
+v1/v2 pdu format;
+
+version:
+community name:
+pdu type : get-0, get-next-1, response-2, set-3, nouse-4, getbulk-5, inform-6, trap-7, report(ack)-8
+request-id:
+error-status: 0 means no error otherwise error.
+error-index
+vbs
+
+Get-bulk packet format: internally uses get-next operation to retrieve all the data.
+version:
+communityname:
+PDU type:
+request id
+non-repeatitions
+max-repetitions
+varbind list
+
+rfc3416#page-22
+In case of both inform and trap:
+The first two variable bindings in the variable binding list of an SNMPv2-Trap/inform-PDU are sysUpTime.0 [RFC3418] and snmpTrapOID.0 [RFC3418] respectively.
+
+snmp v3 message format:
+message version number - 3 for snmp v3
+message id:  message to  match the response to request
+max message size: min is 484, max a sender can receive
+msg flags: reserve: for future use, reportable flag: when receives a msg should ack, priv flag: priv flag, auth flag
+message security model: 3 for user based security model
+message security parameters: set of fields that contain parameters required to implement particular security model.
+context engineid: used to identify to which application PDU will be sent
+context name: name associated with that engine id
+PDU : protocol data unit being transmitted.
+
+Like snmp ipv4, ipv6 messages are sent to 161 port. coldstart/warmstart, linkup/linkdown, authentication failure, egpneighborloss, enterprise specific. For traps/informs, port is 162
+cold start trap: the router is reinitialising itself that configuration may be altered.
+warm start trap: the router is reinitialising itself that configuration maynot be altered.
+
+for snmp v3 requests, first packet discovery is done, for this query will be without the engineid, boots, engine time from NMS.
+then agent reports it. Then again manager requests using these values. snmpNotintimewindows is shown means engineid that is cached on the manager is wrong.
+
+SNMP informs:
+retry times, timeout and pending. If ack did not come then again resent after timeout value. After all the resend happens, then failed count will increase.
+if 100000 informs are there in the buffer, some are sent out and some are dropped based on the buffer size. based on this buffer, the pending value will be there which will tell how many are still pending. if the pending buffer size is less, then many are dropped.
+
+SNMP set-cache feature:
+Because SNMP is UDP, packets are frequently dropped and NMS will therefore send requests repeatedly.
+If the agent responds to NMS, then the NMS does not send requests again.
+If the agent get the new set-request, caching should be done for the response and should be sent to NMS.
+If the agent gets the old request, agent should respond with result that is there in the cache.
+NMS should ensure that request id in set operation is unique.
+If the NMS is sending the request which has duplicate id is sent, then disable this feature using the CLI.
+#undo snmp-agent set-cache enable.
+Based on the ip address, port number, request id, request vb, the response is sent. Many times, ip address, port number is same. Based on request vb, If it was set earlier then response is queried from cache or from data base.
+Buffering is done for 1024 requests. If the buffer is full then oldest packet is removed from buffer.
+When no set operation is performed for 3 minutes, buffer is completely cleared.
+Also when set-cache feature is disabled using the command, the buffer is cleared.
+When the version is disabled that was currently used for the interaction between agent and NMS.
+
+SNMP notification log mib feature:
+
+There are traps and informs in snmp. For informs, manager(NMS) will acknowledge and send the response back to the agent. If the response is not received, agent will again send back on resend times, timeout and pending values.
+After all the cycles of resend and timeout values are completed. This inform is recorded in a mib called notification log mib.
+There are 2 types of logs. named and null-named logs. Only null-named logs are supported.
+For this: CLI
+snmp notification-log enable
+snmp notification-log global-ageout 0-12-36 global-limit 15000-max value
+globallimit-500 default value
+global-ageout - 12-36 - default is 24 hrs.
+display snmp-agent notification-log
+nlmstatsglobalnotificationbumped: discarded logs to make room for a new entry due to lack of resources or value of nlmconfigglobalentrylimit. global-ageout value is not considered.
+
+RFC: RFC specifies both trap and inform , but Huawei uses only informs.
+The logged information should contain the snmp engine id and context name(from where it has been generated).
+Max number logged can be configured using nlmConfigGlobalEntryLimit.
+If nlmConfigGlobalEntryLimit value is changed while the records are there, they oldest values must be discarded.
+nlmConfigGlobalEntryLimit 0 means no limit - default value
+nlmConfigGlobalAgeOut for setting the time limit after which the old notifications may timeout.
+If nlmConfigGlobalAgeOut value is changed while the records are there, they oldest values must be discarded.default value is 1440 min(24 hours).
+Mib consists of 1) configuration 2) statistics 3) logs.
+which notifications are to be logged depends on notifyfiltertable:notifyfiltersubtree, notifyfiltermask(ff), notifyfiltertype(included/excluded), storagetype, rowstatus.
+statistics: contains counters for notifications logged and discarded.
+logs: from the logs we can identify if any logs are lost using the timestamp that are there in the varbinds.
+nlmConfigLogEntryLimit: maximum number of entries that can be held in the nlmlogtable.if the application changes the limit while there are logs,
+oldest notifications are discarded to bring down to the mew limit.
+default value is 0.
+nlmConfigLogOperStatus : values 1) disabled 2) enabled 3) noFilter (administratively enabled but no entries in snmpnotifyfiltertable or nlmConfigLogFilterName is zero)
+nlmStatsGlobalNotificationsLogged : number of notifications put in log table.
+nlmStatsGlobalNotificationsBumped: discarded due to lack of resources or value of nlmConfigGlobalEntryLimit or nlmConfigLogEntryLimit
+The inform in the mib is shown by:
+nlmlogindex: increasing monotonically, its the index.
+nlmlogtime: sysuptime when the entry was placed in the mib.
+nlmlogdateandtime: local date and time when the entry was logged.
+nlmlogengineid: identifies snmp engineid.
+nlmlogengineTaddress: this is used to identify from which source inform is generated.
+nlmLogEngineTDomain: SnmpUDP domain.
+nlmLogContextEngineID: for snmp v3 this value is engine id and for others its 0.
+nlmLogContextName:
+nlmLogNotificationID :
+datatypes like: OID, integer, counter32, unsigned32, timeticks, integer32, octet string, ip address, counter64, opeque.
+
+http://www.h3c.com/portal/Technical_Support___Documents/Technical_Documents/Routers/H3C_SR6600_Series_Routers/Command/Command/H3C_SR6600_CM-Release_2315%28V1.09%29/08/201011/701502_1285_0.htm
+
+snmp commands in linux:
+
+GET:
+$snmpget -v1 -c public 1.1.1.1 system.sysDescr.0
+$snmpget -v1 -c public 1.1.1.1 system.sysUpTime.0 system.sysContact.0
+
+GETNEXT:
+$snmpgetnext -c public 1.1.1.1 interfaces.ifTable.ifEntry.ifType.1
+
+WALK:
+$snmpwalk -c public -v1 1.1.1.1 system
+
+BULKWALK:
+$snmpbulkwalk -v2c -c public 1.1.1.1 system
+
+BULKGET:
+$snmpbulkget -v2c -Cn1 -Cr5 -c public 1.1.1.1 ifTable
+
+SET:
+$snmpset -c private -v1 1.1.1.1 system.sysContact.0 s huawei ip.ipForwarding.0 = 2
+This will set syscontact string data type to huawei
+and ipforwarding integer datatype to 2.
+
+snmp v3 get-next request
+$snmpgetnext -v3 -u username -l authpriv -a MD5 -A "authentication password" -x DES -X "privacy password" 1.1.1.1 system
+-l = noAuthNoPriv, authNoPriv, authPriv
+
+SNMP TRAP:
+$snmptrap -v2c -c public 1.1.1.1 NOTIFICATION-TEST-MIB::demo-notif SNMPV2-MIB::syslocation.0 s = "rama"
+then trap will be received with sysLocation vb as "rama"
+-------------------------------------------------------------------------------------------------------------
+
+PYTHON SNMP SCRIPTING:
+
+For executing the clis and sending the snmp walk operation from linux use this:
+import paramiko
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect('127.0.0.1', username='ibx', password='Kernel@123')
+stdin, stdout, stderr = ssh.exec_command('snmpwalk -v2c -c public 127.0.0.1 system')
+print(stdout.readlines())
+ssh.close()
+
+or
+
+
+import os, sys
+import socket
+import random
+from struct import pack, unpack
+from datetime import datetime as dt
+
+from pysnmp.entity.rfc3413.oneliner import cmdgen
+from pysnmp.proto.rfc1902 import Integer, IpAddress, OctetString
+
+ip='127.0.0.1'
+community='public'
+value=(1,3,6,1)
+
+generator = cmdgen.CommandGenerator()
+comm_data = cmdgen.CommunityData('server', community, 1) # 1 means version SNMP v2c
+transport = cmdgen.UdpTransportTarget((ip, 161))
+
+real_fun = getattr(generator, 'nextCmd')
+res = (errorIndication, errorStatus, errorIndex, varBinds)\
+    = real_fun(comm_data, transport, value)
+
+if not errorIndication is None  or errorStatus is True:
+       print "Error: %s %s %s %s" % res
+else:
+       print "%s \n" % varBinds
+pysnmp is the python for snmp: http://pysnmp.sourceforge.net/docs/4.x/

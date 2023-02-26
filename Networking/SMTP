@@ -1,0 +1,31 @@
+SMTP(Simple Mail Transfer Protocol) uses TCP and port 25. Its an application layer protocol.
+SMTP defines message transport and not the message content.
+Mail clients submit outgoing emails to mail server on port number 587 or 465.
+google SMTP server: smtp.gmail.com, 465 for SSL and 587 for TLS.
+
+How it works:
+when you send an email from abc@gmail.com to xyz@outlook.com.
+When an email is setup we will tell what is SMTP server ip address. In this case it is smtp.gmail.com. The email is sent from client to server using 587 port. Similar 25 port can be used.
+The email tells "from address", "to address", content to the SMTP(google) server.
+SMTP google server breaks to address as xyz(receipent name) and outlook(domain name). If the "to address" has another email address, then it still breaks down them.
+SMTP google server asks the DNS to get the mail exchanger record(MX record) of the recipient's domain(outlook). DNS responds with 1 or more ip addresses.
+SMTP google server communicates with SMTP outlook server.
+SMTP outlook server identifies the xyz name and hands of the message to outlook POP3 server or IMAP(Internet Message Access Protocol).
+POP3 server sends to xyz users mailbox which he can read offline as well.
+
+POP3 server: Post Office Protocol Version 3.
+Its a standard protocol to receive emails from remote server to local email client.
+POP3 allows users to download on to local computer offline and read.
+
+IMAP(Internet Message Access Protocol):
+Using TCP/IP, it helps email clients to retrieve email messages from mail server.
+It helps support management of email box by multiple email clients, therefore clients generally leave messages on the server until the user explicitly deletes them.
+IMAP server listens on 143.
+IMAP over SSL(IMAPS) uses 993 port.
+
+
+urllib2 is used to configure smtp and ap, controller configurations.
+less secure: email settings is set to.
+python library: easyimap module is used to receive the smtp email.
+easyimap.connect('imap.gmail.com', login, password)
+mail.from_addr, body, to address all be retrieved.

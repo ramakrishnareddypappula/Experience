@@ -1,0 +1,505 @@
+
+ISO OSI layers:
+Application layer:
+ web browsers, outlook, opera etc
+Presentation layer:
+  how the data is represented. In JPEG, jif, pdf, xml etc formats. data compression and decompression is done in this layer.
+Session layer:
+  It commonly creates, manages and closes the session. APIs and sockets.
+Transport layer: pdu segment.
+  The pdu will have port number assigned in this layer. Source and destination ports. Like http 80 as destination port. Apart from this reliability, flow control, segmentation/desegmentation and error control.
+Network layer: pdu is packet.
+  The pdu will get source and destination ip address here.  As routers work in layer 3 routing decisions are made in this layer. fragmentation is done.
+Datalink layer: frames
+Ethernet, switch, bridge.
+Physical layer: bits. Fiber, hubs, repeaters.
+
+-> IPv4 header: minimum size 20 bytes(header without data), max is 65535 bytes.
+VIDETIFFTPCSDO
+Version: It is 4 for ipv4.
+IHL(Internet Header Length): It specifies the size of the header.
+Differentiated Services Code Point(DSCP): Originally used for Type of Service(TOS). It is used in VOIP(Voice Over IP).
+Explicit Congestion Notification(ECN): It tells about network congestion without dropping the packets.
+Total Length: Entire packet size in bytes. Header + data.
+Identification: It uniquely identifies the group of fragments of IP datagram.
+Flags: They are used to identify fragments.
+ bit 0: Reserved. Must be zero.
+ bit 1: Dont fragment. If this is set and if fragmentation is required for routing the packet, then router will drop the packet.
+ bit 2: More fragments. For unfragmented packets this field is cleared. For fragmented packets, this field is set for all except for last.
+ For last fragment this field has non-zero value for differentiating from unfragmented packet.
+Fragment offset: It is used to identify the fragmented packets. First fragment has value fragment offset value of 0.
+TTL(Time To Live): In practice it is hop count. When the packet arrives at the router, It decreases the value by 1. When TTL becomes 0, router discards the packet and sends ICMP response to sender. default is 64. max is 255.
+Protocol: This field identifies the protocol used by data portion.
+Header Checksum: Used for error checking. When packet arrives at the router, router calculates the checksum for the header and compares with checksum field.
+If mismatch, then it discards the packet. When packet arrives at router, TTL value is decreased, Hence checksum needs to be calculated every time.
+Source Ipv4 address: senders address. During NATing this address may be changed.
+Destination Ipv4 address: receivers address. During NATing this address may be changed.
+
+Options: Its not often used.
+
+Fragmentation:
+When the router receives the packet, it examines and determines the out going interface. If the MTU(Maximum Transmission Unit) is smaller than packet size,
+dont fragment field is set to zero, router will fragment the packet.
+Each fragment will have
+1) Total length field is fragment size.
+2) More fragments is set for all fragments except for last. Last will have non-zero value.
+3) fragment offset field except for first fragment is set. For first fragment it is zero.
+4) Header checksum is recomputed.
+
+It is also possible that 1 router can fragment the packet and another router can again fragment the fragments.
+
+Reassembly:
+The receiver identifies the packet is fragmented when
+1) more fragments field is set(except for last)
+2) fragment offset field is set(except for first)
+
+based on source, destination, protocol ID and identification field the receiver identifies fragments of a packet.
+The receiver reassembles based on more fragments and fragment offset field.
+
+-> Ipv6: minimum size is 40 bytes.
+VTFPNHSD
+Version: constant 6.
+Traffic class: It consists of Differentiated Services(DS) + Explicit Congestion Notification(ECN)
+Flow label: This indicates this packet belongs to particular sequence of packets. Router again need not reorder them.
+Payload length: Size of the payload.
+Next header: It specifies the transport layer protocol used.
+Hop Limit: Same as TTL of ipv4. Its value decreases by 1 if when passed through the router and discard if its zero.
+Source address: source ipv6 address.
+Destination address: destination ipv6 address.
+
+
+-> UDP header: 8 bytes
+Source port: sender's port number.
+Destination port: Destination port number.
+length: length(UDP header + UDP data).
+checksum: This field is used for error checking.
+
+TCP header: 20 bytes
+Source port: sender port.
+Destination port: receiver port.
+Sequence number: If SYN flag is set then it is the initial sequence number.
+else it is the accumulated sequence number of first data byte number.
+Acknowledge number: If ACK flag is set then the value is the next sequence number that the sender of ACK is expecting.
+Data offset: tells the size of tcp header.
+Reserved: future use and set to 0.
+Flags - 9 bits. 9 flags
+Window size: receive window. sender of segment is willing to receive.
+Checksum: Used for error-checking mechanism. Sender runs algorithm and keeps checksum value in this field. Again the receiver runs and compares. If checksum not matches then it is dropped.
+Urgent pointer: If URG flag is set, This segment is prioritized over others.
+options: maximum segment size, window scale are some of options.
+Padding: TCP header ends and data begins on 32 bit boundary. 0's are added as padding.
+
+TCP and UDP comparison:
+-TCP rearranges segments according to sequence number.
+-Retransmission of lost packets.
+-Error-free data transfer.
+-Flow control: limits the rate of sender transfers for guarantee delivery.
+
+-> What is TCP windowing?
+As TCP is connection-oriented protocol, both ends of connection keep track of data.
+Lost or jumbled packets are reordered.
+Hosts during connection formation, agree to limit the amount of unacknowledged data that it can transit at any given time.
+This is called window size. This is 16-bit field in TCP header.
+Suppose, Host A and B agree to allocate 32KB buffer size for incoming data.
+So Host A can send up to 32768 bytes(Maximum Segment Size MSS) before it must pause and wait for ack. Host B can keep in buffer.
+If the ack is not sent, the sender will stop and wait. This is called stop and wait protocol.
+When the ack is being sent, Host B can report that upper-layer application is processing at half the rate. Then Host B
+can reduce the window size to 16 kb. If the Host B buffer is full, It can set the window size as 0, which means it cannot accept more data.
+
+Example: Assume there is 10 Mbps connection setup between 2 hosts with 80 ms 1 way delay.
+Maximum window size of 65535 bytes. Calculate data transmission
+
+bandwidth * delay = (10 000 000/ 8 bytes) * 0.08 sec = 1000000 bytes
+
+->Receive window?
+who sends out windows sizes to sender.
+Number of bytes the sender can still send without needing ack from the receiver.
+
+-> Congestion window?
+Sender detects there is packet loss in the network and it will cut the window in half.
+The sender detects packet loss when it fails to receive the ack of packet with in estimated timeout.
+
+-> TCP Flow control?
+TCP will help ensure the sender is not overwhelming the receiver by sending more packets than it can handle it.
+Slow down or speed up. TCP implements flow control by increasing or decreasing window size.
+
+-> URG flag?
+This flag is used to inform receiving station that certain data within segment is urgent and should be prioritized.
+
+TCP Flags:
+There are 6 control flags.
+Each flag is 1 bit. We can set or unset.
+1) SYN : synchronize the communication.
+2) ACK : Acknowledge the syn segment. sent from receiver to sender.
+3) FIN : Used to close the connection.
+4) URG: If this flag is set, it indicates this segment has priority over other segments.
+5) PUSH : Sent by sender to indicate flushing for TCP buffers.
+6) RST : Reset the connection.
+7) NS:
+8) CWR: Congestion window reduced.
+9) ECE: Explains about Explicit Congestion Notification.
+
+TCP FLOW:
+1) Sender will segment to receiver to initiate a connection. SYN segment. Lets say sequence number is 0. SYN flag in control bits is set.
+2) Receiver will respond with ACK. ACK segment. ACK number is 1(next sequence number it expects). Receiver will also respond with SYN with number 0.
+3) Sender with ACK as 1 and sequence number 1.
+4) No data is sent in these 3 segments. Connection is established.
+5) After data sent.
+6) Client or server can initiate connection close. client when logout, server when timeout.
+FIN is sent by receiver. FIN bit is set. ACK is sent.
+
+7) Now sender will send FIN and ACK is received.
+
+https://www.youtube.com/watch?v=F27PLin3TV0
+
+Error detection:
+Sequence numbers allow receivers to identify duplicate segments and also to reorder the segments.
+Acknowledgements allow senders to determine if there is a segment loss.
+However TCP has weak checksum computation and it uses layer 2 CRC for more strict checking.
+
+Denial of service.
+With the spoofed ip(Creating ip packets with false source ip address in order to damage server) repeatedly sending assembled SYN packets followed by many acks to create bogus connections. Is called SYN flood attack is 1 varient of DOS. Also PUSH and ACK floods are other varients of DOS attacks.
+
+Duplicate retransmission:
+If a single packet is lost. The receiver will send ack 3 times. Then sender will retransmit the lost packet.
+
+Timeout retransmission:
+Whenever the packet is sent, sender sets the timer. If the sender does not receive ack within the timeout of timer set, it will retransmit the packet. After retransmit, the sender will set timer of double the previous time.
+
+Flow control:
+Flow control is used to avoid the sender to send data too fast.
+eg: If pc sends data fast, mobile will be overwhelmed.
+TCP sliding window flow control protocol.
+sender can send upto receiver buffers max size. Then it will wait for ack.
+If sender receives with window size 0. Sender stops sending and starts persistent timer.
+After timer expires it will send small size packets.
+If the receiver acks with small window size, every time for many packets, this is called silly window syndrome as it is inefficient to send small size packet with huge TCP header.
+
+Maximum segment size:
+It is the largest amount of data(bytes) that tcp will receive in 1 segment.
+
+Ideally it should minimum to avoid fragmenting which allows packet loss and retransmission.
+
+-> Types of errors in TCP/UDP?
+ - Incorrect order of packets
+ - Loss of packets
+ - Corrupt packet in data.
+ - Phantom packets(receiver gets packets that have never been sent.)
+ UDP provides mechanism to overcome corruption of data.
+
+ 1 way to detect the packet loss:
+ TCP has sequence number for every packet.
+ For example, the sequence number is 102. It says it starts with byte 102. If the packet size is 10 bytes.
+ The receiver will ack with sequence number 112. So packet with different sequence number is assumed to be lost or corrupted or phantom packet.
+
+ Also, sender waits for ack from receiver. If the ack is not received, the sender assumes packet is lost and will resend again.
+
+-> TCP CONNECTION?
+Its a 3 way hand shake
+before client connects, server must first bind and listen at a port to open it up for connections. This is passive connection.
+Then client initiates active connection. To establish this 3 way handshake occurs.
+SYN : Client will initiate this. It sets sequence number to random value A.
+SYN-ACK: server will reply with this. The acknowledge number is to 1 more than sequence number A + 1. Also server sends 1 more random number B.
+ACK: Client sends this message back to server. Client will ack A+1. It also increments number B to B + 1
+
+-> TCP TERMINATION?
+Its a 4-way handshake.
+FIN->ACK initial message is sent. Other side which acks can still send the data.
+The side with receives the ack still accepts the data.
+Then from other side FIN->ACK is sent.
+
+Some implementations use 3-way hand shake for termination.
+
+
+ipv6 address range:
+2000::1/128  = 2000::0001 - 2000::0001
+2000::1/112  = 2000:: - 2000::ffff
+2000::1/92   = 2000:: - 2000::ffff:ffff
+2000::1/78   = 2000:: - 2000::ffff:ffff:ffff
+2000::1/64   = 2000:: - 2000::ffff:ffff:ffff:ffff
+2000::1/48   = 2000:: - 2000::ffff:ffff:ffff:ffff:ffff
+
+Ipv6 Address types: 128 bits.
+1) Unicast: Like public addresses in ipv4. They represent single interface.
+2) Multicast: like multicast addresses in ipv4. It represent group of hosts.
+3) Anycast: packets sent to the ip address are forwarded to the nearest server. anycast addresses are often used for load balancing. Known as 1 to nearest address.
+
+Types of unicast address in ipv6:
+1) Global unicast: similar to public ipv4 addresses.
+2) Link Local: Similar to ipv4 apipa address. Usually used with in a network segment. Router will not forward the packet.
+3) Unique local address: similar to ipv4 private address. Used within the organization and not routed outside.
+
+ISATAP: Intra-Site Automatic Tunnel Addressing Protocol.
+It transmits ipv6 packets on top of ipv4 network between dual-stack nodes.
+
+SLAAC: Stateless Address AutoConfiguration.
+Hosts retrieve ipv6 address and default gateway dynamically.
+ICMPv6 Router Solicitation(RS) and Router Advertisement(RA) packets are exchanged between routers and hosts. Using RA packet from Router, hosts derive first 64 bit prefix. Next 64 bits are generated using the EUI format.
+It uses neighbor discovery protocol.
+
+For enabling ipv6 on routers
+#config-t# ipv6 unicast-routing
+
+ipv6 address server: http://[2001::1]:80/index.html
+
+::/1 - loopback ip.
+::/128 - unspecified ip.
+FE80::/10 - link local ip.
+
+---------------------------------------------------------------------------------
+
+
+IPv4 header format: 20 bytes header length. Maximum size of ipv4 packet is 65535 bytes.
+
+Ipv4 is connectionless in the sense no state related to datagrams is maintained either on client or server side.
+ipv4 is unreliable in the sense that it is not guaranteed whether it will be delivered or not.
+
+
+Effect of MTU(Maximum Transmission Unit) on fragmentation:
+Each network has different MTU. When the packet is transmitted from 1 network to another network of lower MTU, the packet is fragmented.
+when fragmenting, Don't fragment bit is set to 0.
+size of each fragmented packet = MTU - header length
+The fragmented packet will have:
+  1) The Total length field as fragmented packet length.
+  2) The more fragments field is set except for last which is set to 0.
+  3) The header checksum field is recomputed.
+
+For example, the MTU is 1500 and header size is 20, then fragmented packet length is 1480 and fragment offset is 1480/8 = 185. So, 0, 185, 370, 555, 740 ..
+
+With last fragmentation offset and last data size, we can determine the size of the packet. 8*(last offset) + last data size = total data size.
+
+So, using flags, fragmentation offset, identification we can determine whether the packet is fragmented or not.
+
+Reassembly at Destination:
+Receiver knows the packet is fragmented based on
+ 1) if more fragments is set 1(This is true except for last fragment.)
+ 2) The fragment offset field is non-zero.(This is true except for first fragment.)
+All fragments are grouped based on the identification field indicating these fragments belong to same packet.
+It will reassemble based on fragmentation offset and more fragments flag. Then the payload is calculated with the original by multiply 8 with offset and last data size.
+Then they are put in order using fragmentation offsets.
+
+In Ipv6, This fragmentation concept is not there. Hosts must determine the path MTU before sending the datagrams.
+
+MTU: It is the largest size of the packet that is sent over the network. It the packet exceeds this size then it is fragmented. Normally its size is 1500 bytes.
+
+UDP header: 8 bytes header length. Maximum size of udp segment is 65527 bytes.
+
+Source port: originated port number
+Destination port: destination port number
+length: length of datagram. header + data
+checksum: optional field for computing the data.
+Data:Higher layer data that is encapsulated.
+
+TCP header : 20 bytes min ~ 60 bytes max
+
+
+The message at the transport level is a segment. Maximum size of tcp segment is MTU i.e 576 or 1500 bytes.
+
+TCP 3 way hand shake:
+
+Before the 3 way hand shake begins the server must bind and listen to port. This is called passive open. After this, the client may send request for active open.
+
+To establish a connection a device must send SYN and receive ACK for it. conceptually 4 messages are exchanged, but SYN and ACK can be send in same request. Therefore combining them, total 3 messages are exchanged which is called 3-way hand shake.
+
+                               client  -->    syn -->     server
+                                         <-- syn+ack  <--
+                                           -->    ack  -->
+
+Similar to connection initiation, connection close will also be 3-way. first FIN is sent then FIN, ACK are sent back and with this ACK is sent back.
+
+source port: port from where the segment is originated.
+destination port: port to where the segment is sent.
+sequence number: This is the first byte of data segment. From here the message starts.
+acknowledge number: This will indicate the ack has been sent for the previous request determined by its value.
+data offset : This will indicate the size of the header
+reserved: reserved and set to zero.
+Control bits : URG: If this is set, the segment needs to be received on priority.
+                    ACK: If this is set, it indicates this segment is carrying the ack and the value is indicated by ack                                field.
+                    PUSH: sender is requesting the data to be pushed immediately to the receiver.
+                    RESET: The sender encountered the problem and hence the channel needs to be reset.
+                    SYN : If this is set, the sequence number field indicates the initial sequence number.
+                    FIN : If this is set, the connection is gracefully closed.
+window size: The size of buffer that is allowed to be accepted for this connection. The size that can be buffered before receiver receives and replies.
+checksum: error-checking is done for data and header using this.
+urgent pointer: This field contains the sequence number of last byte of urgent data
+options: optional data is included here.
+padding: If the options field is not multiple of 32, the zeros are added to pad the header
+Data : data of bytes sent in the header.
+
+
+Flow control: It is used to control the data where the data arrives faster from source and destination receives slowly. The amount of data that can be buffered is for flow control.
+
+
+TCP has Maximum Segment Size(MSS) which will use MTU which is of datalink layer.
+
+Packet fragmentation: Different networks have different maximum packet sizes or MTUs(Maximum Transmission Unit: Largest packet which can fit in a network). Different Ethernet and wifi technologies have different packet sizes allowing. Also hosts should know what is the max size they can send. There are 2 solutions
+1.Fragmentation: Split the large packet if it too large to send.
+
+2.Discovery: Find the largest packet that fits in the network path.
+Here if there are 2 routers in between 2 hosts. First, host will send packet with MTU of 1400, but router 1 can only accept 1200. Then this packet will be dropped. Again host will send packet with MTU of 1200, this time router 2 will drop as it accepts only with 800. Then host will send packet with 800 MTU, then this time packet will be received by host2.
+
+This is currently being used as there are fixed number of MTU sizes.
+
+Port 0 : It is a reserved port and cannot be used. Socket = ip + port number. So network programmer can specify port 0 for their testing purpose.
+
+ipv6 address is 8-set of 16 bit hexadecimal values seperated by (:) total 128 bits.
+leading zeros can be ommited and consecutive zeros in contiguous blocks are represented by ::.
+unlike ipv4 address, many ipv6 addresses can be configured on an interface. Any type of addresses can be assigned on single interface.
+IPv6 does not send broad cast messages.
+
+unicast addresses: packets are delivered to single interface. 64 bits of network ID and 64 bits host id. N/w id is administratively configured
+(first 32 bits assigned to service provider by IANA, 16-subnet id is provided to costumer by service provider, 16lan bit represents individual n/w within customer site and administrated by customer).
+while host id is configured using DHCPv6 or EUI-64.
+multicast : packets are delivered to multiple interfaces.
+Any cast:packets are delivered to nearest node of the group. Its unicast address asigned to multiple devices with host ID=0000:0000:0000:0000
+
+the characters a, b, c, d, e, f must be in lower case letter.
+URLs are http://[2001::1]:80/index.html
+with prefex: 2001:1/64
+unicast example: 3131::a7
+anycast example: 3131::a7(anycast are allocated from unicast address space and not syntactically different)
+multicast :FF01::1
+unspecified : ::/128
+loopback: ::1/128
+ipv4 mapped address: ::ffff:a.b.c.d/96
+ipv4 compatible address: ::w.x.y.z
+link local : fe80::/10
+ISATAP address:  :0:5EFE:w.x.y.z
+Teredo address:  2001::/32
+
+what is scope: Its a region where the address can be defined as unique identifier of an interface.
+unicast and multicast have following scopes:
+link-local: (like nodes in subnet)
+site-local: scope in organization(private site addressing)
+global: public(ipv6 internet addresses)
+
+global unicast addresses: similar to ipv4 public address.
+-routable and reachable across internet
+unicast site local(deprecated): like the ipv4 private addresses within a company, comm b/n vpns, not routable on internet. starts with FEC0::/48
+unicast link-local: comm b/n 2 IPv6 address devices on samelink. Automatically assinged similar to ipv4 APIPA addresses. starts with FE80::/64. Not routable.
+unicast unspecified ip address: similar to 0.0.0.0. 0::0 or ::
+unicaast loopback ip address: similar 127.0.0.1. ::1. its subnet mask is 128
+unicast 6to4 address:ipv6 uses 6to4 to communicate between 2 ipv4/ipv6 nodes over ipv4 internet. it combines 2002::/16 with 32 bit ipv4 address like 157.60.91.123.
+like 2002:WWXX:YYZZ::/48. w.x.y.z is the ip address. this address is connected to hex form. like 2002:9D3C:5B7B::/48.
+
+unique local unicast: to replace site-local addresses. private yet unique across all the sites of a company. Starts with FD00::/8
+Why site-local is deprecated is because there why millions of private networks that have 1-way connectivity to ipv6. When every one can be given unique
+addresses why private again.hence instead of site-local, unique local have come into picture.
+reserved address: for specific type of anycast and for future use.1/256 portion of address space is reserved.
+
+Multicast ipv6 address: similar to ipv4. packets are deliverd to all the addresses identified.like FF00::/8.one-to-many
+Used for route advertisements, DHCPv6, multicast applications.
+solicited node multicast address: multicast with link-local scope.
+Anycast ipv6 address: they are similar to ipv4 anycast address but more effecttive. Used by ISPs. Any cast uses the unicast address space but funtion differently.
+anycasted to the nearest interfaces. contrast to one-many of multicast addresses, any cast is one-one-many. Currently these are assigned only to routers
+and used as destination addresses.Using anycast, duplicate servers with same ipv6 address, nearest one can be choosen.
+
+APIPA(Automatic Private IP address): When the pc(DHCP client) comes up asks for the ip address. May be DHCP server does not respond. Then pc itself assigns
+an automatic address and waits for DHCP server to get the ip-address. This automatic is called APIPA address.
+Range from 169.254.0.1 -169.254.255.254/16.dedicated
+
+Any cast is implemented using BGP to simultaneously announce same destination ipaddress range from many places on internet.
+Application layer protocols simultaneously support both ipv4 and ipv6. use http://[2000::1] in brackets
+Linux config: iface eth0 inet6 static address 2001 netmask 64.
+MLD(multicast listener discover): This is equivalent to IGMP in ipv4.
+
+fragmentation is not part of this header. They are put into seperate extension header. Fragmentation is handled by sending host, not by router.
+
+>ping localhost --->::1 , or 127.0.0.1
+
+IPv6 addresses are used common-names, like in telnet we used to configure ipv6 address ram, telnet ram, dynamic addressing(DHCP), static addressing(pc address), routing.
+
+Ipv6 Stateless address auto configuration: without manual intervention node can configure itself ipv6 on its interface using layer 2 address.
+link-local address generation:First 10 bits are 1111 1110 10 and 54 bits are zero.another 64 bits are derived from MAC address.
+link-local uniqueness test: Using Neighbor discovery protocol, node sends this address for uniqueness. If some neighbor advertisement has another device with same ip address, then new address must be generted or autoconfiguration fials.
+link-local address assignemnt: this address is configured on 1 of the interfaces and used for comm in local net. but not on wider network.
+router contact: using this node attempts to contact router for more information using router advertisements ND protocol.
+router direction: router provides how to proceed further in autoconfig. It may tell statefull config is being used and the DHCP server to use. or global ipv6 address to get.
+global address config:assuming autoconfig not dhcp server. host will generate ipv6 address using router ipv6-address it got during ads as n/w id and MAC derived as host id.
+
+tentative state:The address is in the process of being verified as unique. Using duplicate address detection we can verify the uniqueness of tentative address.
+valid state: address can be used for sending and receiving unicast traffic.
+preferred: Address is valid and can be used for unlimited configuration.
+deprecated:  Address is valid but its discouraged for new communication.
+invalid: Address can no longer be used to send and receive unicast traffic.
+
+This is called stateless because no infomration at all to work with and has no need for DHCP server.Autoconfiguration: Devices can confgure ipv6 addresses themselves independently.
+
+Ipv6 device renumbering: related to autoconfigation. Networks devices can be renumbered by specifying the expiration interval in the router. After expiry,
+devices will get new ipv6 addresses and they can maintain old ipv6 addresses for a while.
+
+DHCP for ipv6: like ipv4, client requests for address when it comes up, then server sends the response for this.
+DHCPv6 client knows whether to use ipv6 based from the router. Default gateway has 2 configurable bits in router advertisements for this purpose.
+O bit: When this bit is set, the client will use DHCPv6 to retirve other confguration parameters(TFTP server address, DNS server address).
+M bit: when this bit is set, client can use DHCPv6 to retireve managed ipv6 address and other config paramters from DHCPv6 server.
+State less DHCP: When router send Router Advertisement with O bit set and M bit not set, The client uses state less address auto configruation to obtain IPv6 and other info(TFTP server and DNS server address.)
+Stateful DHCP: When M bit is set, O bit is irrevelent because DHCP server will return other config info. When router send Mbit with RA, client should use DHCP to obtain their ip addresses.
+
+DNS for Ipv6: AAAA records are used instead of A records, but others are same.
+Ipv4 packets encapsulates ipv6 packets using tunnneling.
+multicast address of ospf v3 is FF02::5 and FF02::6. For RIPng it is FF02::9, VRRP it is ff02::12
+IPng is just a concept where as Ipv6 is protocol. but are different.
+link-local addresses are based on existing layer 2 address.
+::192:168:0:1 , ::, 2001:22:: are all valid ipv6 addresses
+Devices like pcs run on both Ipv4 and IPv6 llelly. This is called "dual stacking".
+IPv6 can give unique address eliminating NAT of Ipv4.
+IPv6 can give as many hosts on the subnet as needed.
+Using the neighbour discovery protocol and Stateful DHCP, Ipv6 host can learn ipaddress of default gateway.
+Ipv6 transition mechanism: 6 to 4 tunneling: Without tunnel setup, ipv6 addresses can communicate over ipv4 network.
+ISATAP tunneling(Intra site Automatic tunnel addressing protocol):
+Within the site with ipv4 network, uses virtual links to connect ipv6 links.
+And ur network, DHCP server, DNS infrastructure are ipv4 then with ISATAP technology, IPv6 packets are sent on an IPv4 network.
+Teredo tunneling: Instead of using router to tunnel packets, hosts perform the tunneling. For this hosts require dual stacks.
+GRE tunneling:Generic routing encapsulation:simple point to point tunnels that can be used within a site.
+NAT-PT(proxying and translation): address to translate between an ipv6 and ipv4 network and vice verse.
+
+IPv6 Header format: Consists of 2 main packets.
+1.Header : first 40 bytes.
+2.payload: 16 bits + extension headers(not present in ipv4).with extension header it can go upto 4 GB.
+
+Header format:
+version: value:6, 4-bit. however packets are not distinguished based on version field but by protocol type present in layer 2 frame.
+traffic class/packet priority: 8 bit, source identifies its packets by giving different delivery priorities.
+flow label/QoS management: 20 bit. Contains source address+ flow id(non-zero). routers must handle packets belonging to same flow label in same fashion.
+when first packet is received router will store Ipv6 header, routing header etc in cache memory. when other packets belong to same flow arrive, router route using the cached information.
+payload length: 16 bits. payload length field puts an upper limit to 64 kilobytes. In case extra payload is required,jumbo payload extension header is provided.
+its indicated by value zero in payload length field. supercomputers use this to tranmit heavy data payload.
+next header:8 bit.This field identifies the type of transport layer protocol used in packet payload. whether its tcp or UDP. but may others are also possible.
+hop limit/TTL: 8-bit, This value is decermented by 1 every time a node forwards the packet.If reaches 0, then discarded. maximum 255 hops before being discarded. ipv6 packet can go through 254 routers max.
+source address: 128 bit. Ipv6 address of the originator of the packet.
+destination address:128 bit. Ipv6 address of the intended recipient of the packet.
+vpfpnhsd
+
+Zone Ids:Link-local and site-locals ipv6 address can be reused. Therefore same ipv6 aaddress host can exist on multiple interfaces.
+So to specify on which link or in which site the host is located, another id is required called ZOne id. Its an integer value.
+zone ids are defined relative to sender. Different hosts may choose different zone ids values for same physical location.
+with zone identifier: 2001::1%eth0
+eg: ssh usrname@2001::1%eth0
+scp file.txt username@[2001::1%eth0]/path/
+URI inclding zone identifier:2001::1%25eth0 ir [2001::1%25eth0]:21
+
+ipv6 acls:
+Have only 1 type of acls, extended named acls. No numbered acls in Ipv6.
+Ipv6 acls do not use wildcard masks. Instead prefix-length is used to indicate how much of ipv6 source and destination address should be matched.
+
+with port number we can deny.
+
+IPv4 and IPv6 Difference:
+
+-IPv4 32 bits, ipv6 is 128 bits.
+-Ipv6 header is 40 bytes and ipv4 is 20 bytes.
+-since there is not shortage of ipv6 addresses NAT ing and proxy servers are not required. In Ipv4 NAT ing is required.
+-IPv6 uses the Neighbor discovery address resolution to map an ipv6 address onto a MAC address. For IPv4 Its ARP.
+-Neighbor discovery provides secure address resolution using SEcure Neighbor Discovery(SEND) protocol.
+-Ipv4 supportes unicast, multicast and broadcast.
+Unicast has 4 scopes:1)loopback 2)Apipa 3)private addresses(RFC 1918) 4) public addresses.
+IPv6 supports unicast, multicast and anycast. No broadcast.
+unicast has 4 scopes: 1) link-local(fe80::64) 2)unique local(FC00::/7) 3)global(2000::/3), 4)site local(FEC0::48).
+-Multicast ipv4 addresses is 224.0.0.0 to 239.255.255.255. for Ipv6 it is FF00::/8.
+-In Ipv4 Variable length subnet mask(VLSM) and CIDR(Class less inter domain routing) are supported which split the network Id and host ID.
+-subnetting is present in Ipv6. 64 bit subnet. no subnetting is required for bottom 64 bits.
+Minimum Ipv4 MTU is 586 bytes, wheread for ipv6 it is 1280 bytes. Dual stack should be able to handle 1280 bytes.
+In ipv4, autoconfiguration is done using DHCPv4 server.
+In Ipv6, autoconfiguration to generate link-local address.whether or not router advertisement messages present.
+
+Using SLAAC(stateless address autoconfiguration) ipv6 address can be obtained.

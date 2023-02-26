@@ -1,0 +1,119 @@
+DHCP:
+
+
+server <-> client
+
+client uses UDP port 68.
+server uses UDP port 67.
+
+configure dhcp ip address pool on server so that client receives the ip.
+
+server:
+#config#ip dhcp pool VAULT
+#dhcp-config# dns-server 10.10.10.1
+#dhcp-config# network 1.1.1.0 255.255.255.0 # dhcp network.
+#dhcp-config# lease 0 0 2 # leading  <days> <hours> <min>
+#config# ip dhcp excluded-address 1.1.1.10 1.1.1.15 # To exclude so address in the given address range.
+#config# ip dhcp bootp ignore # for ignore bootp protocol. bootp is the earlier version of dhcp.
+
+client:
+#config-intf# no ip address
+#config-intf# shut
+#config-intf# ip address dhcp
+#config-intf# no shut
+
+DHCP relay agent:
+Any host that forwards DHCP packets between clients and servers.
+
+DHCP server         DHCP client
+              <--   Discovery(broadcast 255.255.255.255)
+Offer(unicast)-->
+              <--  Request(broadcast)
+  Ack(unicast)-->
+  (remember mac address in DHCP db)
+
+
+server.1 <-1.1.1> .2relay agent .1<-2.2.2> client
+
+client needs to get 2.2.2 network ip address.
+
+server
+
+#config#ip dhcp pool VAULT
+#dhcp-config# dns-server 10.10.10.1
+#dhcp-config# network 2.2.2.0 255.255.255.0
+#dhcp-config# default-router 10.10.10.1
+
+#config# ip route 2.2.2.0 255.255.255.0 gigabitethernet0/0
+
+relay agent:
+
+#config-intf.1# ip helper-address 1.1.1.1
+
+client:
+#config-intf#ip address dhcp
+
+DHCP header has options field where we can provide many options.
+DHCP can send ip, default gateway, dns servers etc as options.
+DHCPv6 does not send this information.
+
+common dhcp options:
+option 3 - default gateway
+option 12 - hostname
+option 15 - domain name.
+option 82 - DHCP relay agent.
+etc
+
+If all the addresses in DHCP network are used up then client will get APIPA(169.) network address. This is only on windows.
+
+
+DHCP: DHCP client sends broadcast query. DHCP server manages the pool of ip addresses and also information related to subnet mask, default gateway, DNS server address and time server.
+DHCP server allocates dynamically an ip address from a pool and reclaim them when not in use. DHCP uses UDP port. UDP port 67 is destination port of server and 68 for client.
+
+>ipconfig /all will give DHCP service details. sometimes DHCP server is same as gateway ip, leased line expiration, DNS server ip.
+The client asks for the ip address after booting is done.But on policies set by administrators, The server may send client specific ip address with some expiration interval or no expiration interval.
+After expiration interval, It may ask for same ip address but server may also respond with new ip address.
+In Big networks, there can be 1 DHCP server and relay agents can be present for helping the traffic from client to server.
+3 types of allocation:
+1)Dynamic allocation: Client asks ip address from server, server provides with controllable time period.
+2)Automatic allocation: Similar to dynamic allocation, but the server maintains the table of past ipaddress assignments so that it can preferrabily assign again.
+3)static allocation: Based on the client's MAC address, The ip address is statically assigned.
+
+DHCP is used for both ipv4 and ipv6. Also in Ipv6 stateless address configuration is present.
+DHCP operations: DORA
+1)DHCP Discovery: Client broadcasts the packet using 255.255.255.255 or network specific broadcast ip address.
+Client can request for same ip, but the assignment is made by server.
+2)DHCP Offer: server offers the ip address by a message that contains Client's MAC address, ip address that the server is offering, subnetmask, lease duration.
+3)DHCP Request: Client can receive offers from multiple servers, but only 1 server request will be accept based on identification options.
+servers are informed whose offer is accepted. Then other servers withdraw offer and return the offered ip address to the pool.
+4)DHCP Acknowledgement: server sends the ack to the client with expiration time.
+
+A pool of ips for each subnet are required for DHCP to function.
+
+DHCP relaying: Within a subnet, DHCP client gets the address from the server. But in multiple subnets, clients with out ip cannot route nor it does not know the ip address of router. DHCP clients within subnets need help of relay agents to forward packets to server.
+client broadcasts the packet and relay forwards it to 1 or more servers using unicast. relay agent stores its ip address in the GIADDR field of packet. With this server will come to know the client belongs to which subnet. If the GIADDR field is emptyor 0 then based on interface address on which it received the packet, it will assign from that pool. The server replies in unicast to the relay agent(GIADDR), which then forwards to the client.
+
+DHCP snooping: series of techniques applied to ensure the security of DHCP infrastructure. When allocating ip address, DHCP snooping is configured on switches for security of LAN clients.
+Whitelist is applied on switch ports and DHCP server gives access only to clients with whitelisted mac and ip addresses.
+DHCP snooping can also prevent attackers adding DHCP server(rogue server) to the network.
+
+Reliability: After using ip address for half of expiration, the client sends unicast packet to renew ip address to server. If server is up, it will renew, otherwise client will send unicast packets from time to time.
+Once server is up it will renew, otherwise after expiration the client sends broadcast packet for ip address so that other DHCP servers may respond.
+If new ip address is assigned the ongoing connections will be broken.
+
+
+DHCP snooping?
+
+Q&A:
+> Dhcp snooping drops the packet where the client MAC and source MAC does not match.
+> DHCP option 66 provides TFTP server that cisco phones use to download configuration.
+> server, client and relay are valid options for DHCP v6 functions.
+> DHCPv6 provides additional parameters like domain name and DNS server details than EUI64.
+> DHCPv6 provides tighter controls over ipv6 address assignment than EUI64.
+> DHCP relay agent needs to be configured with "ipv6 address autoconfig".
+> DHCPv6 is advantagous EUI64 since DHCPv6 provides tigher control over clients and DHCPv6 allows additional parameters to be sent to the client.
+> valid DHCPv6 functions: client, server and relay.
+> DHCPv6 provides 2 way message exchange using steps: solicit and reply.
+> ip helper-address must be configured on the interface that will receive the broadcasts.
+> If TCP traffic has blocked 547 port between relay agent and server, when rebooted routers will not obtain DHCPv6 prefixes but DHCPv6 relay agent will resume distributing addresses.
+>

@@ -1,0 +1,866 @@
+Boarder Gateway Protocol
+Its an exterior gateway protocol.
+
+BGP runs on top of ospf and EIGRP.
+It supports VLSM and summarization.
+
+BGP should only be used if
+1) connecting to more than 1 AS(Autonomous System) or ISP.
+2) Routing policy of your organization and ISP differ.
+3) Your company is an ISP i.e traffic of other AS use your AS.
+
+BGP should not be used if:
+1) There is single connection to the internet.
+2) when you dont care which path is used.
+3) Router resources(CPU, memory) are limited.
+4) Multiple low bandwidth ASs are connected.
+
+BGP uses TCP port 179 to connect with other BGP router.
+
+BGP states:
+
+BGP forms TCP session with peers.
+BGP FSM(Finite State Machine) has:
+1) Idle: Tries to initiate TCP connection with BGP peer. If error occurs, goes back to idle state. ConnectRetryTimer set to 60 sec and doubles for every failure.
+2) Connect: peer with higher ip address manages the connection. TCP port 179 is used.
+3) Active: 3 way handshake occurs, connection is established. If error occurs moves back to connect state.
+4) OpenSent: both peers exchange OPEN messages. Version, source ip, ASN, router-id, security(ttl, password) are checked. If error goes to active state.
+5) OpenConfirm: In this state, bgp waits for keepalive or notification message. If error, moves back to idle state.
+6) Established: BGP peers exchange routes. If error goes back to idle state.
+
+If there is physical connectivity failure or neighbor is not defined properly or port 179 is blocked or update-source or ebgp multihop then neighborship is not properly formed. Use debug ip bgp and debug ip tcp command to debug.
+
+Hold down timer log is shown when there is BGP peer flaps.
+
+BGP messages:
+1) open message(version, hold time, ASN.)
+2) Notification message(error).
+3) keep alive message(keep alive, hold time)
+4) update message(attributes).
+
+AD iBGP = 200
+AD eBGP = 20
+
+Types of attributes:
+well known, mandatory: Every update message will have this, other wise notification is sent by peer.
+Must be supported by all.
+eg: AS_PATH, origin, next-hop
+well known, discretionary: May or may not appear in every update message. Must be supported by all.
+eg: local perf.
+optional, transitive: If bgp peer does not understand then it may pass to other bgp peers. may or may not be supported by all.
+eg: community string.
+optional, non-transitive: If bgp peer does not understand then it must not pass to other bgp peers.
+eg: MED.
+
+iBGP: BGP peer in same AS as local router is an internal BGP.
+It is recommended that peers not be directly connected.
+
+Generally loopbacks are used for connecting iBGP.
+IGP(ospf, eigrp) or static routes are used to direct and loopback interfaces of all routers.
+
+configuration:
+
+router bgp 1234
+ neighbor 2.2.2.2 remote-as 1234
+ neighbor 2.2.2.2 update-source Loopback1
+
+> local-AS and remote-AS must be same.
+> update-source must be used since loopbacks are not directly connected.
+
+ network 11.11.11.0 mask 255.255.255.0
+
+> network in bgp is advertised using above command. ip and mask must be strict.
+
+> In "show ip bgp", its own advertised route will be 0.0.0.0 as next-hop.
+> In "show ip bgp", "i" internal will be displayed for all ibgp routes except its own route.
+
+eBGP: BGP peer not in same AS as local router is an external BGP.
+It is recommended that peers be directly connected.
+
+> Generally directly connected interfaces are used for eBGP. Hence IGP and static routes are not required.
+
+router bgp 7
+ neighbor 67.67.67.2 remote-as 6
+
+> Local-AS and remote-AS must be different.
+> update-source is used if loopbacks are used.
+> ebgp-multihop command is used to configure ebgp time-to-live (TTL) value to support ebgp multihop. When ebgp peer is not directly connected, ebgp-multihop command is required to reach remote peer.
+
+> If remote-AS(iBGP) can be via multiple-paths to local-AS(eBGP) and all params are default, then router with lower router-id will have valid and best path from iBGP to eBGP.
+
+eBGP is preferred over iBGP.
+
+iBGP and eBGP differences:
+1) eBGP peering is between 2 ASes and iBGP peering is between same AS.
+2) By default, eBGP TTL value is 1 and not for iBGP. We can change this behaviour using ebgp-multihop command
+   neighbor x.x.x.x bgp-multihop <TTL>
+3) eBGP AD is 20, IBGP is 200.
+4) Next hop remains unchanged in iBGP and it changes in eBGP.
+
+5) routes received from an eBGP peer can be advertised to eBGP and iBGP peer. Routes received from an iBGP peer cannot be advertised to another iBGP peer but can be advertised to eBGP peer.
+
+
+Preferences: 1) highest weight is preferred(cisco proprietary)
+2) if tie or non-cisco routers, highest local preference is preferred. default is 100.
+3) locally originated path is preferred.
+4) shortest AS_PATH is preferred.
+5) best origin code(i, then e, then ?)
+6) lowest MED(Multi exit discriminator). Lower the better.
+7) eBGP path over iBGP path.
+8) lowest IGP metric to BGP next-hop address.
+9) oldest path
+10) path from bgp router with BGP Router ID.
+
+BGP ADVERTISEMENTS:
+bgp looks at routing table instead of interfaces. Hence ip address must match for advertisements.
+
+advertisements can be done in 2 ways:
+1) network command.
+2) redistribute command.
+3) aggregation.
+
+Summarization/aggregation routes:
+Similar to ospf eigrp, bgp does the same route summarization.
+The "ones" and "zeros" are written in brinary format, identify the common bits and add those bits to get the route and mask.
+
+example:
+16.0.0.0/255.0.0.0
+17.0.0.0/255.0.0.0
+18.0.0.0/255.0.0.0
+19.0.0.0/255.0.0.0
+
+Ans: 16 = 00010000
+     17 = 00010001
+     18 = 00010010
+     19 = 00010011
+     -------------
+     16 = 00010000 = get the common bits only using AND operation and then add remaining to mask.
+left - to -right calculation
+output: 16.0.0.0/252.0.0.0
+#router# router bgp 14
+#config-router# aggregate-address 16.0.0.0 252.0.0.0 summary-only
+
+BGP Split horizon rule:
+Within iBGP peers, AS_PATH and next_hop remain unchanged. This causes route to be sent back and forth causing routing loops.
+Using split horizon rule,
+1) iBGP routes learnt from 1 peer will not be forwarded to another peer
+2) Creating full mesh between iBGP peers.
+
+Route Poison:
+Its a method used by router to prevent sending packets through the routes that become invalid. It can be done by making the route metric as infinite. In RIP, hop count is made infinite(16).
+
+Poison reverse:
+Reverse of split horizon. Router advertises routes as unreachable over the interface over which they were learned by setting the route metric to infinite.
+
+BGP WEIGHT ATTRIBUTE: This is cisco proprietary.
+It is local significantly only. It is never advertised to any other router(iBGP or eBGP).
+
+Path with larger weight is preferred.
+Default weight for route originated on local router is 32768 and for other routers it is 0.
+
+weight lab1:
+
+R1 <-> R2
+ |     |
+R3 <-> R4
+
+Configure R12 and R34 in iBGP. R1 R3 in eBGP R2 R4 in eBGP.
+R1 # 192.168.1.1
+   # 192.168.2.1
+   # 1.1.1.1
+   # 11.11.11.11
+
+Create neighbors using main interfaces(192.168.1.1, 192.168.2.1 etc):
+
+Advertise all interfaces in bgp.
+# network 192.168.1.0 mask 255.255.255.0
+# network 192.168.2.0 mask 255.255.255.0
+# network 1.1.1.0 mask 255.255.255.0
+# network 11.11.11.0 mask 255.255.255.0
+
+Check valid and best path to R4 and R3 from R1.
+
+change weight using:
+method 1:
+
+In R1
+# neighbor 192.168.1.2 weight 500 or
+# neighbor 192.168.2.2 weight 500
+
+Method 2:
+In R1:
+config # route-map WEIGHT1 permit 10
+config-route-map# match ip address 1
+config-route-map# set weight 500
+config# route-map WEIGHT1 permit 20
+#exit
+
+config #access-list 1 permit 4.4.4.0 0.0.0.255
+config#router bgp 12
+#config-router# neighbor 192.168.1.2 route-map WEIGHT1 in
+
+To apply to neighbor:
+# router bgp 12
+config-router# neighbor 2.1.1.1 route-map R1R2 in
+config-router# neighbor 3.1.1.1 route-map R1R4 in
+
+# clear ip bgp * soft
+
+BGP LOCAL PREF ATTRIBUTE:
+
+local pref decides which path to use as exit if there are multiple paths exiting the AS.
+This attribute is advertised over iBGP and not eBGP.This is only relevant to that particular router.
+default value is 100. highest is preferred.
+well-known and discretionary attribute.
+open source.
+
+R1
+    R3
+R2
+
+R1 and R2 are in iBGP and R1, R2 connected to R3 via eBGP.
+
+if R1 is best path choosen for iBGP to R3, we can change from R1 to R2 using.
+
+1-way:
+# R2 # router bgp 12
+     # bgp default local-preference 200
+
+2-way:
+R1
+R2  R4
+R3
+
+R1,R2,R3 are connected using loopbacks in iBGP and R4 is connected to R1 and R3 via ebgp.
+R4 advertises loopback using network. R1 and R3 are configured with next-hop-self so that it can see and ping.
+
+R2 chooses R1 path to reach R4.
+Change local pref so that R1 to R3
+
+R3 # route-map LOCALPREF permit 10
+   # set local-preference 500
+   # route-map LOCALPREF permit 20 # There is an implicit deny at the end, hence we use this to overcome.
+   # exit
+   # router bgp 123
+   # neighbor <R3R4 physical connect> route-map LOCALPREF in
+
+Now R2 will choose R3 path.
+
+BGP LOCAL ORIGIN PATH:
+local originate route can be seen using 0.0.0.0 as next-hop. This route should preferred over redistributed and aggregated routes.
+
+ORIGIN CODE ATTRIBUTE:
+
+It is mandatory attribute. It defines the origin of path information.
+
+IGP : done using network command. i indicates IGP.
+EGP: exterior gateway protocol. e indicates EGP.
+? : when routes are redistributed in BGP and origin of route is incomplete.
+
+i > e > ?
+
+1-way:
+Any ip that is advertised using network command will show as 'i' in show ip bgp. Instead of network, if we use 'redistribute connected', it will show up as '?'.
+
+2-way:
+any ip that is advertised using network command, on the other router where you want see as ? use route-maps there.
+
+R1
+   R3
+R2
+
+R1,R2 are in iBGP and no connected and eBGP with R3.
+1.1.1.1 and 1.1.1.2 loopback are advertised by R1 and R2. R1 is best and valid path in R3.
+
+R3
+# route-map origin_attr permit 10
+# match ip address 1
+# set origin incomplete # igp is also another option.
+# route-map origin_attr permit 10
+# exit
+# access-list 1 permit 1.1.1.0 0.0.0.255
+
+#router bgp 12
+# neighbor 12.12.12.1 route-map origin_attr in
+
+Now R2 is best and valid path in R3.
+
+BGP AS PATH:
+
+well known and mandatory attribute.
+AS path is updated only for eBGP. for iBGP it is not updated.
+Main advantage of AS path is avoid loops.
+Other advantage AS PATH helps in selecting the best path. Lower AS PATHs count is the best path.
+unlike other attributes, changes in the AS path is propogated to other ASes.
+AS number 3 digit or 4 digit is not important, but hops are concerned.
+
+BGP AS PATH PREPEND:
+
+It influences the incoming traffic from neighboring AS.
+BGP prefers the shortest path destination.
+we can manipulate AS path.
+
+R1 R2
+R3 R4
+
+All R1, R2, R3 and R4 are in ebgp with directly connected and loopbacks are advertised.
+
+R1 loopback can reach R4 via 2 paths. To change the best path in R4 we use AS PATH prepend.
+
+#access-list 1 permit loopback_of_R1 wild_card_mask
+#route-map AS_PATH permit 10
+# match ip add 1
+# set as-path prepend 20 20 20 20 # this will show as appended in 'show ip bgp'.
+# route-map AS_PATH permit 20
+#exit
+# router bgp 10
+# neighbor <best_path_ip> route-map AS_PATH in
+
+BGP MED ATTRIBUTE: Multi Exit Discriminator.
+
+Lower MED value is preferred.
+Default value is 0.
+Best path can be selected if there are multiple paths to remote AS.
+MED is set on remote AS to tell other AS which path to select.
+MED is passed between between 2 ASes but not to other ASes.
+MED is metric in BGP table and route-map.
+
+R1
+R2 R4
+R3
+
+R1,R2,R3 are in iBGP with loopback neighbors, R4 is connected R1 and R3 via eBGP directly connected.
+If R4 advertises its loopback using network command, R2 will not have route to ping R4 loopback.
+
+Use next-hop-self on R1 and R3 to overcome this and advertise R1,R3 directly connected network to ping from R2 to R4 loopback.
+
+R2 will have 2 paths to reach R4 loopback. R2 will change R1 loopback since it has lower router-id
+
+To choose R3 path
+
+R4
+# access-list 1 permit <R4 loopback> <wildcard mask>
+# route-map MED1 permit 10
+# match ip address 1
+# set metric 444
+# route-map MED1 permit 20
+# router bgp 4
+# neighbor <R1 direct ip> route-map MED1 out
+
+Now, R3 will have lower med than R1, R3 path will be choosen.
+
+
+Local pref, weight, AS path, MED differences:
+
+LOCAL PREF is used to manipulate the traffic going out of the AS. It is exchanged between iBGP.
+WEIGHT is used to manipulate the traffic going out of the AS. But this is not exchanged with eBGP or iBGP neighbor.
+AS_PATH is selected if local perf and weight are tied. It manipulates going out of AS traffic.
+MED is used to manipulate incoming traffic. eBGP will share with iBGP peers where traffic needs to be
+
+manipulated and will not forward to any other AS.
+
+BGP NEXT HOP SELF:
+
+RTA <- iBGP -> RTB <- eBGP -10.1.1.2> RTC (1.1.1.1)
+
+RTC will advertise 1.1.1.1 loopback.
+RTA will not ping 1.1.1.1, but can see in "show ip bgp".
+
+next hop for 1.1.1.1 will be eBGP(10.1.1.2) which is outside of iBGP.
+"show ip route" in RTA cannot see this route(1.1.1.1).
+
+To overcome this, RTB must be configured as next-hop-self.
+
+For this
+RTB # neighbor <RTA loopback> next-hop-self
+
+Now RTC loopback ip will become valid and best.
+But still cannot ping since RTA <-> RTB directly connected network is not visible to RTC.
+
+To make it visible
+RTB # network <RTA-RTB physical network> mask <mask>
+
+Then we can ping from RTA to RTC loopback.
+
+BGP ROUTER ID:
+> It selects the best path if weight, local pref etc are same.
+> It is a unique identifier.
+> If no bgp router-id is specified, then global router-id is used.
+> If all the parameters are same and iBGP has multiple paths to eBGP. Then changing the router-id will change the valid and best route from iBGP to eBGP.
+> Route with lower router-id will make valid and best path.
+
+router bgp 1234
+  bgp router-id 99.99.99.99 # increase the router-id will make other route as valid and best.
+clear ip bgp *
+
+undo
+router bgp 1234
+  no bgp router-id # undoing will make old route as valid and best.
+
+
+router id conditions:
+> use address configured using bgp router-id command.
+> use loopback interface highest ip.
+> use physical interface highest ip.
+> if no interface exists, set router-id to 0.0.0.0.
+
+BGP Route-Reflector:
+Number of iBGP peerings in full mesh = N(N-1)/2
+
+Route-reflector is an alternative to logical full-mesh requirement of IBGP.
+Route reflector acts as a server. This is similar to ospf DR/BDR concept.
+
+If there are 9 routers in iBGP. Instead of full mesh, we can have 3 route reflector and other 6 as clients.
+So 3 routers should be fully meshed and other 6 must be clients.
+
+To avoid single point of failure, redundancy must be there.
+
+If an RR receives route from non-client, it reflects it to clients-only and eBGP peers.
+If an RR receives route from client, it reflects to clients(except from where it received), non-clients and eBGP peers.
+
+RR and clients form a cluster. cluster-id is advertised to avvoid routing loops.
+
+
+R1 <- ebgp -> R2 <- ibgp -> R3 <- ibgp -> R4
+
+no ospf is configured.
+
+R1, R2, R3, R4  are configured with loopback and management ips.
+
+Advertise all loopbacks and mgmt ips in bgp using network command.
+
+R4 will not get R1 adverstiments since iBGP is not full mesh.
+
+To get the ads, we need to configure R3 as route-reflector-client.
+
+R3# router bgp 54
+R3 # neighbor 23.23.23.2(R2) route-reflector-client
+R3 # neighbor 43.43.43.2(R4) route-reflector-client
+
+SOFT REST, HARD RESET, SOFT RECONFIGURATION:
+
+BGP uses tcp.
+
+Hard reset:
+tear down BGP peerings. This should be performed last as last resort.
+This can be done on peer basis or on all peers using *. consumes cpu.
+
+clear ip bgp *
+
+Soft reset(Route Refresh):
+BGP peerings remain active. This allows neighbors to perform route refresh. It resends and reprocesses the updates.
+
+clear ip bgp * soft
+
+Soft-reconfiguration:
+soft reset for inbound routing tables.
+router bgp 123
+  neighbor 1.2.3.4 soft-reconfiguration inbound
+
+
+BGP FAST-FALLOVER:
+
+when the interface is down for some problem, BGP neighborship goes down immediately not waiting for hold down time.
+
+To overcome this, fast-fallover technique is used which waits until hold down time(default 180 sec).
+
+RTA <-> RTB
+
+In RTA and RTB,
+router bgp 1
+  no bgp fast-external-fallover
+
+MD5 AUTHENTICATION:
+
+In iBGP and eBGP it is supported.
+
+md5 authentication is supported.
+router bgp 1
+  neighbor 1.1.1.2 remote-as 2
+  neighbor 1.1.1.2 password <password string>
+
+both sides the passwords should match.
+
+
+BGP AGGREGATION:
+
+RTA <-> RTB
+
+RTA and RTB are connected via eBGP and 4 loopbacks are configured on RTA and advertised using network command.
+
+4 networks will be shown in RTB.
+To create a summary route
+
+RTA:
+router bgp 1
+  aggregate-address 172.1.0.0 255.255.252.0
+
+In RTB, all routes including summary route is shown.
+
+RTA:
+router bgp 1
+  aggregate-address 172.1.0.0 255.255.252.0 summary-only
+
+In RTB, only summary route will be shown.
+
+ADD BGP ROUTE IN FUTURE:
+BGP will advertise network if it is there in routing table. To add to routing table use NULL interface.
+
+#config# ip route 20.0.0.0 255.0.0.0 null 0
+#config# router bgp 1
+#config-router# network 20.0.0.0 mask 255.0.0.0
+
+ROUTE MAPS:
+They are processed orderly.
+match and set are like if-then.
+implicit deny by default.
+All routing protocols use route-maps.
+
+BGP routes can be filtered using prefix lists, access-lists, distribute lists and route-map.
+
+
+eg:
+route-map 10
+route-map 20
+implicit deny
+
+match condition can have access-lists, prefix-lists etc.
+set can have BGP as path prepend, set metric of ospf or eigrp in redistribution.
+
+SINGLE, DUAL, MULTI HOMES:
+When talking about ISP, BGP connections, we have single-homed, dual-homed, single multi-homed and dual multi-homed. With these topologies we can achieve load sharing.
+
+Single homed:
+
+Home RTA <-> RTB ISP
+
+Dual homed:
+
+Home RTA <=> RTB ISP
+
+home RTA RTB  ISP
+         RTC
+
+Home RTA   RTC  ISP
+     RTB   RTD
+
+Single Multi Homed:
+
+Home RTA  RTB  ISP 1
+          RTC  ISP 2
+
+Home RTA   RTC  ISP1
+     RTB   RTD  ISP2
+
+Dual Multi Homed:
+2 connections Home, ISP1 and ISP2, 2 homes and 2 ISPs and 2 homes 2 ISPs is X.
+
+PUBLIC AND PRIVATE AS:
+
+1-64511 - public AS numbers. unique.
+64512 - 65535 - private AS numbers. not unique.
+
+private AS numbers cannot be leaked to global BGP.
+
+remove-private-as command
+
+R1 <-> R2 <-23.23.23> R3
+65532   2     5
+
+R3 will have AS_PATH as 2 and 65532. To remove private as
+
+R2
+router bgp 2
+ neighbor 23.23.23.2 remove-private-as
+
+> In "show ip bgp" of R2, AS_PATH will show 2 instead of 2 65532.
+
+PEER-GROUPS:
+
+To reduce the configuration and improve performance we use peer-groups.
+update is generated once per group instead of each update which improves the performance.
+Outbound peer-policy must be same for all peer-group members, inbound policy can be per peer basis.
+
+create the group: neighbor <group-name> peer-group
+configure remote-as: neighbor <peer-group> remote-as <ASnum>
+make neighbor part of group : neighbor <ip address> peer-group <group-name>
+
+
+RTA  <-> RTB <-> RTC
+         890
+
+RTA - RTB - RTC configuration must be same except neighbors loopback ip change.
+router bgp 890
+ neighbor AS890 peer-group
+ neighbor AS890 remote-as 890
+ neighbor AS890 update-source Loopback0
+ neighbor AS890 next-hop-self
+ neighbor 9.9.9.9 peer-group AS890
+ neighbor 10.10.10.1 peer-group AS890
+
+BGP RULE OF SYNCHRONIZATION:
+Transit AS will not advertise a route until every router in the transit AS has that same route in its IGP routing table.
+
+This rule is because packets that are not able to reach the destination will not be sent.
+
+#config# router bgp 5
+# router-config# no synch
+
+bgp synch is turned off by default.
+
+BGP SYNCHRONIZATION RULE:
+
+BGP router should not use or advertise a route learned by iBGP to an external neighbor, unless that route is local or learned from the IGP(EIGRP, OSPF, RIP or ISIS).
+
+earlier in old days, sync was enabled by default but now it is disabled.
+#config# router bgp 10
+#config-router# synchronization
+
+It avoids loop prevention.
+
+R0 <-eBGP> R1 <-> R2 <-> R3 <-eBGP> R4
+
+R1 and R3 are in iBGP.
+
+Here R2 only runs IGP(ospf, RIP etc) and not bgp.
+R1 and R3 runs iBGP(internal BGP) and IGP(ospf).
+Enable bgp syncrhonization on R1 and R3.
+Advertise loopback intfs on R0 and R4 using network command.
+Enable synchronization rule on R3 and R1.
+Synchronization rule R3 and R1 should contain routes for R4 and R0 both in IGP and BGP tables.
+
+Since R2 does not contain routes for R0 and R4, it will drop the packet.
+
+To avoid this. redistribute routes in ospf in R1 and R3.
+R1:
+#config-router#router ospf 1
+#config-router# redistribute bgp 2<AS number of R1 and R3> subnets
+
+R3:
+#config-router#router ospf 1
+#config-router# redistribute bgp 2<AS number of R1 and R3> subnets
+
+what is bgp flapping?
+Bgp flapping can use because of unstable peer. This occurs when bgp route disappears and appears in routing table.
+
+BGP LOCAL-AS:
+
+While doing migration, in many scenarios we need to change the AS numbers.
+To change the AS which does not drop the connection, we use local-as.
+
+R1 <- ebgp -> R2
+
+R1
+#config# router bgp 1
+#config-router# neighbor 1.1.1.2 remote-as 2
+
+R2
+#config# router bgp 2
+#config-router# neighbor 1.1.1.1 remote-as 100
+
+remote-as in R2 is different then R1. This is create problem. This case can also occur during migration.
+
+To avoid this.
+
+R1
+#config-router# neighbor 1.1.1.2 local-as 100
+
+In R2, #show ip bgp will show both 1 and 100 for path attribute.
+# show ip bgp summ will show 100
+
+
+BGP PRIVATE-AS REMOVAL LAB:
+
+Public AS numbers range: 1 - 64511. Theey are unique globally.
+Private AS numbers: 64512 - 65535. Not used globally.
+
+R1 1 < -ebgp ->2  R2 2 <-ebgp -> 65503 R3
+
+R1 and R2 are configured with ebgp 1 and 2.
+R3 is configured with private AS 65503.
+
+If we configure a network and advertise in R3, In R2 and R1 that network of private AS will show up.
+
+To block the private AS being shown up in R1,
+R2
+#config-router# neighbor 1.1.1.1(R1 ip) remove-private-as
+#config-router# clear ip bgp *
+
+R2 table will still contain private-as.
+
+still R1 will not be able to ping R3 advertised loopback ip.
+
+for pinging from R1.
+
+R2
+#config-router# network 192.168.1.0 mask 255.255.255.0
+
+Now R1 can ping R3.
+
+KEEP ALIVE, HOLD DOWN, ADVERTISEMENT AND SCAN TIMERS:
+
+using "show ip bgp neighbors" we can see the keep alive and hold down timer values.
+
+default keep alive = 60 seconds.
+default hold time = 180 seconds.
+
+keep alive: BGP does not depend on TCP to ensure neighbors are alive. It uses keep alive timer.
+
+hold time: 3 times the keep alive timer. If keepalive or update message is not received from peer before the hold time, peer is considered dead.
+
+router bgp 12
+  timers bgp <keepalive timer> <holddown timer>
+
+scan time: bgp will walk through bgp table, if there are any anomolies, it is rectified. scan time is 60 sec.
+
+router bgp 12
+ bgp scan-time 30
+
+advertisement interval: bgp will wait for advertisement interval to batch process all the prefixes and send them at once.
+Default eBGP advertisement interval is 30 sec.
+Default iBGP advertisement interval is 0 sec.
+
+router bgp 12
+neighbor x.x.x.x advertisement-interval 0 # send immediately.
+
+PREFIX LISTS:
+
+Similar to acl, if route is not permitted, default is denied.
+At the bottom, both for prefix lists and acls implicit deny.
+explicit deny do not override the implicit deny.
+Prefix lists work from top to bottom. If a match found, process stops.
+Prefix lists are numbered with lowest numbers at the top.
+
+#config# ip prefix-list NET5 deny 15.0.0.0/8
+#config# ip prefix-list NET5 permit 0.0.0.0/32 le 32 # permit remaining.
+
+BGP recursive lookup:
+1. Router to reach the destination checks bgp table and next hop.
+2. Router to reach the desintation checks routing table and next hop.
+This process of looking up twice to reach destination is called recursive lookup.
+
+BGP RIB failure(r):
+BGP RIB failure, In "show ip bgp" indicates the routes learned from a neighbor where a lower AD(static or IGP) has already been installed into the routing table, this BGP route has failed to install into the ip routing table(RIB).
+
+
+Usually if "show ip bgp" has 'r', then "show ip route" has route other than "B", usually lower AD route.
+
+BGP COMMUNITIES:
+
+This attribute is transitive optional attribute.
+BGP community is a numerical value assigned to prefix and then advertised to the neighbors.
+The neighbor will examine it and takes proper action(like filtering or modifying other attributes).
+bgp routes can be tagged with communities during incoming or out going or when doing redistribution.
+
+By default community attribute is not advertised to the neighbor.
+
+To enable
+router bgp 1234
+ neighbor x.x.x.x send-community
+
+By default communities are shown in large numbers. Human-readable format is "ASN:Value". To change from large number to new format
+
+# "ip bgp-community new-format"
+
+4 well known communities are
+1) Internet: advertise these routes to all neighbors.
+2) local-as: prevent sending routing outside the local as within in a confederation(AS within AS).
+3) no-advertise: do not advertise this route to any peer, internal or external.
+4) no-export: do not advertise this route to external BGP peers.
+
+
+NO-EXPORT LAB:
+
+R1
+
+R2 <-> R3
+
+R4
+
+R2, R3 are in iBGP. R1, R2 are in eBGP and R2,R4 are in eBGP.
+Advertise network 1.1.1.0 loopback on R1.
+by using next-hop-self and advertising the networks we can make ping from R4 and R3.
+
+Goal: we do not want to advertise 1.1.1.0 network to R4.
+
+R2
+# access-list 1 permit 1.1.1.0 0.0.0.255
+# route-map NOEXPORT permit 10
+# match ip address 1
+# set community no-export
+# route-map NOEXPORT permit 10
+# exit
+# route bgp 1
+# neighbor <R1 direct connected ip> route-map NOEXPORT in
+
+Now R2 will not advertise 1.1.1.0 network to R4.
+But if there is connection between R3 and R4, R3 can advertise to R4.
+To stop this
+
+R2
+# neighbor <R3 direct connection> send-community
+
+Now R3 will also not forward to R4, if there was a connection.
+
+
+NO-ADVERTISE LAB:
+almost same as no-export.
+
+R1
+
+R2 <-> R3
+
+R4
+
+R2, R3 are in iBGP. R1, R2 are in eBGP and R2,R4 are in eBGP.
+Advertise network 1.1.1.0 loopback on R1.
+by using next-hop-self and advertising the networks we can make ping from R4 and R3.
+
+Goal: we do not want to advertise 1.1.1.0 network to R4, R3.
+
+R2
+# access-list 1 permit 1.1.1.0 0.0.0.255
+# route-map NOADVERTISE permit 10
+# match ip address 1
+# set community no-advertise
+# route-map NOADVERTISE permit 10
+# exit
+# route bgp 1
+# neighbor <R1 direct connected ip> route-map NOADVERTISE in
+
+Now R2 will not advertise 1.1.1.0 network to R4 and R3.
+
+MBGP or MP-BGP: MultiProtocol extensions for BGP.
+Standard BGP supports ipv4.
+MBGP supports ipv4 and ipv6 and it supports unicast and multicast variants of it.
+MBGP stores both unicast and multicast in different routing tables.
+MBGP is widely used in MPLS L3 VPN.
+
+MBGP uniquely distinguishes each customer routes that comes to PE routes.
+
+
+MBGP:
+
+MBGP is introduced in order to provide extra functionality for BGP protocol, new BGP AFI(Address Family Identifier) and BGP SAFI(Sub Address Famiy Identifier).
+
+If neighborship is added between 2 BGP neighbors and later L3VPN address is added then BGP goes down. This is not tolarated.
+
+If new AFI and SAFI are configured between 2 bgp neighbors, then MBGP is setup.
+
+LAB:
+router bgp 1000
+ NO BGP DEFAULT IPV4-UNICAST
+ neighbor <ip> remote-as 100
+ ADDRESS-FAMILY VPN4 UNICAST
+ neighbor x.x.x.x activate
+ NEIGHBOR X.X.X.X SEND-COMMUNITY EXTEND
+
+above configuration will create vpn4 neighborship. vpn4 address family is activated.
+Send-community extend will send ROUTE-TARGET value between MPBGP neighbors.
+
+BGP communities:
+
+The first 16 bits generally indicate their AS number and next 16 bits are assigned(like local pref, MED) by the AS.
+
+
+example: 3356:70 , 3356 indicates the AS number, 70 indicates the local preference value.

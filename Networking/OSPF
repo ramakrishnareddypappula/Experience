@@ -1,0 +1,1352 @@
+
+Also called spf based or distributed database protocol.
+
+> Its a link state protocol. Other example is IS-IS.
+> Its open standard and not proprietory like EIGRP.
+> Its a dynamic routing protocol.
+> Packets are routed solely based on destination ip address found in ip packet header.
+> All routers run same spf algorithm at same time.
+> If 2 routes have same cost, traffic is distributed equally among them.
+> Cost is described by dimensionless metric.
+> Used Designated router concept for traffic reduction.
+> Used multicast capabilities for bandwidth reduction.
+> Used areas concept for data protection/hiding.
+
+RIP sends updates at regular scheduled updates even when there are no changes in the network. Default is every 30 sec.
+
+ospf information exchange:
+To ensure ospf routers have latest information in dbs, LSA are assigned with sequence numbers.
+when ospf router receives LSA, it checks its db for pre-existing entries.
+1) if there is no entry, then router will create an entry in db.
+2) If there is an entry, then sequence number comes into play.
+             1) if sequence number is same: LSA are ignored and no action taken.
+             2) if sequence number is less: router ignores the update and sends back an LSU containing the LSA back to original router. basically current router has latest and ignores the old.
+             3) if sequence number is more: router adds LSA to its db and sends LSAck to original router. router floods the LSA and updates its own routing table by running the spf algo.
+
+
+Features of OSPF:
+>classless inter domain routing.
+>Only metric used: interface cost.
+>default administrative distance: 110
+>uses multicast addresses: 224.0.0.5 and 224.0.0.6
+
+Routers running ospf must establish neighbor relationship before exchanging routes.
+Because ospf is a link state routing protocol, neighbors does not exchange routing tables but exchange network topology.
+Because routers knows entire topology of network, the chance of looping to occur is minimal.
+
+ospf runs on top on top of IP.
+It uses protocol number 89.
+It does not rely on TCP or UDP.
+
+ospf uses multicast and unicast instead of broadcast.
+IPv4 multicast:
+224.0.0.5
+224.0.0.6
+
+Ipv6 multicast:
+FF02::5
+FF02::6
+
+To enable ospf on all interfaces of router
+#router ospf 1# network 0.0.0.0 0.0.0.0 area 1
+
+To enable ospf at the interface level:
+#int loopback 99#router ospf 1 area 1
+
+If no ip address is present, router-id is not configured, hence ospf process is not started.
+If router-id is manually configured under ospf view then ospf process with start.
+
+Routers in area 0 are called backbone routers.
+
+Neighboring routers:
+2 routers having interface in same network. neighbor state is usually discovered by ospf.
+
+Adjacency:
+relationship formed by routers to exchange routing information.
+
+routers in ospf form adjacencies.
+
+different parameters like area id, hello timer, dead timer are considered to form adjacency.
+
+There are 3 tables in ospf:
+
+neighbour table:
+In ospf, neighbors are discovered by sending hello packets on multicast ip of 224.0.0.5
+If R1 and R2 routers are connected directly, neighbor relationship is established by sending hello packets after ospf is enabled.
+command to check neighbors is
+> show ip ospf neighbors
+
+Routing table:
+
+Topology table:
+
+This command output will contain router-id
+
+Autonomous system:
+A group of routers exchanging routing information via common routing protocol.
+IGP(Interior Gateway Protocol) is the protocol spoken by routers belonging to an autonomous system.
+
+Hello protocol:
+Part of ospf protocol used to establish and matinain neighbor relationship.
+
+Flooding:
+Part of ospf protocol to distribute and synchronize link state data base between ospf routers.
+
+Hello packets:
+
+Using hello protocol neighbors are selected.
+Using multicast ip hello packets are sent out.
+Routers become neighbors as soon as they see themselves in neighbors hello packets.
+Neighborship can be applied to only primary ip address of the interface.
+
+The following fields in R1 and R2 hello packets should be same to become neighbors.
+1) subnet : Interfaces should be in same subnet and similar mask.
+2) area : They belong to same area.
+3) hello and dead interval timers : For keepalive knowledge between the routers we use hello packets.
+hello interval indicates the length of time in secs, between which hello packets are sent.
+Dead interval indicates the number of secs router's hello packets have not be seen. So neighbors declare it as dead.
+OSPF requires hello and dead intervals be same on all routers of the area.
+Configure hello and dead interval on interface.
+# ip ospf hello-interval <seconds>
+# ip ospf dead-interval <seconds>
+
+4) authentication : password must be same on all routers of the area.
+5) area stub flag : if stub area, stub area flag must be present in all routers hello packets with in the area.
+6) MTU(Maximum Transmission Unit): The MTU on the neighboring routers interfaces must match. Otherwise they get stuck in exstart/exchange state.
+
+ospf uses dijkstra's algorithm:
+It helps in finding shortest path from source to all vertices in a graph.
+It is used in google maps and ospf to get the best route. Based on the cost best path is calculated.
+
+For this first the source is taken and distance is calculated. From source to itself is 0.
+To other vertices it is assumed to have distance of infinity.
+To all the values using cost distance is updated.
+Then again from each of these vertices, using cost distances are calculated.
+Care should be taken that each vertex is seen only once. If more than once they using cost best route is calculated.
+Using above technique parse until destination is reached.
+A priority queue is maintained where distances are arranged in ascending order.
+Using priority queue after destination is reached, the best path is selected from source to destination.
+
+Priority queue:
+Priority queue has following properties
+1) An element with higher priority is removed before the element with lower priority.
+2) If 2 elements have same priority they are served according to order of queue.
+
+from queue import PriorityQueue
+
+def priority_queue():
+    q = PriorityQueue()
+
+    q.put([2, 'code'])
+    q.put([1, 'eat'])
+    q.put([3, 'sleep'])
+    q.put([2, 'new code'])
+    while not q.empty():
+        next_item = q.get()
+        print(next_item)
+
+priority_queue()
+# output: [1, 'eat']
+[2, 'code']
+[2, 'new code']
+
+[3, 'sleep']
+
+Hello interval:
+It specifies how often router needs to send hello packet
+# interface# ip ospf hello-interval 10
+
+dead interval:
+This defines how long router should wait for hello packet before neighbor is declared dead.
+#interface# ip ospf dead-interval 30
+
+
+By default ospf sends hello packets every 10 sec on ethernet network.
+Dead timer is 4 * hello interval = 40 sec on ethernet network.
+
+Retransmit interval:
+Router running ospf send LSA to its neighbors and waits to receive ack. If the router does not receive ack then router will retransmit again.
+default is 5 sec.
+#interface# ip ospf retransmit-interval <1-65535>
+
+Transmit delay:
+Transmit delay timer increments the age of LSAs in update packet to accomodate the transmission and propogation delays for the interface. The timer is more important on very low speed links where transmission delay is more important.
+
+default is 1 sec.
+#interface# ip ospf transmit-delay
+
+Adjacencies:
+Next step after hello packet exchange.
+Database exchange is done.
+Instead all routers communicating creating O(n*n), Designated Router(DR) and BDR(Backup Designated Router) are present to reduce to O(n) communication. Idea is all routers communicate to DR and BDR to exchange information exchange and DR and BDR will exchange with everybody else.
+The BDR is backup when DR goes down.
+
+Designated Router:
+Router that have atleast 2 attached routers.
+They are elected by the hello protocol.
+This reduces traffic and size of lsdb.
+
+DR Election:
+DR and BDR election is done by hello protocol.
+Router with highest priority will be DR. Same for BDR.
+If priority is same for 2 routers then router with highest router-id becomes DR.
+Default priority value is 1.
+Configure priority value on interface
+interface# ip ospf priority <0-255>
+
+If priority value is 0 indicates they considered ineligible for DR and BDR.
+Priority value 0 router is DROTHER.
+
+DR and BDR concept is present in ospf for faster convergence when there is a change in network.
+when a router detects first change in network, it does not advertise to others. Instead it advertises to DR and BDR which are listening on 224.0.0.6. Both DR and BDR will listen and update DB. DROTHERs will also send the advertisements to DR/BDR.
+
+DR(not BDR) then sends multicast to 224.0.0.5 so that all other routers can update it. All send LSAck to DR.
+
+
+Single router in an area cannot be both DR and BDR.
+
+# show ip ospf neighbor
+-> This gives information about priority value, neighbor id(RID), dead time, ip address, interface of neighbor.
+
+# show ip ospf interface <int name>
+-> It tells neighbour things like: DR or BDR, neigbhbor count, hello time, dead time etc.
+
+If we change priority of DR from 1 to 0 it will become DROTHER. Again if we change from 0 to 2 it does not preempt itself and become DR until we clear the ospf process.
+
+OSPF neighbor states:
+1) down state: No information is received from anybody.
+2) Attempt: An effort is made to contact the neighbor by sending hello packets.
+3) init state: Router receives hello packet from other router.
+2) 2-way state: Router sends hello packet to other router. The bidirectional communication starts. Router receives its own RID in hello packet.
+DR and BDR election is done at the end of this stage both for broadcast and NBMA networks.
+Adjacency is decided at the end of this stage which considers other router is a DR or BDR or link or virtual link etc.
+3) exstart state: Routers start exchanging LSDB(Link State DataBase). THey establish a sequence number which will be used for future information exchanges.
+4) Exchange state: Routers will describe their entire link-state database by sending database description packets.
+5) Loading state: one neighbor sends LSR(Link State Requests) for every network it does not know about. Other neighbor replies with LSUs(Link State Update) which contains information about requested networks. This process is done for all neighbors.
+6) Full state: Both routers have the synchronized DB and are fully adjacent to each other. Adjacent routers will have similar-link state database.
+
+OSPF Areas:
+
+WHY AREAS?
+using areas, ospf can build a layered network.
+Routing table size is reduced.
+
+Limit LSA traffic.
+
+Area is a logical grouping of networks and routers.
+All routers in same area have same topology table.
+Routers is 1 area does not know about routers in other areas.
+Advantages:
+1) Size of topology is reduced.
+2) Routing table on router is reduced.
+3) Less time is required to run SFP algorithm.
+4) Routing updates are reduced.
+
+Guidelines for areas:
+No router should be more than 3 areas.
+No area should contain more than 50 routers.
+
+Do not run more than 1 ospf process on Area border router.
+
+Multiple ospf processes works much like running multiple routing protocols on the same device i.e each process has its own routing topology.
+
+All routers in same area have same area id.
+Router that has interfaces in more than 1 area is called ABR(Area Border Router).
+Router that connects ospf network to other routing domain(EIGRP or internet) is called ASBR(Autonomous System Border Router).
+
+In ospf, manual route summarization is only possible on ABRs and ASBRs.
+
+The role of ABR is to advertise address summaries to neighboring areas.
+The role is ASBR is to connect OSPF routing domain to other routing domain.
+
+LSA, LSU and LSR:
+
+what is LSA:
+LSA is a basic communication means of ospf for IP(Internet Protocol).
+It communicates router's local routing topology to all other routers in same ospf area.
+There are different types of LSA. It also has sequence number.
+
+What is LSDB:
+Each ospf router in Autonomous system(AS) maintains AS topology called Link state database(LSDB).
+Each router stores the received LSA packets in LSDB.
+After LSDBs are synced between the routers, ospf will use SPF algorithm to calculate the best routes.
+
+what is DBD:
+Database descriptors or Database description packets(DDP). These packets are initialized when the adjacency is initialized.
+They describe the contents of topological database.
+It only include LSA headers instead of full LSAs.
+
+what is LSR: Link State Request
+After exchanging DBD the router may find that its topological database are out of date.
+Link state request packet is used to request the pieces of neighbor's database thare are more upto date. Sending LSR packet is the last step in adjacency.
+
+LSU: Link State Update
+packet that contains the full detailed LSA. Its the response for an LSR message.
+
+LSACK: Link State Acknowledge
+send confirm receipt for LSU message.
+
+LSA(Link State Advertisements): Using these routers exchange topology information.
+The neighboring routers exchange LSAs. Each router checks Topology database and sends LSRs(Link State Request) message requesting all LSAs not found in topology table.
+Other router responds with LSU(Link State Update) that contains all LSAs requested by the neighbor.
+
+OSPF configuration:
+
+Single Area:
+
+1) Configure the ospf process id on multiple routers. It can be same or different
+#config # router ospf <process-id>
+
+2) Configure the network address for all the interfaces on the router. Area id must be same on all the routers within the area.
+# config # network <network ipv4 address> <wildcard mask> area <area-id>
+
+3) Check the configuration using
+# show ip ospf neighbor
+# show ip route  # O indicates the ospf routes.
+
+Multiple areas:
+
+1) Configure the ospf process id on multiple routers. It can be same or different.
+#config # router ospf <process-id>
+
+2) Configure the network address for all the interfaces on the router. Area id must be same which are within the area and must be different in different areas.
+# config # network <network ipv4 address> <wildcard mask> area <area-id>
+
+3) For convience configure the router id on each router.
+# config # router# router-id <ip-address>
+
+4) Check the configuration using
+# show ip route ospf
+# show ip ospf neighbor # IA in command output represents routes reside in different areas.
+
+Router-ID:
+A 32-bit number assigned to each router running the OSPF protocol. This number uniquely identifies the router within an Autonomous System.
+
+It is not an ip address. It can be same as ipv4 address.
+
+
+If router-id is not configured, then router-id is 0.0.0.0 in "#show ip protocols".
+
+Router id uses the following criteria in the decreasing order.
+1. Manual configuration of router-id.
+2. Highest ip-address on loopback interface even if ospf is not configured.
+3. Highest ip-address on non-loopback interface even if ospf is not configured.
+
+ospf process must be cleared for ospf routers to take effect.
+
+Administrative distance:
+Ranges between 0 to 255.
+Less value means more trust.
+Default administrative distance values:
+directly connected = 0
+static route = 1
+EIGRP = 90
+IGRP = 100
+OSPF = 110
+RIP = 120
+
+Routers on network can learn about the best route to reach distination from multiple sources.
+Administrative distance is used by routers to find out which route is better(lower number is better).
+eg: If a cisco router learns about same route from RIP and EIGRP, it will use EIGRP since its administrative distance is lower.
+
+We can change the administrative distance to manipulate the routing table to avoid routing loop.
+
+AD change command:
+#router config#distance <admin-distance> <interface-ip> <wildcard mask>
+
+Metric: ospf metric is based on cumulative costs of all outgoing interfaces from source to destination.
+Interface cost: It is inversely proportional to interface bandwidth that can be setup explicitly.
+
+Cost:
+
+cost = Reference bandwidth / interface bandwidth
+     = 100 Mbps / interface bandwidth
+     = (10 ^ 8) / bandwidth in bps
+
+if interface bandwith is 1.544 Mbps then cost is 64.
+if interface bandwith is 10 Mbps then cost is 10.
+if interface bandwith is 100 Mbps then cost is 1.
+if interface bandwith is 1 Gbps then cost is 1.
+So, for interface bandwith is 100 Mbps cost is 1.
+
+We can change the default reference bandwidth, then cost will become "auto-cost".
+If we want to change auto-cost then do it on ospf routers.
+
+Administrative distance/ cost of the path = [110/892] as displayed in some commands.
+
+since ethernet/fast ethernet/gigabit all have same cost of 1, we can configure auto-cost to differentiate.
+
+#config-router# auto-cost reference-bandwidth 1000
+
+keep cost same on all routers otherwise 1 ethernet interface on 1 router has 10 and other has 1.
+
+Manually configure the cost:
+#conf-intf# ip ospf cost 5
+
+Change the bandwidth on the interface level:
+#config# int serial 1/1
+#config-if# bandwidth 56
+
+This changes the interface cost on the ospf.
+
+When there are 4 or more routers in same segment with 1 DR and 1 BDR. 2 DROTHERS will be stuck in 2way adjancency. This is ok.
+
+INTERNAL ROUTER: Router that has all its interfaces in same area.
+
+BACKBONE ROUTER: Router that have atleast 1 interface in area 0.
+
+ABR: Routers which have atleast 1 interface in Area 0 and another in nonbackbone area.
+
+
+ASBR: Router that injects into the ospf domain via route redistribution.
+
+Ospf Authentication:
+By default ospf routers use null authentication.
+Other authentication mechanism are
+1) simple authentication:
+
+under ospf process:
+#conf # area 0 authentication
+
+Under interface that communicates with other router
+# inter fa0/0# ip ospf authentication-key mypassword
+
+2) md5 authentication:
+
+under ospf process:
+#conf # area 0 authentication message-digest
+
+Under interface that communicates with other router
+# inter fa0/0# ip ospf authentication message-digest
+# inter fa0/0# ip ospf message-digest-key 10(random-value) md5 mypassword
+
+If 1 router is configured with authentication, other routers wait until dead timer and then go down.
+When passwords are configured on all routers, they come up by themselves.
+In ospf,
+type 0 authentication is no authentication.
+type 1 authentication is clear text authentication.
+
+type 2 authentication is md5 authentication.
+
+Backbone and area 0:
+If multiple areas are configured, 1 must be area 0. This is called backbone area.
+Backbone area must be center of all areas. All areas must be directly connected to backbone area.
+
+Intra-area Routes: routes that are generated within an area. In Routing table they are represented by O.
+Inter-area or summary routes: routes that originate from other areas are called inter-area or summary routes.
+In routing table they are represented by O IA.
+External routes: Routes that originate from other routing protocols and are injected to ospf via redistribution are called external routes.
+
+Virtual links:
+In case any area is not connected to area 0 directly, then we use virtual links to connect to that area.
+
+To create a virtual link between RTA and RTB, execute the below command on both RTA and RTB.
+# router ospf 1# area <area-id> virtual-link <RID>
+
+# where <area-id> is the connection area id between RTA and RTB.
+
+There can be multiple area 0s if the company is trying to merge 2 seperate ospfs into 1 network with common ospf 0. In these cases, virtual link can be configured between 2 area 0s.
+
+Point-To-Point Interfaces:
+Ospf will form adjacencies with point to point serial lines. There is no concept of DR or BDR.
+There is no DR/BDR in point to point network. so state will be FULL/- in "show". - indicates no DR/BDR.
+
+point to multipoint is nothing but point to point ospf links.
+
+NBMA(Non Broadcast Multi Access) Networks:
+Special care is taken when ospf is running on NBMA networks like Frame relay, x.25, ATM etc.
+DR and BDR needs to have full physical connectivity of networks. DR and BDR needs to have static list of all routers.
+# neighbor <ip address> priority <number> poll-interval <seconds>
+
+In non broadcast networks(NBMA), There is a rule for router BR DBR selection.
+
+NBMA has rules at spoke and hub. spoke spoke does not communicate. Communication from spoke to spoke goes via hub. Routers do not forward broadcast or multicast.
+
+default hello is 30 and dead 120 sec for NBMA network.
+
+
+unicast hello packets are sent to neighbor. We see this only on hub router in NBMA network.
+
+ip address and priority number are of neighbor.
+"poll-interval" is the amount of time(hello interval) after which neighbor is considered dead.
+
+We can set DR and BDR by making others to set priority value of 0 or less the DR.
+
+# show ip ospf neighbours
+# show ip protocols
+# show ip ospf database (link state db)
+# clear ip ospf process(to restart the ospf process on the router.)
+
+OSPF LSA types:
+
+Type 1: Router LSA
+Each router with in the area will flood this.
+This explains about list of directly connected links to a router
+
+Links can be point-to-point, connection to transit network, connection to stub network, virtual link.
+
+Type 1 LSA is always within the area.
+link state id is the originating router id.
+
+Type 2: Network LSA
+sent out by DRs.
+Designated Router(DR) on the broadcast segment explains which routers are joined together.
+
+link state id is the ip interface address of DR.
+Every router in ospf area will receive type 1 and type 2 LSA.
+
+Type 3: Summary LSA
+
+Type 3 LSA summarize the networks from 1 area to another  and are not flooded to total stub area. This removes detailed topology of other areas.
+Summarization process removes lot of address prefixes and replaces them with single summary prefix.
+
+Type 4: ASBR Summary LSA
+Generated only by ABRs and describe the path to the ASBR. Type 4 LSAs are not flooded to total stub area.
+
+Link state id is the router id of described ASBR for type 4 LSAs.
+
+Type 5: External LSA
+
+Type 5 LSAs are generated only by ASBRs and they are flooded to all areas except stub and total stub areas.
+
+Link state id of type 5 LSA is external network number.
+
+Type 6: multicast ospf LSA.
+generated only by routers using multicast extensions to ospf(MOSPF).
+
+Type 7: external LSA
+Type 7 are generated only by an ASBR and sent into not-so-stub area.
+But they do not leave nssa, instead they are converted to type 5 LSA and sent out of NSSA.
+
+NSSA will not allow type 5 lsa but they will allow type 7 lsa.
+Type 7 lsa carry same information as type 5 lsa but they are not blocked within NSSA area.
+
+LSA type 1 and 2 are found in all areas and never flood outside of an area.
+Other types of LSA flooding depends on area types.
+
+LSA Type 1: sent by all routers.
+LSA Type 2: sent by DRs only
+LSA Type 3, 4: Sent by ABRs only
+LSA Type 5, 7: sent by ASBRs only
+LSA Type 6: reserved for MOSPF
+
+1) backbone area(area 0).
+2) standard area.
+3) stub area.
+4) Totally stub area
+5) Not so stubby area(NSSA).
+
+Standard area:
+
+          Area0 <-> ABR <-> AREA 10 <-> ASBR <-> non ospf network
+
+If area 0 and area 10 are connected then an ABR connects area 0 and area 10.
+If non-ospf network is connected area 0 via area 10, connection between non-ospf network area 10 are connected by ASBR.
+
+Type 3 are internal routes from area 10 to area 0 and type 5 are external routes from non-ospf network to area 0.
+
+Type 4 LSA are injected into area 0 by ABR which contains ASBR.
+
+Stub area:
+
+    R1 <-> area 0 <-> R2 <-> stub area 10 <-> R3
+
+Instead of propagating Type 5 LSAs(external routes) into the area, ABR injects type 3 LSA containing default route into stub area.
+ABR does not allow to forward type 4 LSA into stub area.
+
+It can contain type 1, 2, 3 LSAs. A default route is substituted with external routes.
+
+All routers in stub area should execute below command. Stub and non-stub routers does not form adjacencies.
+#config router# area 10 stub
+"O*IA" inter Area candidate default route.
+
+stub area contains "O" same area, "IA" inter Area and "O* IA" default inter area to reach external destination.
+
+Totally stub area:
+Stub areas reduce the size of ospf database.
+
+Type 3(except default route),4,5 LSAs are not received by totally stub area from ABR.
+
+Default route(type 3 LSA) is injected by ABR which helps routers in totally stub area to route.
+
+only ABRs should configure below:
+#config router# area 10 stub no-summary
+
+Stub and total stub area cannot contain ASBR as Type 4 and 5 are not permitted. To solve this problem NSSA(Not So Stubby Area) are used.
+
+Total stub area contains "O" same area and "O*IA" single default route for all other areas.
+
+Area 0 cannot be configured as stub or total stub area.
+Area which is a transit area between Area 0 and virtual links cannot be stub area.
+
+NSSA(Not So Stubby Area):
+NSSA act as stub area, but some more specific routes are advertised rather than default route.
+For implementing stub and totally stub area and yet containing ASBR NSSA is used.
+NSSA uses type 7 LSA which are Type 5 LSA in disguise.
+This allows ASBR to advertise external links to ABR.
+
+An NSSA can either function as stub or totally stub area.
+
+All routers in the area must be configured with:
+# config-router# area 10 nssa
+
+For eliminating type 3 LSAs and injects default route, configure below in ABR
+no so stub total stub area:
+# config-router# area 10 nssa no-summary
+
+"O N2" means ospf nssa external type 2(default).
+
+Virtual links:
+All areas in ospf must be connected to backbone area(area 0).
+If physical connection is not possible, create a virtual connection
+
+   Area10 <-> Area 0(10.10.10.10) <-> Area 1 <-> Area 2(2.2.2.2)
+Create a virtual link between Area 0 and Area 2.
+We can also use virtual links to connect to 2 parts of backbone area through non backbone area.
+
+The area through which virtual link is configured is called transit area. The transit area cannot be stub area and should have full routing information.
+
+#config - router# area <area-id> virtual-link <router-id>
+
+area-id is transit area id and router-id is the neighbor router-id
+
+The area through which a virtual link is built, a transit area, cannot be stub area of any kind.
+
+example : In above
+Area 0 Router# area 1 virtual-link 2.2.2.2
+Area 2 Router# area 1 virtual-link 10.10.10.10
+
+redistribution:
+Routers that run 2 or more routing protocols can be configured for redistribution.
+example is ospf and EIGRP. we can import routes from ospf to eigrp and vice verse.
+Since routing protocols use different metrics, we need to manually assign a metric to redistributed routes.
+
+Checking the next hop ip address we can redistribute.
+
+Below command does the classful redistribution:
+#config-router#redistribute connected
+
+#config-router#redistribute connected subnets
+
+ASBR redistributes external routes.
+
+"O E2" denotes external routes into the ospf.
+
+E1 - external route type 1. It gives metric from local router to entire network.
+E2 - external route type 2(default). It gives metric between ASBR and remote router. has default seed of 20 metric
+
+To convert from E2 to E1.
+#config-router#redistribute connect subnets metric-type 1
+This will change the metric.
+
+ASBR can contain "O IA" and "O E2" routes.
+
+N1 and N2 routes are found only in nssa networks.
+N1 and N2 are same as E1 and E2 but in nssa networks.
+N2(default) reflect only the cost from ASBR to destination.
+N1 reflect the cost from local router to destination.
+
+instead of 4 different networks configs under router area we can configure single summary route
+# config-router# area 1 range 8.0.0.0 252.0.0.0
+
+To summarize many routes that are in same router:
+#config-router#summary-address 4.0.0.0 252.0.0.0
+
+Types of networks:
+
+Point to point networks:
+Networks that joins single pair of routers. 56Kb serial line is an example for point to point networks.
+
+Broadcast networks:
+Networks that support single message of router to be broadcasted to all attached routers is called broadcast network.
+Ethernet is example of broadcast networks.
+
+In broadcast networks, there is no hard rule for router selection.
+Routers can act DR for 1 segment and BDR for other segment.
+
+
+First configure the loopback ip then configure ospf network to take RID as loopback ip.
+
+Non broadcast networks:
+networks with routers having non broadcasting capibility.
+If router wants to send message to each router, it will multicast.
+X.25 Public Data Network(PDN) is an example of non broadcast networks.
+
+here ospf runs in 2 modes:
+1) Non Broadcast Multi Access(NBMA): ospf simulates as broadcast network.
+2) Point to Multipoint: ospf treats this as point to point links.
+
+
+LABS:
+
+DR/BDR VERIFICATION:
+
+ROUTER 1 <----> ROUTER 2
+
+R1
+
+interface GigabitEthernet0/0/0
+ ip address 10.1.1.1 255.255.255.0
+ duplex auto
+ speed auto
+
+router ospf 1
+ log-adjacency-changes
+ network 10.1.1.0 0.0.0.255 area 0
+
+R2:
+
+interface GigabitEthernet0/0/0
+ ip address 10.1.1.2 255.255.255.0
+ duplex auto
+ speed auto
+
+router ospf 1
+ log-adjacency-changes
+ network 10.1.1.0 0.0.0.255 area 0
+
+neighbors:
+# show ip ospf neighbors
+
+RID, DR/BDR/, hello, dead, network type, cost:
+# show ip ospf interface
+
+
+CHANGE DR TO BDR:
+#config-intf# ip ospf priority 100
+# clear ip ospf process    , or reload the router.
+
+
+change the priority to 1 and clear ospf process.
+DR will not become BDR.
+
+When priority is changed to 0, DR will become DROTHER and BDR will become DR.
+
+CHANGE ROUTER ID:
+#config-router# router-id 3.3.3.3
+# clear ip ospf process
+
+
+NBMA CONFIGURATION:
+serial interfaces must be configured with ip address in NBMA.
+3 routers, 1(R1) hub 2(R2, R3) spokes
+
+inorder to make hub as DR:
+R2, R3
+# inter-serial# ip ospf priority 0
+
+R1:
+#router-config#neighbor 172.12.123.2
+#router-config#neighbor 172.12.123.3
+#router-config#network 172.12.123.0 0.0.0.255 area 0
+
+R2:
+#router-config#network 172.12.123.0 0.0.0.255 area 0
+
+R3:
+#router-config#network 172.12.123.0 0.0.0.255 area 0
+
+R2 and R3 will be DROTHER and R1 will be DR.
+
+
+POINT TO POINT CONFIGURATION:
+
+R1 AND R2 connected via serial interface.
+R1 and R2:
+
+#router-config#network 172.12.123.0 0.0.0.255 area 0
+
+MULTI AREA OSPF:
+
+R1 <-> R2 <-> R3
+
+R1:
+interface FastEthernet0/0
+ ip address 10.1.1.1 255.255.255.0
+
+router ospf 1
+ log-adjacency-changes
+ network 10.1.1.0 0.0.0.255 area 0
+
+R2:
+interface FastEthernet0/0
+ ip address 10.1.1.2 255.255.255.0
+!
+interface FastEthernet0/1
+ ip address 20.1.1.2 255.255.255.0
+
+router ospf 1
+ log-adjacency-changes
+ network 10.1.1.0 0.0.0.255 area 0
+ network 20.1.1.0 0.0.0.255 area 1
+
+R3:
+interface FastEthernet0/0
+ ip address 20.1.1.1 255.255.255.0
+
+router ospf 1
+ log-adjacency-changes
+ network 20.1.1.0 0.0.0.255 area 1
+
+IA: Inter Area route.
+R1#show ip route os
+     20.0.0.0/24 is subnetted, 1 subnets
+O IA    20.1.1.0 [110/2] via 10.1.1.2, 00:07:16, FastEthernet0/0
+
+Router#
+
+VIRTUAL LINKS and SUMMARIZATION:
+
+#config- router# area <area-id> virtual-link <router-id>
+
+L0 <-area0-> R1 <- area 1-> R2 <- area 2->L0
+
+R1, R2 connected via 192.168.1 network and in area 0.
+R1 has L0 as 1.1.1.1 and R2 has L0 2.2.2.2
+
+R1:
+# network 192.168.1.0 0.0.0.255 area 1
+# area 1 virtual link <R2 router id>
+
+R2:
+# network 192.168.2.0 0.0.0.255 area 1
+# area 1 virtual <R1 router id>
+
+for virtual link command, area is transit area.
+
+R2:
+#ping 1.1.1.1 source 2.2.2.2
+should wok fine.
+
+STUB AREAS:
+
+192.168.1.1 <--Area0--> R1 2.1<--Area1-->2.2 R2 3.1<-Area1->
+
+R1:
+router ospf 1
+ area 1 stub
+ network 192.168.1.0 0.0.0.255 area 0
+ network 192.168.2.0 0.0.0.255 area 1
+
+R2:
+router ospf 1
+ area 1 stub
+ network 192.168.2.0 0.0.0.255 area 1
+
+ network 192.168.3.0 0.0.0.255 area 1
+
+
+Fast way to enable ospf on all interfaces:
+#config-router#network 0.0.0.0 255.255.255.255 area 0
+
+if 192.168.12.1 255.255.255.0 is there.
+# network 192.168.12.0 0.0.0.255 area 0
+# network 192.168.0.0 0.0.255.255 area 0
+# network 192.0.0.0 0.255.255.255 area 0
+
+All the above are ok.
+
+other routers Loopback interfaces configured with /24 will show as /32 on "show ip route" in current router.
+This can be fixed with
+#config-intf-lo0#ip ospf network point-to-point
+
+Route change lab:
+Route change can be done using cost or bandwidth.
+
+Using cost: increase the cost.
+
+If there are 3 routers in a triangle.
+Router A,B, C have loopbacks as well.
+from Router C we can ping to Router A loopback.
+For changing the path of ping from Router C to Router A, It should use Router C->RouterB->RouterA.
+For this we should increase cost at Router C, A connection at Router C side.
+
+# config-intf#ip ospf cost 50
+
+To check the path use #traceroute command.
+
+Using bandwidth: reduce to bandwidth
+
+# config-intf#bandwidth 100
+#clear ip ospf process
+
+To check the path use #traceroute command.
+
+Using per neighbor cost:
+
+#config-router# neighbor 192.168.16.3 cost 10
+
+using above 3 ways we are implementing load balancing as well.
+
+Authentication lab:
+
+Clear text authentication:
+
+we can configure same text password of both sides of interface. NOT REQUIRED TO CONFIGURE ON ALL ROUTERS.
+
+if R1 <-area0->R2<-area0->R3
+Only R2, R3 interface can be configured with authentication
+On R2, R3:
+#config-intf# ip ospf authentication
+#config-intf# ip ospf authentication-key <password>
+
+Above is sufficient.
+
+On R1, R2 interface we can configure md5 authentication
+#config-intf# ip ospf authentication message-digest
+#config-intf# ip ospf message-digest-key <1-255> md5 <password>
+
+Above is sufficient
+
+
+Hello timer change:
+
+same as authentication, hello timer can also be changed on 1 interface connecting 2routers.
+
+R1,R2:
+#config-intf# ip ospf hello-interval 5
+
+
+Default route add:
+
+Out of R1,R2,R3, R1 will be used for sending traffic to internet.
+We need to configure R1 with default router
+#router-config#default-information originate always
+
+In R2 and R3 we can see "O*E2(0.0.0.0)" default route is routing table.
+
+
+Reduce ospf flooding:
+LSAs are refreshed every 30 min(doubt). This causes huge bandwidth and cpu utilization.
+
+To reduce this we can use below command on all interfaces of all routers.
+#config-intf# ip ospf flood-reduction.
+
+
+
+DR/BDR lab:
+
+  R2
+   |
+  switch <-> R1
+   |
+   R3
+
+R1, R2, R3 are connected by switch. No configuration is required in the switch.
+To become DR
+#config-intf# ip ospf priority 100
+#clear ip ospf process
+
+Another way to change DR/BDR
+#config-router# router-id 222.222.222.222
+#clear ip ospf process
+
+Autocost reference bandwidth change lab:
+
+Both Fastethernet and gigabit ethernet has same cost 1.
+To make difference so that gigabit ethernet is faster, auto cost should be changed.
+
+Execute below command on all routers:
+#config-router#auto-cost reference bandwidth 10000
+
+
+LSA Type 3 Summarization:
+
+l1                                          l4
+l2 <- area 1 -> R1 <- area 0 -> R2 <-area2->l5
+l3                                          l6
+
+lo1,2,3 are in 172 network,
+R1, R2 are in 192.168 network
+L4,5, 6 are in 10 network.
+
+lly in R1:
+#router-config#area 1 172.16.0.0 255.255.0.0<subnetmask>
+so that all the networks can be summarized to 1 route in "show ip route"
+eg: O IA  10.10.0.0 [110/2] via 192.168.1.2, 00:00:11, GigabitEthernet0/0
+
+lly in R2:
+#router-config#area 2 10.10.0.0 255.255.0.0<subnetmask>
+
+LSA TYPE 5 SUMMARIZATION:
+
+l1
+l2
+l3 <- -> R1 <-area 0-> R2
+..
+l7
+
+l0..7 are in 172.16.0.1, 1..7 networks.
+R1 and R2 are in 192.168.1 networks.
+
+R1
+#config-router#redistribute connected subnets
+
+This will advertise 172 routes to R2 via "O E2".
+
+R1 to summarize:
+#config-router#summary-address 172.16.0.0 255.255.252.0
+#config-router#summary-address 172.16.4.0 255.255.252.0
+
+This will generate 2 summary routes("O E2") on R2 instead of 8.
+
+lab 1:
+
+O routes: Intra Area(same area)
+
+R1 <-area0->R2 <-Area0-> R3
+
+R3 will about R1 via O route.
+
+O IA routes: inter Area
+
+R1 <-area1->R2 <-Area0-> R3
+
+R3 will learn about R1 via O IA route.
+
+O E2 routes: external routes
+
+l1 <-> R1 <-area0-> R2
+l2 <->
+l2 <->
+
+basically l1,l2,l3 are added using ">redistribute connected subnets" command in R1 without any area command.
+R2 will learn about l1,l2,l3 via O E2 route.
+
+If we use "network l1 area 1" then R2 will learn about l1, l2, l3 via O IA route.
+
+E1 vs E2:
+E1: it indicates cost to reach ASBR + cost to reach destination from ASBR
+E2: It indicates cost to reach destination from ASBR. E2 is default in ospf.
+
+
+Total stub, stub and nssa areas:
+
+
+lo
+l1 <-area0> R1 <-area1->R2
+l2
+l3
+
+lo is added via ">network 1.1.1.1 command" It shows up as O IA route in R2.
+
+l1,l2,l3 are added via ">redistribute connected subnets" command in R1, In R2 they show up as O E2 routes.
+
+STUB AREA: Add below command on R1 and R2.
+# area 1 stub
+
+In R2, "O*IA" default summary route(0.0.0.0) will be shown and "O IA" inter area route is shown.
+
+TOTAL STUB AREA: add below command on R1 and R2.
+# area 1 stub no-summary
+
+In R2, "O*IA" default summary route(0.0.0.0) will be shown. No inter area("O IA") route is shown.
+
+NSSA: Not so stubby area: type 7 lsa of ASBR is converted to type 5 lsa by ABR.
+
+# area 1 nssa
+In R2, "O IA" inter area route is shown, but instead of "O*IA", "O N2" is shown.
+
+TOTALLY NSSA: add below command on R1 and R2.
+# area 1 nssa no-summary
+
+
+In R2, "O *IA" is shown instead of "O IA" route and "O N2" will still be there.
+
+
+ast way to enable ospf on all interfaces:
+#config-router#network 0.0.0.0 255.255.255.255 area 0
+
+if 192.168.12.1 255.255.255.0 is there.
+# network 192.168.12.0 0.0.0.255 area 0
+# network 192.168.0.0 0.0.255.255 area 0
+# network 192.0.0.0 0.255.255.255 area 0
+
+All the above are ok.
+
+other routers Loopback interfaces configured with /24 will show as /32 on "show ip route" in current router.
+This can be fixed with
+#config-intf-lo0#ip ospf network point-to-point
+
+Route change lab:
+Route change can be done using cost or bandwidth.
+
+Using cost: increase the cost.
+
+If there are 3 routers in a triangle.
+Router A,B, C have loopbacks as well.
+from Router C we can ping to Router A loopback.
+For changing the path of ping from Router C to Router A, It should use Router C->RouterB->RouterA.
+For this we should increase cost at Router C, A connection at Router C side.
+
+# config-intf#ip ospf cost 50
+
+To check the path use #traceroute command.
+
+Using bandwidth: reduce to bandwidth
+
+# config-intf#bandwidth 100
+#clear ip ospf process
+
+To check the path use #traceroute command.
+
+Using per neighbor cost:
+
+#config-router# neighbor 192.168.16.3 cost 10
+
+using above 3 ways we are implementing load balancing as well.
+
+Authentication lab:
+
+Clear text authentication:
+
+we can configure same text password of both sides of interface. NOT REQUIRED TO CONFIGURE ON ALL ROUTERS.
+
+if R1 <-area0->R2<-area0->R3
+Only R2, R3 interface can be configured with authentication
+On R2, R3:
+#config-intf# ip ospf authentication
+#config-intf# ip ospf authentication-key <password>
+
+Above is sufficient.
+
+On R1, R2 interface we can configure md5 authentication
+#config-intf# ip ospf authentication message-digest
+#config-intf# ip ospf message-digest-key <1-255> md5 <password>
+
+Above is sufficient
+
+
+Hello timer change:
+
+same as authentication, hello timer can also be changed on 1 interface connecting 2routers.
+
+R1,R2:
+#config-intf# ip ospf hello-interval 5
+
+
+Default route add:
+
+Out of R1,R2,R3, R1 will be used for sending traffic to internet.
+We need to configure R1 with default router
+#router-config#default-information originate always
+
+In R2 and R3 we can see "O*E2(0.0.0.0)" default route is routing table.
+
+
+Reduce ospf flooding:
+LSAs are refreshed every 30 min(doubt). This causes huge bandwidth and cpu utilization.
+
+To reduce this we can use below command on all interfaces of all routers.
+#config-intf# ip ospf flood-reduction.
+
+
+
+DR/BDR lab:
+
+  R2
+   |
+  switch <-> R1
+   |
+   R3
+
+R1, R2, R3 are connected by switch. No configuration is required in the switch.
+To become DR
+#config-intf# ip ospf priority 100
+#clear ip ospf process
+
+Another way to change DR/BDR
+#config-router# router-id 222.222.222.222
+#clear ip ospf process
+
+Autocost reference bandwidth change lab:
+
+Both Fastethernet and gigabit ethernet has same cost 1.
+To make difference so that gigabit ethernet is faster, auto cost should be changed.
+
+Execute below command on all routers:
+#config-router#auto-cost reference bandwidth 10000
+
+
+LSA Type 3 Summarization:
+
+l1                                          l4
+l2 <- area 1 -> R1 <- area 0 -> R2 <-area2->l5
+l3                                          l6
+
+lo1,2,3 are in 172 network,
+R1, R2 are in 192.168 network
+L4,5, 6 are in 10 network.
+
+lly in R1:
+#router-config#area 1 172.16.0.0 255.255.0.0<subnetmask>
+so that all the networks can be summarized to 1 route in "show ip route"
+eg: O IA  10.10.0.0 [110/2] via 192.168.1.2, 00:00:11, GigabitEthernet0/0
+
+lly in R2:
+#router-config#area 2 10.10.0.0 255.255.0.0<subnetmask>
+
+LSA TYPE 5 SUMMARIZATION:
+
+l1
+l2
+l3 <- -> R1 <-area 0-> R2
+..
+l7
+
+l0..7 are in 172.16.0.1, 1..7 networks.
+R1 and R2 are in 192.168.1 networks.
+
+R1
+#config-router#redistribute connected subnets
+
+This will advertise 172 routes to R2 via "O E2".
+
+R1 to summarize:
+#config-router#summary-address 172.16.0.0 255.255.252.0
+#config-router#summary-address 172.16.4.0 255.255.252.0
+
+This will generate 2 summary routes("O E2") on R2 instead of 8.
+
+lab 1:
+
+O routes: Intra Area(same area)
+
+R1 <-area0->R2 <-Area0-> R3
+
+R3 will about R1 via O route.
+
+O IA routes: inter Area
+
+R1 <-area1->R2 <-Area0-> R3
+
+R3 will learn about R1 via O IA route.
+
+O E2 routes: external routes
+
+l1 <-> R1 <-area0-> R2
+l2 <->
+l2 <->
+
+basically l1,l2,l3 are added using ">redistribute connected subnets" command in R1 without any area command.
+R2 will learn about l1,l2,l3 via O E2 route.
+
+If we use "network l1 area 1" then R2 will learn about l1, l2, l3 via O IA route.
+
+E1 vs E2:
+E1: it indicates cost to reach ASBR + cost to reach destination from ASBR
+E2: It indicates cost to reach destination from ASBR. E2 is default in ospf.
+
+
+Total stub, stub and nssa areas:
+
+
+lo
+l1 <-area0> R1 <-area1->R2
+l2
+l3
+
+lo is added via ">network 1.1.1.1 command" It shows up as O IA route in R2.
+
+l1,l2,l3 are added via ">redistribute connected subnets" command in R1, In R2 they show up as O E2 routes.
+
+STUB AREA: Add below command on R1 and R2.
+# area 1 stub
+
+In R2, "O*IA" default summary route(0.0.0.0) will be shown and "O IA" inter area route is shown.
+
+TOTAL STUB AREA: add below command on R1 and R2.
+# area 1 stub no-summary
+
+In R2, "O*IA" default summary route(0.0.0.0) will be shown. No inter area("O IA") route is shown.
+
+NSSA: Not so stubby area: type 7 lsa of ASBR is converted to type 5 lsa by ABR.
+
+# area 1 nssa
+In R2, "O IA" inter area route is shown, but instead of "O*IA", "O N2" is shown.
+
+TOTALLY NSSA: add below command on R1 and R2.
+# area 1 nssa no-summary
+
+In R2, "O *IA" is shown instead of "O IA" route and "O N2" will still be there.
+
+
+Administrative Distance(AD):
+If there 2 or more protocols to reach the same destination, Then using AD we can choose the protocol to reach destination.
+It range from 1-255.
+Lower the better.
+
+We can change the AD.
+
+ospf AD change:
+
+#config-router# distance ospf external 100 inter-area 100 intra-area 100
+
+bgp AD change:
+
+#config-router# distance bgp <internal-distance> <external-distance> <local-distance>
+----------------------------------------------------------------------------------------------------------------------
+
+Ospf:
+
+AD : 110
+Protocol number: 89
+multicast: 224.0.0.5 | FF02::5
+                224.0.0.6 | FF02::6
+
+client --224.0.0.6--> DR-BDR --224.0.0.5--> other clients
+router with highest priority becomes DR and next is BDR.
+If same, router with highest router-id.
+default priority 1.
+DROTHER - priority value = 0
+
+When new LSA arrives, ospf checks DB.
+if not present in db, ospf creates entry in db.
+if there, it checks sequence number
+ -if seq num is same, no action is taken
+ -if seq num is less it ignores.
+ -if seq num is more, if updates its db.
+
+- all intf #router ospf 1#network 0.0.0.0 0.0.0.0 area 1
+-dijkstra's algorithm.
+-hello=10, dead=40, retransmit=5.
+In NBMA(Non Broadcast Multiple Access), hello=30, dead=120
+
+Areas: routing table size is reduced, grouping and less spf algorithm.
+ABR(Area Boarder Router): Router intf in 2 areas.
+ASBR(Autonomous System Boarder Router): Router connects ospf with other routing domain(rip, ISIS, eigrp).
+Both ABR and ASBR summarizes routes.
+
+Cost= reference bandwidth/ interface bandwidth
+if we can change Ref bandwidth then it is auto-cost.
+
+Virtual links: if any area is not directly connected to area 0, we use virtual links to connect to that area.
+# area <area-id> virtual-link <RID>
+
+LSA TYPES:
+
+Type 1: Router LSA: Generated by each router in the area. Its router-id is the link-state id.
+Type 2: Network LSA: Generated by DR. Its router-id is the link-state id.
+Type 3: Summary LSA: Generated by ABR and is flooded to other areas. Its router-id is the link-state id.
+Type 4: Summary ASBR LSA: All routers in the area needs to know where is ASBR. For this reason, ABR will generate summary ABSR LSA with the router-id of ABSR as link state id.
+Type 5: External LSA: Generated by ASBR.
+Type 6: Multicast LSA: not supported.
+Type 7: External LSA: Also known as NSSA lsa. Generated by ASBR. Not so stubby area does not allow type 5 lsa. To overcome this issue, Type 7 lsa are generated.
+
+
+STANDARD, STUB AREA, TOTALLY STUBBY AREA, NSSA: reduces the memory cpu usage.
+
+standard area: Also includes backbone area. Type 1, 2, 3, 4,5.
+
+stub area : ABR stops the external routes and replaces it with default route. type 3 which includes default route are sent to stub area.
+command: area 1 stub
+
+Totally Stubby area: stub area + stops type 3 lsa. ABR injects default route. Only default route is sent to Total stub area. NO type 3,4,5 are sent.
+command: area 1 stub no-summary
+
+NSSA: stub area + ASBR. Type 3 are sent by ABR.  Rule of stub area is type 5 lsa not sent. Hence Type 7 lsa is sent which is then converted to Type 5 ABR.
+command: area 1 nssa
+
+Totally NSSA: If you want to block type 3 summary lsa and type 5 external lsa but still need ASBR within the totally stub area then we can use totally NSSA.
+
+default route: 0.0.0.0/0(O*IA)

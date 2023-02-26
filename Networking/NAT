@@ -1,0 +1,155 @@
+
+NAT: Network Address Translation
+
+Inside local: ip address assigned to hosts inside network. They are not advertised outside.
+Inside Global: Public ip of your router facing the internet.
+Outside Global: public ip of the website or server.
+Outside local: private ip address of the device. Generally its the server with private ip.
+
+
+host <-> R1 <- internet cloud -> R2 <-> host
+ IL        IG                   OG     OL
+
+IL = Inside local
+IG = Inside global
+OG = outside global
+OL = Outside local
+
+Static Network Address Translation(Static NAT) lab:
+
+Map each private ip to public ip.
+
+laptop 1
+laptop 2(192.168.1) <-> switch <->(192.168.1.4) Router 1 (12.12.12.1) <-> (12.12.12.2)Router 2
+laptop 3
+
+Laptop 1 : ip : 192.168.1.1
+           gateway : 192.168.1.4
+
+Similarly for other laptops.
+
+Router 1:
+#config# interface gigabitethernet0/0
+#config-intf# ip address 192.168.1.4
+#config-intf# ip nat inside
+#config# interface gigabitethernet0/1
+#config-intf# ip address 12.12.12.1
+#config-intf# ip nat outside
+#config# ip nat inside source static 192.168.1.1 12.12.12.11  # this ip will be public ip.
+#config# ip nat inside source static 192.168.1.2 12.12.12.12
+#config# ip nat inside source static 192.168.1.3 12.12.12.14
+
+R1#show ip nat  translations
+
+#ping from Laptop1, 2, 3 to 12.12.12.2 should work.
+
+Dynamic Network Address Translation(Dynamic NAT) lab:
+
+It uses a pool of available public ip addresses.
+We need to configure acl to allow private ip addresses to map to public ip addresses.
+
+#config# interface gigabitethernet0/0
+#config-intf# ip address 192.168.1.4
+#config-intf# ip nat inside
+#config# interface gigabitethernet0/1
+#config-intf# ip address 12.12.12.1
+#config-intf# ip nat outside
+
+#config# access-list 1 permit 192.168.1.0 0.0.0.255
+#config# ip nat pool mypool 12.12.12.1 12.12.12.254 netmask 255.255.255.0
+#config# ip nat inside source list 1 pool mypool
+
+Port Address Translation(PAT):
+PAT to be mapped to a single or few global addresses.
+PAT is called NAT Overload. Configuration will have keyword "overload".
+
+Steps:
+1) Specify inside/outside interfaces.
+2) Specify an acl with inside local addresses.
+3) Specify the interface instead of address pool with Dynamic NAT.
+
+syntax: private ip: port number -> public ip: port number
+             10.10.10.1:4441 -> 3.2.1.3:4441
+
+
+#config# interface gigabitethernet0/0
+#config-intf# ip address 192.168.1.4
+#config-intf# ip nat inside
+#config# interface gigabitethernet0/1
+#config-intf# ip address 12.12.12.1
+#config-intf# ip nat outside
+
+#config# access-list 1 permit 192.168.1.0 0.0.0.255
+#config# ip nat inside source list 1 interface GigabitEthernet0/1 overload
+
+NAT64:
+
+NAT64 enables translation between ipv6 and ipv4 addresses. It can be done with either stateless or stateful NAT64.
+
+If a client is Ipv6. Client will ask DNS64 to give the server ipv6 server.
+DNS64 will ask the root server for ipv6 address.
+If root server does not send an ipv6(AAAA record) address then root server sends ipv4(A record) address to DNS64. DNS64 will send prefix64 address.
+Then client will send prefix64 address to NAT64 which will convert ipv6 to ipv4 address.
+
+6to4 address can be 64:FF9B::112.1.2.3
+prefix64 address: 64:FF9B::/96
+
+NAT64 can be achieved using stateless or stateful.
+
+Stateless NAT64:
+It algorithmically maps ipv6 addresses to ipv4 and ipv4 to ipv6.
+Supports both ipv4 and ipv6 initiated connections.
+performs 1-to-1 address mapping.
+Does not maintain states or bindings.
+Not recommended.
+Ipv4 address is embedded in Ipv6 address.
+Does not conserver ipv4 addresses.
+ALG is not supported.
+Requires ipv6 systems to use RFC6052 ipv4 translatable addresses.
+All protocols are supported.
+
+Statefull NAT64:
+It translates ipv6 addresses to ipv4 and ipv4 to ipv6..
+Supports both ipv4 and ipv6 initiated connections.
+performs 1-to-many address mapping.
+maintains a table of bindings.
+scalable.
+allows dynamic bindings.
+unable to route VRF and multicast traffic.
+Supports FTP64 for ALG.
+Supports PAT and overload.
+Its allows ipv6 systems to use any kind of ipv6 addresses.
+ICMP, TCP and UDP protocols are supported.
+lack of end to end address transparency.
+DNS64 is the Prerequisite.
+Conserves ipv4 addresses.
+bindings are created on every unique translation.
+No constraint is put on number of endpoints due to 1:N translation.
+VFR technology is supported in stateful NAT64.
+Stateful NAT64 maintains bindings or session state while performing translation.
+
+NPTv6: Network Prefix Translation.
+Translating 1 ipv6 to another ipv6.
+It does not do overloading.
+NPTv6 cannot work in NAT64 is on same interface.
+It does not support VRF and multicast traffic.
+It changes only the ip header and does not change top level headers.
+Payload address or port translation is not supported.
+Syslog is not supported.
+It is checksum neutral.
+
+
+Q&A:
+> "clear ip nat traffic *" to clear ip nat translations.
+> "no ip nat pool" command throws "Dynamic pool in use", then clear ip nat translations then replace NAT configuration quickly before new NAT entries are populated into translation table due to active NAT traffic.
+> "ip nat inside source static tcp 1.1.1.1 80 12.12.12.12 8080". This allows the external clients to connect to web server hosted 1.1.1.1
+> "ip nat inside source list 1 int s0/0 overload" provides "many-to-one" and provide single ip upon exiting.
+> "ip nat inside source static tcp 172.16.10.8 8080 172.16.10.8 80". Any packet that is received with source 172.16.10.8:8080 is translated to 172.16.10.8:80.
+> NAT command to disable dynamic ARP learning on interface "ip nat allow-static-host"
+> NAT64 is successor for NAT-PT.
+> NAT64 translates from ipv6 to ipv4 when it receives an incoming ipv6 packet that matches stateful NAT64 prefix.
+> "ipv6 nat" enables NAT-PT on ipv6 interface.
+> NAT and DNS are independent when implementing NAT64 and NAT-PT.
+> Dynamic NAT maps inside addresses to pool of global addresses.
+> Network Address Translator - Protocol translator(NAT-PT) is required on router of an ipv4 network and ipv6 network to allow communication between ipv6-only and ipv4-only nodes.
+> "ip nat allow-static-host" to disable dynamic ARP learning.

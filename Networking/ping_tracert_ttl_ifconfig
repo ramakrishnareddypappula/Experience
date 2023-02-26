@@ -1,0 +1,71 @@
+
+PING: packet internet groper
+Its tests the reachability of the host on a IP network.
+ping measures the round trip time from origin to destination that are echoed back to the source.
+ping operates by sending ICMP(Internet Control Message Protocol) echo requests to the target and waiting for ICMP echo reply.
+For IPv6, ping6 is used.
+> ping -c 5 www.facebook.com
+
+Ping tests the layer 3 connectivity. TTL value for ping is 255 and reduces by 1 every time when reaches router.
+
+This command replies with packet transmitted, received, packet loss, round trip min, max, avg, stddev values.
+
+ping to host name and ip address:
+> ping www.google.com # This is a hostname(server name), So first request goes to dns server of this server to get the ip address of www.google.com, then pinged to ip address.
+This is slower.
+> ping 8.8.8.8 This is a google public DNS server. domain name is not required to be resolved. This is faster.
+
+ping functionality:
+
+host1 .1<- 1.1.1->.2 RTA .1<-2.2.2 -> .2host2
+mac 1               mac2 mac3                mac4
+
+If host1 want to ping host2
+step1: host1 has source ip as its ip, source mac as mac1. destination ip as 2.2.2.2 and dont know about destination mac.
+step2: host1 broadcasts ip with FF mac address. RTA will unicast with mac2 as mac address. ARP in RTA resolves destination mac based on destination ip.
+Step3: host1 sends  icmp echo request.
+Step4:Now RTA will replace destination mac from mac2 to mac4 and forwards the request.
+
+Similar happens at host2 and send the icmp echo reply to host1.
+
+
+ICMP: Internet Control Message Protocol. Its an error reporting protocol.
+When there is an problem in the network, network devices like routers will generate and send this message to senders to inform about it.
+
+
+
+TRACEROUTE:
+> traceroute www.facebook.com
+
+For ipv6 packets, command: traceroute6 www.facebook.com
+In windows, tracert sends ICMP packets. But traceroute send UDP packets.
+The path that packets take from source to destination.
+traceroute uses TTL(Time To Live) field in ip header. TTL prevents routing loops.
+
+Functionality of TTL:
+Generally, TTL value at source by default is 64. At each hop, when it passes the router, its value is decremented by 1.
+When its values reaches 0, the router drops the packet and sends the message to source with its ip address.
+
+Traceroute uses this functionality of TTL. It first sends ICMP packet is sent with TTL as 1.
+Then router drops it and sends the ICMP response to source with its ip address.
+Then second packet is sent with TTL as 2.The router forwards it to another router by reducing value to 1.
+Other router reduces to 0 and drops the packet and ICMP Time exceeded response with its ip address is sent back for UDP packets.
+same procedure happens until it reaches the server. For server ICMP destination unreachable message is sent back for UDP packets.
+
+1 Problem: Sometimes some routers does not send ICMP response with ip address. Also, if next routers send, this router will not forward ICMP responses. Then traceroute is the problem.
+Also some firewalls filter ICMP messaes.
+
+traceroute is used to test the delay and route between 2 end points.
+
+
+IFCONFIG: It explains about the network interfaces on a machine.
+It shows the ipv4 and ipv6 ip addresses that are present on an interface. examples are en0, en1 on mac machine.
+loopback ip address(127.0.0.1)(localhost) is always present even when there is no internet.
+It is mainly used for debugging purpose.
+Ifconfig explains: 1) Type of interface(Ethernet), 2) mac address, 3) ip address 4) broadcast address
+5) subnet mask 6) MTU(Maximum Transmission Unit) is the size of packet received by ethernet card. By default it is 1500.
+> ifconfig eth0 192.168.1.5 netmask 255.255.255.0 up
+> route add default gw 192.168.1.1 eth0 (default gateway command.)
+> route -n (To display the routes on different networks.)
+
+> ifconfig eth0 inet6 add 2001::1/64

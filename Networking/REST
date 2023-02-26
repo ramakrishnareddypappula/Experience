@@ -1,0 +1,701 @@
+SOA(service oriented architecture):
+Its a design where 1 application component provides services to other components
+via a protocol.
+
+what is web service?
+A piece of software that makes itself available over the internet.
+Eg: when we search for flights in www.google.com, it gets all the information
+from other sites and displays in it site. www.google.com and other sites can
+interact with each other using protocol.
+
+
+REST State less: means all client requests should contain complete information(cookies, headers, payload etc) otherwise server will not be able to identify the client.
+
+
+API GATEWAY: Its an API management tool that sits between client and collection of backend services(databases, nginx, etc). An API gateway acts as a reverse proxy to accept all API calls. The major benefit of using API gateway is it allows developers to encapsulate the internal structure of application in multiple ways depending upon use case.
+
+using web service, a java app can interact with .net app. It is platform
+independent and technology independent.
+
+Security threats with web services are 1) confidentiality, 2)Authentication and
+3) Network security.
+
+REST: REpresentational State Transfer.
+When web service use http methods to implement the concept of REST architecture,
+the it is called Restful web services. It is language independent.
+
+REST methods are case sensitive. Its not a standard. It uses various standards
+like http, url, html and text/xml, image/gif, image/jpeg etc MIME types.
+f
+MIME: MIME type is used to identify the type of data. It is similar to file extensions in windows OS. If the MIME type is text/html then client identifies it as HTML content or if application/pdf, then client identifies it as pdf doc and need to open with installed pdf plugins. MIME type consists of type/subtype.
+
+
+
+               SOAP                                                                       REST
+1. SOAP is a protocol.                                            1. REST is architectural style.
+2. Simple Object Access Protocol.                         2. Representational State Transfer.
+3. SOAP cant use REST as its a protocol.             3. REST can use SOAP web service
+                                                                                    because its a protocol and can use                                                                                           protocol like SOAP or HTTP.
+4. SOAP uses service interface to expose              4. REST uses URI to expose buss logic.
+    business logic.
+5. SOAP defines standards to be strictly followed.  5. REST does not define standards like                                                                                        SOAP.
+6. SOAP requires more bandwidth and resource    6. REST requires less bandwidth n resrcs
+    than REST.
+7. SOAP defines its own security.                           7. REST inherits security measures from                                                                                       underlying transport layer.
+8. SOAP permits xml data only.                               8. REST permits XML, HTML, JSON,                                                                                            plain text.
+9. SOAP is less preferred than REST.                     9. REST is more preferred.
+10. SOAP reads cannot be cached.                        10. REST reads can be cached.
+11. SOAP is by default stateful.                               11. REST, similar to HTTP is stateless,       12. It is slower                                                             but to make it stateful, we use                                                                                                   cookies.
+                                                                                  12. It is faster.
+13. wsdl(web services definition language)              13. wadl(web app description language.)
+
+xml and html differences:
+(xml)extensible markup language
+(html)hyper text markup language
+they are not compiled and not executed.
+xml is used for storing and transporting the data
+html is used for displaying the data.
+xml does not use predefined tags: we can define our own tags.
+every starting tag has an ending tag.
+<p>, <h1>, <table> html has predefind tags.
+
+Difference between xml and Json ?
+     xml                                                        Json
+1) xml is a markup language.                        1. JSON is way        of representing objects.
+2)For hirarchical objects representation, its not    2.for hirarchical objects representation, JSON
+good.                                                   good.
+                                                       {"relatives": ["granpa", "grandma", "lisa"]}
+
+
+<relatives>
+  <relative>grandpa</relative>
+  <relative>grandma</relative>
+  <relative>lisa</relative>
+
+
+</relatives>
+3. In most languages, It is called with variable.  3. In most languages, it is replica of datatype.
+                                                          like dictionary in python.
+
+In future, there can be enhancements like get + delete operation is supported
+where in you know final value before the delete of a resource can be known.
+
+REST Authentication:
+Authentication is verifying the connection who you are and authorization is asking if you have access to certain resource.
+
+
+Basic Authentication:
+simple authentication. HTTP header is encoded with 'username: password' base64.
+Even though credentials are encoded, they are not encrypted.
+very easy to retrieve username and password.
+should be sent over SSL/TLS and should not be sent over plain HTTP.
+
+HMAC authentication: Hash based message authentication.
+Basic authentication requests password to be sent every time.
+Instead of password, hashed version of password is sent.
+Actual password is known by both server and client.
+Even if the hacker is listening, POSTing the data using the authentication
+information would change the digest.
+
+authorization_string = 'basic ' + basic64.b64encode(username, password)
+request = urllib2.Requst(url)
+request.add_header('Authorization', authorization_string)
+def send_request(request, proxy): # proxy is not present.
+  return urllib2.urlopen(request) # this will return file-like object.
+response = send_request(request, proxy)
+
+Apart from these, oauth 1.0 and oauth 2.0 authentication schemas are present.
+
+OAUTH: Open standard for authorization. It allows internet users to login to
+third party sites using their google, facebook accounts without exposing
+their password. Oauth provides secure delegated access to server resources.
+
+Authentication is required before accessing the resources.
+
+Request Body: if we want to create or update/delete something,
+then we can use body using JSON or XML and send it as part of request.
+
+Resources: On the server side, resource is identified by logical URIs.
+user-agent : client that sends the requests, like browsers etc.
+origin server : server on which resource resides or it is created.
+
+upstream and downstream define the flow of messages. All messages flow from
+upstream to down stream.
+inbound: traveling towards server
+outbound: traveling towards user-agent.
+
+Content-type: application/json --> specifies the format of the request body.
+Accept: application/json --> specifies the format of the response body.
+
+REST json format = {"username": "abc23", "password": "123qwe"}
+response:  {"login': "success"}
+{"books": [{"name":"abc', "quantity":"8'}, {"name":"mybook", "quantity":"9"}]}
+
+json.dumps: takes dict object and converts to string.
+eg: a = {1:2}
+json.dumps(a)
+'{1:2}'
+
+json.loads: takes a string representing the json object and converts to dict object.
+
+json.load and dump read/write from/to file instead of string.
+eg: with open('file.txt') as fh:
+        a= json.load(fh)
+
+1) HTTPconnection(ip)
+2) send accesscontrol request using get operation with content-type: application/json as headers and with no body.
+3) response will contain sessionid, securetoken
+4) cookie uses sessionid and password uses hashlib(securetoken).hexdigest
+5) create request payload with password and headers with cookie + accept
+6) Post this request to create a session.
+7) After successful creation we will send different api requests.
+8) validate response.read, response.status, response.reason
+
+
+Different applications:
+
+logs: /all
+
+macfilterlist: /blockeddevices, /whitelisteddevices
+dnssettings: /manualdnsaddress1, /manualdnsaddress2, /DNSenabled
+deviceinfo: modelnumber, manufacturername, IMEI, hwversion, swversion, PRIversion,
+macaddress
+datausage, datausagelimitUnit(KB, MB), Datausagelimit(10, 20),
+datausagelanstartdate
+batterystatusinformation:
+simlock:
+portforwardingsettings: /enabled
+portfilteringsettings: /enabled
+wifisettings:
+
+wifi:
+wifi channel bands: 2.4 Ghz and 5 Ghz.
+wifi channels in 2.4Ghz band: 1 to 11
+wifi channels in 5 Ghz band: 36, 40, 44, 48.
+wifi modes: WPA2PSK, WPAPSK, WEP, WPA/WPA2
+support protocols: 802.11a/b/g/n None(explore this)
+
+routersettings: /dhcprangestart, /dhcprangeend, /dhcpenabled, /dhcpleasetime,
+/ipv6enabled, /routeripv4address, /routersubnetmask
+ConnectedDevices-> ApplianceType(laptop), ipaddress, ipv6address, macaddress.
+
+request = method + URI + body + headers
+response = status line + protocol version + success or error code
+URI = URL + URN  = 255 bytes
+HTTP headers : include general header, request header, response header and
+entity header.
+
+URI(Uniform Resource Identifier): Identifies the resource( text document, image)
+URN(Uniform Resource Name): Identifies the name within given space. Subset of URI.
+URL(Uniform Resource Locator): Identifies the network location. Subset of URI.
+URL + URN = URI
+Each request should contain enough context to process the message.
+Delete: Delete the record/resource.
+
+CRUD operations: Create, Retrieve, Update and Delete. These operations can be
+performed on any web application.
+
+We can create the resource using POST request. for example, /messages/21
+resource can be created using POST. Every time you do POST request new resource
+will be created like /messages/22 next time.
+
+
+GET:
+response: HEAD(status + header info) + body content.
+GET is read-only operation. Repeatedly doing REST operation using PUT, GET and
+DELETE operations will not harm, same operation will be performed.
+Whereas with POST. new resource will be created every time. Get response is cacheable.
+
+HEAD:
+response : headers without any body.
+request is similar to GET request and response is without the body.
+Identical to GET except the server must not return message-body in response.
+This response may be cacheable. It is generally used to check whether the
+resource is present or not.
+
+PUT: not cacheable. Used to create/update the record.
+
+POST: used to create the record.
+
+DELETE: Used to delete the record.
+
+TRACE: Echos back the received request so that the client can see what changes
+have been made by received request.This is used for debugging purpose during development.
+
+OPTIONS: Returns the methods supported by the server for a particular URL.
+If the * is sent in the request, it is intended for the server rather than a
+particular resource.
+
+CONNECT: Sends HTTP requests over a secure SSL tunnel.
+
+PATCH METHOD: patch is used for updating partial resources. For example when you
+need to update only 1 field of a resource, instead of PUT we can use PATCH which
+is less cumbursome and utilizes less bandwidth.
+
+warning: patch is not idempotent.
+
+PURGE(clear) method: This is unoffical method. This is not present in the RFC. When ever the server receives PURGE method request, the resource is removed from the cache.
+
+PROPFIND: Use to retrieve properties, stored as xml in the resource.
+
+GET: Get operations can be performed on a resource or a collection(collection is
+a group of resources.)
+HEAD: head operation can be perforned on a resource or a collection.
+POST: POST operation creates a resource in a collection.
+PUT: updates a resource.
+PATCH: updates a resource.
+DELETE: deletes a resource.
+
+PUT, POST, PATCH, DELETE operations require both type of headers. GET operation
+only requires accept header.
+Failing to provide this header results in 400 bad request header.
+
+using the OPTIONS "Allow" header we can know which methods are supported. Comma seperated
+methods are retrieved.
+
+Asynchronous operations:
+When response is being generated for large requests, 202 accepted response code
+is sent back. It is only applicable for PUT, POST, PATCH and DELETE. The response
+can contain like:
+ACCEPTED: 202
+progress: 50%
+after the request is completely processed, 201 created is sent back.
+If we want the server not to perform asynchronous, then a expect header called
+"Expect: 200-ok/201-created/204-no-content" is sent. If the server is not willing
+to accept this, then it will send "417 Expectation failed" response.
+If we want server to perform asynchrounous operations, then in Expect header send
+"Expect: 202-accepted" header.
+
+Ranges/pagination:
+If the response is huge, use pagination to retrieve the response.
+In the collections of resources, if we want only some resources to be shown, lets say from 100-199
+then this can be done with pagination.
+Range: resources = 100-199
+The server in the OPTIONS response header should display this.
+Accept-Ranges: resources.
+
+What are cacheable methods ? RFC
+methods are called cacheable if and only if responses to them are allowed to be stored for future use.
+Most of the safe methods are cacheable like GET, HEAD and POST, Although in most implementations it is GET and HEAD.
+
+what are safe methods? RFC
+methods which are read-only, which does not change the state of server, cause any harm or any loss.
+GET, HEAD, OPTIONS, TRACE are safe methods.
+
+what are UNSAFE methods?
+Modify the resource. They are not cached. PUT, POST, DELETE and PATCH.
+
+what are Idempotent methods ? RFC
+Request method has same effect when single request or multiple identical requests are sent.
+GET, PUT, HEAD, OPTIONS, DELETE and TRACE methods are idempotent.
+
+Non Idempotent methods : POST and PATCH.
+
+Are REST and HTTP same ?
+Http is protocol for transfer of files. It links pages on web.
+without http, we can use snmp, smtp and other protocols and our API can still be restful.
+Apart from REST, SOAP can also be considered for http.
+Apart from HTTP, url, headers and body are also used by REST.
+
+Difference between PUT and PATCH ?
+If we need to modify full resource, then we can go for PUT. With PATCH,
+we can give only those attributes which we want to update in a resource.
+
+Difference between PUT and POST ?
+Both are used for creating the resources.
+If you do not know where to store the resource and let the server decide the actual URL,
+then we can use POST.
+If you want to update the resource in a particular path, then we go for PUT.
+Both PUT and POST can be used to create and update the resources. In post, if we know the path we can do update.
+
+What is HATEOAS ?
+It means hypertext should be used to find a way for your API.
+
+sample http REST testing site : http://jsonplaceholder.typicode.com/posts/1
+import httplib
+conn = httplib.HTTPConnection("jsonplaceholder.typicode.com:80")
+conn.request("GET", "/posts/1", "")
+res = conn.getresponse()
+print res.status, res.reason
+200 OK
+print res.read()
+conn.close()
+
+con = httplib.HTTPConnection("jsonplaceholder.typicode.com:80")
+con.request("HEAD", "/posts/1", "")
+response = con.getresponse()
+print response.getheaders(), response.status, response.reason
+headers = {'content-type':'application/json'}
+param = "{\"title\":\"ram\", \"body\":\"ram\", \"userId\":1, \"id\":102}"
+conn = httplib.HTTPConnection("jsonplaceholder.typicode.com:80")
+conn.request("POST", "/posts/", param, headers)
+r = conn.getresponse()
+print r.read(), r.status, r.reason
+
+Using urllib, urllib2.
+import urllib2, urllib
+url = 'http://www.google.com/#q=my_search'
+headers = {'User-Agent' : 'Mozilla 5.10'}
+request = urllib2.Request(url, None, headers)
+response = urllib2.urlopen(request)
+page = response.read()
+
+print response.getcode() # 200
+print response.msg  # OK
+so that next time when the request from the same user, server can know the status.
+
+Server only knows about cookie, Client does not understand about it. It just stores.
+Proxy Server : Web Caching is done by these. All requests are sent to proxy server which will respond.
+It will ask origin server only when the content is not present. Fast and low traffic.
+If only the content is modified in the origin server then proxy server will ask for content,
+otherwise it will send from here.
+
+sample request
+send: 'HEAD / HTTP/1.1\r\nHost: 192.168.1.1\r\nAccept-Encoding: identity\r\n\r\n'
+reply: 'HTTP/1.1 403 Forbidden\r\n'
+header: Content-Length: 3212
+header: X-UA-Compatible: IE=edge, chrome=1  ---> This meta tag allows web authors to choose on which version of IE the content should be displayed., IE=edge, 10, 9 etc.
+header: Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+header: Expires: Mon, 26 Jul 1997 05:00:00 GMT
+header: Pragma: no-cache
+header: X-Frame-Options: deny
+header: Connection: close
+header: Content-Type: text/html
+header: Set-Cookie: mifisess=bf3b5f2506fca03acc0f254dbb905fef3c3d3c7e; HttpOnly; Path=/; Version=1
+header: Date: Thu, 28 May 2015 10:28:27 GMT
+header: Server: MiFi
+conn.request("HEAD", "/", "")
+conn.request("GET", "/rest/1.0/USBSerialSettings","" , headers)
+conn.request("PUT", "/rest/1.0/USBSerialSettings","{\"USBSerialEnabled\":false}" , headers)
+conn.request("OPTIONS", "*","" , headers)
+
+conn.request("GET", "/rest/1.0/ManualDNSSettings", "", headers) ----> will give {"ManualDNSAddress1":"","ManualDNSAddress2":"","ManualDNSEnabled":false}
+Then below put operations are all valid.
+conn.request("PUT", "/rest/1.0/ManualDNSSettings", "{\"ManualDNSAddress1\":\"\",\"ManualDNSAddress2\":\"\",\"ManualDNSEnabled\":true}", headers)
+conn.request("PUT", "/rest/1.0/ManualDNSSettings", "{\"ManualDNSAddress1\":\"1.1.1.1\",\"ManualDNSAddress2\":\"2.2.2.2\",\"ManualDNSEnabled\":false}", headers)
+conn.request("PUT", "/rest/1.0/ManualDNSSettings", "{\"ManualDNSAddress1\":\"\",\"ManualDNSAddress2\":\"\",\"ManualDNSEnabled\":false}", headers)
+OPTIONS METHOD: Methods supported by server are shown. * can be used.
+Request:
+conn.request("OPTIONS", "*", "", headers)
+response = conn.getresponse()
+print response.status, response.reason, response.read()
+Response:
+reply: 'HTTP/1.1 200 OK\r\n'
+header: Allow: OPTIONS, GET, HEAD, POST
+header: Content-Length: 0
+header: Date: Fri, 29 May 2015 04:01:44 GMT
+header: Server: MiFi
+200 OK
+
+sample:
+import httplib
+con = httplib.HTTPConnection('192.168.1.1')
+conn.request('METHOD', 'RESOURCE END POINT', 'REQUEST_BODY', 'HEADERS')
+response = conn.getresponse()
+response.read(),
+response.status = 200
+response.reason = 'OK'
+
+HTTP protocol:
+HTTP uses 1.1 version.
+Web Browser is generally the client. Also called user-agent. mobile apps, voice browsers are also clients.
+example Mozilla/4.0 is user-agent.
+
+Computer hosting a website is server.
+web cache servers are present to improve the response time.
+Http is an application layer protocol and uses TCP as transport layer protocol.
+Some time it also uses UDP.
+http 1.0 makes a new connection for every connection request.
+http 1.1 reuses the connection for multiple requests, hence latency is reduced.
+First when Http was developed, only GET operation with html format was used.
+Http session is made with port number 80. response with status is sent.
+
+product tokens: They are used to identify the software name and version between the communicating applications.
+Etag: It is used as web cache validation which allows client to make conditional requests.
+This allows caches to be more efficient and saves bandwidth.
+For example: for a request, the server will respond along with etag value.
+Next time when the browser is asking for same resource, it will send the etag value with it.
+If the etag value is not modified in the server side. Then it not send the content,
+instead it sends no content and browser loads from the cache.
+
+Message Headers:
+This consists of field name followed by ':' followed by field value. Field name is case insensitive.
+header field names are:
+example:
+accept: text/plain
+accept-datetime: 12, thu, jun, 2015
+Authorization: Basic
+Content-type: Application/json
+user-agent: Mozilla/5.0
+keep-alive: 300
+cache-control: no-cache,
+no-cache: This is used to check
+no-store: every time a request is sent, full response is downloaded each and every time. no caching.
+public: Response must be cached even if authentication is required.
+private: End browsers can cache the data, but intermediates like CDN cannot cache the data.
+max-age: Number of seconds the cache is valid for.
+Pragma in http/1.0 and cache-control in http/1.1 implementation is same.
+They both are meant to prevent the client from caching the response.
+
+Content-type: text/html
+Content-type: This header indicated the mime type of the document.
+text is the type and html is the sub type of the document.
+Content-length: In the response, the header is shown.
+This will indicate the size of the bytes the server has transferred.
+Last modified: This header indicates the last time the resource is modified.
+The browser can also send this in a request.
+location: This is mainly used in re directions(301 and 302) where the server url is changed.
+set-cookie: When the website wants to update or set the cookie, then it will use this.
+Content-Encoding: This header is set when the returned content is compressed.
+
+Cookie: HTTP cookie is a small piece of data that is sent by the server to the client. It may store it and send it with next request.
+
+Using this, the server will understand whether 2 requests are from same browser. This makes stateless HTTP protocol to stateful.
+
+
+General header Fields: These are applicable for both request and response messages.
+Entity Headers:
+request headers and response headers.
+
+http error codes:
+    1xx (Informational): The request was received, continuing process
+
+    2xx (Successful): The request was successfully received,
+      understood, and accepted
+    3xx (Redirection): Further action needs to be taken in order to
+      complete the request
+    4xx (Client Error): The request contains bad syntax or cannot be
+      fulfilled
+    5xx (Server Error): The server failed to fulfill an apparently
+      valid request
+
+Response codes that are cacheable by default : 200, 203, 204, 300, 301, 404, 405, 501
+Last-modified: The time at which the origin server was last modified.
+It will be sent in the header field of response.
+
+100: continue
+this response code indicates that initial request is received and can send the remaining request.
+The client can discard this response and server send should send final response.
+The purpose is to allow the client sending request with request body to determine if the origin server is willing to accept
+the request before the client sends the request body.
+The purpose of 100 is client SHOULD NOT wait for an indefinite period before sending the request body.
+
+101: switching protocols.
+switching from old version to new versions of http while sending the response.
+
+200: ok
+request is succeeded.
+
+201: created
+the resource is created.
+
+202: Accepted
+the request is accepted for processing, but the processing has not been completed.
+
+203: Non-authoritative information
+The request is processed and accepted. But the response is from third party server rather than origin server.
+
+204: no content
+successfully processed the request and not returning any response. Usually for delete request it is used.
+
+205: Reset content
+The server has fulfilled the request, the client has to reset the document-view which caused the request to be sent.
+
+206: Partial content
+The server has fulfilled the partial get request for the resource. The request must have included the range header field indicating the desired range and may have included an IF range header field to make the request conditional.
+
+301: moved permanently
+This and future all requests should be redirected to the given URI.
+the response will show the new URI, so the client from next time should use new URI for sending the requests.
+
+302: Found
+307: temporary redirect
+The request should be repeated with another URI. However, in future the requests should still use original URI.
+
+308: permanent redirect
+the request and all other future requests should repeated using another URI.
+
+400: bad request
+wrong request syntax, invalid request message.
+
+401: unauthorized
+authentication is required, otherwise this error is shown.
+
+402: Payment required
+for future use.
+
+403: forbidden
+server is not willing to respond for a valid request. Authentication makes no difference
+
+404:not found
+the requested resource could not be found but may be available in future.
+
+405: method not allowed
+Doing PUT or POST operation on a resource where only GET operation is allowed.
+
+406: Not Acceptable
+This response code indicates that a response matching the list of
+acceptable values defined in 'accept-charset' and "accept-language" cannot be served.
+
+407: Proxy authentication required.
+request is not applied because it lacks valid authentication credentials for a
+proxy server that is between the browser and the server that can access the requested resource.
+
+408: request timedout
+server timedout waiting for the request. Client may send the request after the  server is active.
+
+409: Conflict
+server sends message saying with old request.
+For example if you try to upload a older file than which is already there in the system, then this is shown.
+
+410: Gone
+This response code indicates that the target resource is no longer available
+at the origin server and this condition is likely to be permanent.
+If we dont know whether this is temporary or permanent lack, 404 status code should be used.
+
+411: length required
+This response code indicates the server refuses to accept the request without the required content-length header request.
+
+414: URI too long
+This response code indicates that the URI requested by the client is
+longer than the server is willing to interpret.
+
+500: Internal server error
+generic error message given when unexpected condition is encountered.
+
+501: Not implemented
+Currently this is not implemented but may be in future.
+
+502: Bad Gateway
+
+503: service unavailable
+The server is not currently unavailable. It is temporary
+
+CURL REST:
+
+curl -i -H "Accept: application/json" -X POST -d "firstName=james"http://192.168.0.165/persons/person
+-i  = show response header
+-H = pass request header
+-X = pass method name
+-d = pass parameters in quotes, for multiple parameters use &
+
+for get #curl -i -H "Accept: application/json" "192.168.1.1:80/rest/1.0/USBSerialSettings"
+
+for PUT # curl -H  'Content-type: application/json' -X PUT 192.168.1.1:80/rest/1.0/USBSerialSettings -d '{"USBSerialEnabled": false}'
+
+curl -i -H "Accept: application/json" -X PUT -d "phone=1-800-999-9999"http://192.168.0.165/persons/person/1
+
+multiple value put operation using json:
+
+curl -i -H "Accept: application/json" -X PUT -d '{"GPSEnabled":true,"NMEAOverWiFiEnabled":true,"NMEAOverW
+
+iFiPortNumber":11010}' http://192.168.1.1/rest/1.0/GPSSettings
+
+GET resource
+
+curl -i -H "Accept: application/json" http://192.168.0.165/persons/person/1
+
+-X is optional in GET
+
+multiple query parameters seperated by &.
+
+curl -i -H "Accept: application/json" "http://192.168.0.165/persons?firstName=james&lastName=wallis"
+
+DELETE:
+
+curl -i -H "Accept: application/json" -X DELETE http://192.168.0.165/persons/person/1
+
+Using POST to PUT the resource:
+
+curl -i -H "Accept: application/json" -H "X-HTTP-Method-Override: PUT" -X POST -d "phone=1-800-999-9999"http://192.168.0.165/persons/person/1
+
+Using POST to DELETE the resource:
+
+curl -i -H "Accept: application/json" -H "X-HTTP-Method-Override: DELETE" -X POST http://192.168.0.3:8090/persons/person/1
+
+HTTP and HTTPS differences: The sender and receiver agree upon the 'code'  and they will send message. Any one in between can open the message, but could not understand it. The one who knows the code can only decipher the message. The security using HTTPs is SSL(secure sockets layer) and TLS(Transport Layer Security).
+
+Datatypes in json:
+scalar:
+array:
+
+Response body is a dictionary : unordered pair of key: value
+
+MIFI OPTIONS REQUEST AND RESPONSE:
+REQUEST
+conn.request("OPTIONS", "*","" , headers)
+RESPONSE
+reply: 'HTTP/1.1 200 OK\r\n'
+header: Allow: OPTIONS, GET, HEAD, POST
+header: Content-Length: 0
+header: Date: Thu, 01 Jan 1970 00:15:15 GMT
+header: Server: MiFi
+200 OK
+PUT REQUEST AND RESPONSE:
+
+REQUEST
+conn.request("PUT", "/rest/1.0/AccelerometerSettings/General",  "{\"Enabled\":true, \"AccelerometerMode\":\"MotionDetection\", \"AccelerometerSampleRate\": 0, \"AccelerometerGRange\": 2, \"AccelerometerAutoCalibrationEnabled\": true, \"AccelerometerRetainCalibrationOnPowerup\": true, \"AccelerometerQualityFactorThreshold\": 25}", headers)
+RESPONSE:
+send: 'PUT /rest/1.0/AccelerometerSettings/General HTTP/1.1\r\nHost: 192.168.1.1\r\nAccept-Encoding: identity\r\nContent-Length: 248\r\nCookie: mifise
+ss=1f30a123ab8aacb927650677b0a11f2f725a83a8\r\nAccept: application/json\r\n\r\n{"Enabled":true, "AccelerometerMode":"MotionDetection", "AccelerometerS
+ampleRate": 0, "AccelerometerGRange": 2, "AccelerometerAutoCalibrationEnabled": true, "AccelerometerRetainCalibrationOnPowerup": true, "AccelerometerQ
+ualityFactorThreshold": 25}'
+reply: 'HTTP/1.1 200 OK\r\n'
+header: Content-Type: application/json
+header: Transfer-Encoding: chunked
+header: Date: Thu, 01 Jan 1970 00:33:13 GMT
+header: Server: MiFi
+200 OK
+
+IF ONLY 1 PARAMETER IS SENT, THEN RESPONSE WILL BE BAD REQUEST. ALL THE PARAMETERS NEEDS TO BE SENT EVEN IF YOU WANT TO MODIFY SINGLE PARAMETER.
+IF PATCH IS USED, THEN ONLY 1 PARAMETER WHICH NEEDS TO BE MODIFIED CAN BE SENT.
+
+Accept and content-type is Headers:
+Accept: Used by http clients to tell servers what content-type they will accept.
+content-type: For PUT and POST operations, The content-type will actually tell what the data is.
+
+https://tools.ietf.org/html/rfc7231#
+
+Resource: The network data object or service that can be identified by URI.
+Entity: Information transferred as the payload of request or response.
+user agent: Client which initiates the request. Often browsers, editors, spiders(web traversing robots), other end user tools.
+server: Any program may be capable of being both client and server. Server can act like origin server, proxy, gateway or tunnel
+based on the nature of the each request.
+origin server: server on which given resource resides or is to be created.
+proxy: Intermediate program which acts as both server and client.
+Proxy must implement both client and server requirements.
+A 'transparent proxy' is proxy that does not modify the request or response beyond proxy authentication or identification.
+A 'Non transparent proxy' is a proxy that modifies the request or response in order to provide added service to user agent like
+media type transformation, protocol reduction or anonymity filtering.
+Gateway: Server which acts as an intermediary for some other server.
+Tunnel: Intermediary program which is acting as a blind relay between two connections.
+first hand: A response if first-hand if it comes directly and without unnecessary delay from origin server, peraps via one or more proxies.
+upstream/downstream: Upstream and downstream describe flow of messages. all messages flow from upstream to downstream.
+
+Complicated request can be of below form which can contain proxy, gateway and tunnel:
+A proxy is a forwarding agent, receiving the requests and rewriting part or all of it and
+forwarding the reformatted message.
+A gateway is a receiving agent, acting as the layer above some other server and if necessary,
+translating the requests to underlying servers protocol.
+A tunnel acts as relay agent between 2 connections without changing the messages.
+Tunnels are used when needs to pass through intermediary(such as firewall)
+even when intermediary cannot understand the contents of messages.
+
+HTTP communication uses TCP/IP and port is 80.
+URI(Uniform Resource Identifiers): combination of URL + URN(Names).
+http_url = "http:" "//" host [":" port ][abs_path["?" query]]
+status line, status code and reason phrase.
+
+If unrecognized status code like 431 is received by the client, it can safely assume that there was something
+wrong with its request and treat response that it received a 400 status code.
+Hence first digit of status code (1xx, 2xx, 3xx, 4xx, 5xx) is really important.
+
+in http/1.1 client should assume that server will maintain persistent connection even after error responses
+from server.
+
+pipelining: server must send its responses to those requests in the same order that the requests were received.
+
+REST response Header contains the server address, content-length(length of response body in octets), cookie, content-type: application/json, date, response status and response reason.
+Request headers support the following types:
+content-type: application/json, application/xml
+Accept: application/json, application/xml

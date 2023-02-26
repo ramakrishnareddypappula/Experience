@@ -1,0 +1,79 @@
+DNS is Domain Naming System or Service. It translates the domain names to ip addresses.
+It acts as a phone book and translates the human readable domain names to ip addresses.
+It uses UDP and uses port number 53.
+Earlier DNS services were based on HOSTS.TXT file.
+Domain names and IP addresses are the 2 important keys present.
+DNS name server stores DNS records for a domain and responds to queries against its database.
+Common types of records present in the database are A and AAAA, MX(SMTP mail exchangers), name servers(NS), pointers for reverse DNS lookups(PTR) and Canonical Names(CNAME) or domain name aliases.
+
+Domain names : .org, .com, yahoo, google are all domain names.
+
+hostnames: a computer name. A hostname and ip address are present for the computer.
+
+DNS lookup steps:
+1. When user types example.com. The query is received by DNS recursive resolver.
+2. The resolver then queries the root nameserver(.)
+3. Root server responds with address of Top Level Domain(TLD) server(.com, .net).
+4. The server then queries TLD.
+5. The TLD server then responds with ip address of domain's nameserver(example.com).
+6. Lastly recursive resolver sends query to domain name server.
+7. ip address of example.com is then returned to resolver by nameserver.
+8. DNS resolver then responds to web browser with ip address.
+9. Browser makes http request to the ip address.
+10. server at that ip address returns web page to be rendered by the browser.
+
+DNS steps:
+1) DNS recursor: It will receive query from web browser of client. It will send to root server.
+2) Root server: It will send information about TLDs.
+3) TLD server: It will send information about Domain nameserver(Authoritative name server).
+4) Authoritative name server: It will return the ip address of request domain name to the recursor.
+
+DNS cacheing is done to make data available as close to client.
+# cat /etc/hosts file
+
+127.0.0.1 , ::1 localhost is used to configure the loopback interface.
+
+Mail Exchangers(MX): Its refers to a host which is acting as Message Transfer Agent(MTA). MTA sends electronic mail from client to server and vice-verse.
+
+Name server(NS): This Implements the network service for providing the responses against the directory service.
+
+Reverse DNS lookups: Its the determination of domain name based on the ip address.
+
+When the ip address is changed, it will updated in the DNS server and user will not experience problems because there is no change in the domain name.
+DNS zone may consist of a single domain or many domains and sub domains.
+
+Domain syntax: www.example.com. . is the root server
+com is the top level domain. example is subdomain of com domain and www is subdomain of example.com domain. total 127 levels can exist.
+domain name should not exceed 253 characters.
+www.example.com and example.com are hostnames but com is not hostname.
+
+DNS is maintained by Database. Each node of this database is a nameserver. Top of the hierarchy is the root name server which resolve the top level domains.
+
+In Address resolving, initially DNS resolver(client) will ask DNS server about ip address which checks in inital cache, if present returns from there, otherwise asks the
+TLD which in turn will ask the secondary servers. In real time, caching is used in DNS servers to avoid this bottleneck.
+
+DNS servers also act as DNS caches to improve the performance and and gain efficiency.
+
+DNS use UDP with port number 53 for single request followed by response. If response packet size is > 512, then TCP is used. some implementations use TCP for all request and responses.
+
+DNS resolver sitting on the client side will send either non-recursive or recursive.
+In non-recursive, the DNS server provides a record for which it is administrative or partial result without querying other servers.
+In recursive, DNS server will also query other servers to answer fully.
+
+name server: A Web server with DNS installed. When a domain name(www.example.com) is registered, atleast 2 name servers(Just for redundancy) must be configured to handle the requests.
+NS records: TLD place NS records for your domain in TLD name servers.
+Time server: Server that reads the actual time from the reference clock and distributes this information to clients within a network.
+Widely used protocol for this is NTP.
+White list ip address : list of ip address that are considered spam free. users can receive or send to whitelist addresses.
+Black list ip address : list of ip address that needs to be blocked. Blacklists are generally used to filters the mails.
+
+# For DNS issues debugging in linux or MAC:
+> nslookup google.com # easy command find the domain to ip address
+under the non-authoritative answer of the command output, ip address will be shown.
+
+> dig google.com # more detailed form to find the domain to ip address.
+for trouble shooting dns related we can really use above.
+
+if we want to find more extensive details, we can use host command
+>host -a www.google.com  # we can get CNAME, ipv6 address  etc.
+>host -t NS www.google.com # we can get the NameSpace record information.

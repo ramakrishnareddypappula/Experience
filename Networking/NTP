@@ -1,0 +1,86 @@
+NTP: Network Time Protocol
+
+All the network devices should be in sync.
+Router can be a time source in same network or external time source(NTP server).
+
+Top of NTP hierarchy are stratum 0 devices, typically atomic clocks.
+cisco router cannot be configured with stratum 0 server.
+NTP uses UDP port 123 by default.
+cisco router can be configured NTP server or clients or peers.
+NTP server will send message to clients. Clients will not send message to server. client peer can send again sync messages to another peer.
+
+NTP stratum: Stratum is how accurate the time is. Its the representation of hierarchy of time servers in NTP network.
+stratum 0 means directly connected(GPS antenna). The lower the stratum number the more timing accuracy.
+High stratum levels devices are NTP servers.
+cisco default stratum value is 8.
+127.127.1.1 is like loopback address for ntp master.
+127.127.7.1 indicates the internal server created by ntp master command.
+
+
+NTP lab:
+
+R1(Server) <-> R2(Client)
+
+
+R1
+#config# ntp master 1<1-14>
+
+R2:
+#config# ntp server 1.1.1.2
+
+#show ntp association
+#show ntp status
+
+NTP authentication:
+
+R3(Client) <-> R4(server)
+
+R4: server
+#config# ntp authenticate
+#config# ntp authentication-key 1 md5 CCNP
+#config# ntp trusted-key 1
+
+R3: Client
+#config# ntp authenticate
+#config# ntp authentication-key 1 md5 CCNP
+#config# ntp trusted-key 1
+#config# ntp server 1.1.1.2 key 1
+
+NTP does not authenticate clients, it only authenticates source.
+
+NTP clients without authentication as well can sync with NTP servers. This means NTP clients can make use of authentication if required else not required.
+
+To avoid this, acls can be configured.
+
+On server:
+# config# access-list 33 permit host 10.1.1.3
+# config# ntp access-group serve-only 33
+
+On client side unconfigure and configure ntp server command to this effect.
+
+NTP version 3,4:
+
+version 4 is backward compitable with version 3. NTPv4 also adds DNS support for IPV6.
+NTPv3 supports broadcast message whereas v4 uses multicast.
+NTPv4 allows increased security.
+
+we can configure version by adding version keyword at end of server and peer commands.
+
+#config# ntp server x.x.x.x version 4
+#cofig# ntp peer x.x.x.x version 4
+
+Q&A:
+> "ntp broadcast client" enables receiving NTP broadcasts on the interface where the command is executed.
+> ntp client polls server for time and listens to NTP broadcasts.
+> If multiple NTP servers are configured, 1 with lowest stratum is preferred.
+> NTP has 4 access groups: serve, peer, serve-only and query-only. NTP services can be permited to only acl group with <ntp access> only etc.
+> NTP client can update local system without updating or synchronizing remote system using "Serve" command.
+> stratum 16 indicates the device is unsynchronized.
+> ntp trusted key during authentication cen be configured on server, client and broadcast.
+> "show ntp associations" shows synchronized ntp servers that are configured on device.
+> "show ntp status" shows ip address of the peer to which the clock is synchronized, where the clock is synchronized.
+> NTP stratum 1 is directly connected to authoritative time source.
+> NTP stratum 2 receives their time from peer that is directly connected to an authoritative time source.
+> client, server and broadcast that NTP operating modes must the trusted-key be configured.
+> Uses UDP port 123.
+> For NTP client to be able to update the local system without updating or synchronizing with remote system, NTP serve option of ntp access group is used.

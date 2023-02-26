@@ -1,0 +1,60 @@
+Remote Authentication Dial In User Service: Using radius only authenticated users can only access the network. It is UDP.
+UDP port number 1812 for authentication and 1813 for accounting. Earlier they were 1645 and 1646 ports respectively.
+Application layer protocol used for Authentication, Authorization and Accounting.
+Radius runs as client in Huawei routers and connects to remote server for user authentication.
+Remote Access server(RAS) which acts as client sends requests and also share the secret key with the server. For 802.1x authentication also, radius is used. Authentication and Accounting can be done by same or different servers.
+username and user's password is only encrypted , authorization and accounting are sent in cleartext.
+
+Authentication credentials(username, password and others like network address, phone number, physical point of attachment of user to RAS) are passed to client from user via PPP or HTTPS web based protocol. Credentials are verified at server using PAP, CHAP or EAP schemes. Server for ACCESS REQUEST may respond with:
+
+ACCESS ACCEPT: authenticated and server often checks what services the user can access in the network.
+ACCESS REJECT: When user provides incorrect authentication or user is inactive. These packets are discarded silently.
+ACCESS CHALLENGE: server asks for more information like secondary password, PIN, token or card. If RAS does not support this access challenge, then packet is silently discarded.
+
+The response for these 3 may welcome message for ACCEPT, reason for REJECT and prompt for CHALLENGE. This is passed to the webpage.
+
+ACCOUNTING REQUEST AND ACCOUNTING RESPONSE:
+Accounting message is sent from RAS to radius server and periodically records are sent by NAS to radius server. Finally when the network access is closed, packets transferred, data transferred, time information and reason for disconnect are sent. This is for billing, networking monitoring, planning.
+
+Roaming between ISP's is done using realms. '@' or '\' can be used at postfix or prefix respectively with usernames for access. Radius server can act as Proxy and send request to another server during this for authentication.
+
+Only username and password are protected. Other requests are not protected, hence security is the main issue.
+
+Radius(RAS) can be monitored using SNMP protocol.
+
+                                                                               RAS
+ PC -------(SSH/TELNET/802.1x)--------------->ACCESS NODE -----------------> internet
+ (USER)                                                                     |      |
+                                      |      |
+                                    primary      secondary radius server
+
+CHAP(Challenge Handshake Authentication Protocol) authentication:
+
+Configuration:
+1)configure the authentication scheme in AAA view
+2)In that configure authentication-mode as radius
+3)configure the accounting scheme in AAA view
+4)In that configure accounting-mode as radius
+5)Configure the radius-server templete
+6)Configure radius-server ip address.
+7)Create a domain in AAA view.
+8)Assign the authentication scheme and accounting scheme
+
+Diameter is the planned replacement of Radius.
+
+Cisco ACS(access control server) and shiva server are used as radius servers.
+
+PPP(Point to Point Protocol):
+Enables transmission of data packets between point to point links.
+Data is encapsulated over ethernet(PPPoE) or Asynchronous Transfer Mode(PPPoA).
+PPP supports 3 types of Authentication protocols 1)PAP, 2)CHAP and 3)EAP.
+
+PAP(Password Authentication Protocol):
+2-way handshake. It asks for username/password and sends accept/reject response.
+No encryption and not secure.
+Username and password are sent in plain text.
+Authentication is only done at link establishment.
+
+CHAP(Challange handshake Authentication Protocol):
+more secure than PAP and its 3 way handshake, request is sent and challange is sent and response it sent back.
+Once authenticated PAP stops working but CHAP makes periodic challanges.

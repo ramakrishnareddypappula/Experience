@@ -1,0 +1,28 @@
+
+echo "$(date +%F)"   # 2023-02-25
+
+if [ -n x]  # means if x is a number
+
+sh -x debug.sh # command that is being executed is printed first.
+
+www.shellcheck.net # editor will help is debugging and check for errors.
+
+$() is better than ``
+
+
+heredocs:
+A feature of shell scripting that allows you to include a block of text within a script or command.
+eg:
+cat << EOF
+This is a heredoc block.
+It can span multiple lines, and may include
+variables and other shell expressions.
+EOF
+
+cat << EOF > myconfig.cfg
+server_name = $HOSTNAME
+port_number = $PORT
+EOF
+
+
+#https://www.youtube.com/watch?v=7GNUzvjS_mE&list=PL8cE5Nxf6M6b8qW7CSMsdKbEsPdG9pWfu&index=1

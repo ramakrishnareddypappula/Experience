@@ -77,7 +77,13 @@ Remove added file:
     > git add abcd.txt
     > git reset abcd.txt # removes from add.
 
-
+Git stash:
+    > git stash # stashes the current changes.
+    #OR
+    > git stash push -m "Changes made." # This also stashes with name.
+    > git stash list # to list the stashes by index.
+    > git stash apply 1 # To get into index 1 of stash.
+    > git stash pop 0 # To delete the stash index.
 
 Jenkins file is pipeline as a code.
 A text file that contains the definition of jenkins pipeline and is checked into source control.

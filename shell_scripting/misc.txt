@@ -25,4 +25,32 @@ port_number = $PORT
 EOF
 
 
+-b file is a block device file.
+-c file is a character device file.
+-d file is a directory.
+-e file exists.
+-f file is a regular file.
+-g file has its setgid bit set.
+-G file's group ID is the same as the effective group ID
+-h file is a symbolic link.
+-k file has its sticky bit set.
+-L file is a symbolic link.
+-O file is owned by the shell's effective user ID.
+-p file is a pipe or named pipe
+-r file is readable.
+-s file is not empty.
+-S file is a socket.
+-u file has its set UID bit set.
+-w file is writable.
+-x  file is executable
+-z string is empty or not
+
+if [ -e "$1"]
+then
+echo "$1 file exists"
+else
+echo "$1 file not exists"
+fi
+
+
 #https://www.youtube.com/watch?v=7GNUzvjS_mE&list=PL8cE5Nxf6M6b8qW7CSMsdKbEsPdG9pWfu&index=1

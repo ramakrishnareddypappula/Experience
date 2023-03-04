@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 THRESHOLD=40
 mailto="root"

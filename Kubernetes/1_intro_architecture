@@ -1,0 +1,134 @@
+
+Kubernetes is an open-source orchestration system for automating deployments, scaling and management of containerized  applications.
+
+k8s = k + 8 letters + s
+
+Architecture:
+
+kubectl is the command to interact with the cluster.
+
+In kubernetes we setup machines. It can be baremetals, vm, raspberry pi etc.
+
+A node is a vm.
+1 vm can act as control plane node and other can be worker node.
+
+containers run as pods on worker nodes.
+Control plane node manages everything.
+
+kubernetes objects: pods, services, deployments, namespaces etc.
+
+control plane components:
+    - Api server:
+        when we run the commmand or yaml file, it goes to api server. Its the brain of kubernetes.
+        > kubectl run nginx --image=nginx
+
+        Using API server create, modify, and delete Kubernetes objects.
+        Api server maintains the desired state of cluster using etcd.
+
+        Api server will do authentication, authorization and admission.
+        It checks if a person is authorized to do a particular task.
+        For example, in the above command, if nginx image is coming from dockerhub or not is checked.
+
+    -Scheduler:
+        Scheduler is responsible for assigning pods to nodes.
+        When pod is created, scheduler checks the pod's resource requirements(Resource request and limit(upper limit)),
+        node affinity rules and current node resource usage.
+        Scheduler runs default algorithm which eliminates the nodes which does not have pod resource requirements.
+
+        what is nodeAffinity?
+        Node affinity can be used to ensure that pods are scheduled onto nodes that have specific labels or attributes.
+        In yaml file, if nodeAffinity key("gpu") is specified and rule="required", then if node does not exist, then pod will not be
+        run. In another case if rule="preferred", then if node does not exist, then pod may run.
+
+    -etcd:
+        key-value db for the cluster. It's fault tolerant storage and supports automatic failover and recovery.
+        k8s stores configuration and state of all k8s objects in etcd.
+        APi server reads and writes to the etcd to maintain the state of k8s cluster.
+        Its the source of truth for k8s cluster.
+        It uses a consensus-based replication protocol to ensure that all instances of etcd are kept in sync.
+        Only API server talks to etcd, rest all talk to API server.
+
+        In HA mode, a leader is elected and all other instances are replicated with the help of leader. If an instance goes down,
+        remaining instances detect failure and calls for election. Once leader is elected, remaining instances replicate the data of leader.
+
+    -Controller manager:
+        It contains various other controllers like replicaset controller, deployment controller, statefulset controller,
+        Daemonset controller.
+        Replicaset ensures correct number of replicas of particular pod are running, Deployment controller manages the rolling
+        updates of a set of replicas.
+        It monitors the cluster for changes and make the cluster achieve desired state.
+
+    - CCM:
+        Cloud Controller Manager.
+        Manages various cloud-provider(AWS, GCP) specific resources and services.
+        for example a service like load balancer is present, CCM is responsible for talking to cloud and load balancer.
+
+Worker node components:
+    -kubelet:
+        kubelets in all worker nodes poll API server to see if some pod needs to run, monitor pods and restarts them if necessary.
+        When Kubelet receives the pod specs from API server, it uses containerd to create and manage containers.
+        Main tasks of kubelet:
+            -mount pod volumes and secrets.
+            -update status of pod to API server.
+            -Run health checks.
+            -Garbage collection of unused images and containers.
+
+    -Containerd:
+        Its a container runtime. Its used to manage lifecycle of containers.
+        Kubelet communicates with containerd using Container Runtime Interface(CRI).
+        Kubelet can request CRI to start, stop and manage containers and manage container storage and file systems.
+        Containerd is the implementation of CRI. Apart from CRI we have CNI(Container Network Interface) and CSI(Container Storage Interface).
+        Flannel, calico etc are the implementation of CNI. Longhorn, openEBS etc are the implementation of CSI.
+
+    -kube-proxy:
+        kube-proxy is a network proxy that runs each node on k8s cluster and manages network connectivity between services and pods.
+        It helps in pod to pod communication within a node and pod to pod communication between 2 nodes.
+        It provides stable ip address and DNS name to set of pods that perform same function.
+        Every time a pod is created, ip tables is handled by kube-proxy.
+        kube-proxy maintains list of iptables or ipvs.
+        > iptables -l # displays iptables on the node.
+
+    - Pod:
+        It is run on worker node.
+
+Imperative vs Declarative:
+    -Imperative:
+        via the command like kubectl.
+    -Declarative:
+        Via the yaml file.
+        In all yaml files, below things are common.
+        apiVersion, kind, metadata and spec.
+
+GVR: Group Version Resource.
+    GVR is used to identify and manipulate k8s API objects.
+    In k8s, A group represents collection of related resources.
+    Version is the API version of the resource.
+    Resource is the specific object type.
+    Example: deployment object has "apps" group, "v1"  version and "deployments" resource.
+
+Iterative vs declarative:
+    declarative: From the configuration file k8s will read and automatically work to ensure that the current state of your resources matches the desired state.
+    Typically we use "kubectl apply" for declarative statements.
+    iterative: It involves making changes to your resources by directly modifying their current state.
+    Typically we use "kubectl edit" for iterative statements.
+
+
+https://killercoda.com/playgrounds/scenario
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

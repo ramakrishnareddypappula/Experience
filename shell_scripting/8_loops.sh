@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 # WHILE LOOP
 
@@ -69,3 +70,22 @@ sleep 1
 done
 
 echo "host $ip is up"
+
+
+echo "#################"
+
+seq 7 # 1 2 3 4 5 6 7
+
+seq 1 2 10   # 1 3 5 7 9
+
+echo "#################"
+#seq command
+
+a=1
+b=2
+c=30
+
+for x in `seq $a $b $c`
+do
+echo "$x"   # 1 3 5 7 9 ...29
+done

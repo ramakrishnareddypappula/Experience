@@ -11,6 +11,11 @@ else
 echo "$x is equal to $y"
 fi
 
-touch ./test{1..100}.txt   # this will create test1.txt, test2.txt .... test100.txt
+#touch ./test{1..100}.txt   # this will create test1.txt, test2.txt .... test100.txt
 
-
+str=""
+if [ -z $str ]; then
+  echo "The string is empty"
+else
+  echo "The string is not empty"
+fi

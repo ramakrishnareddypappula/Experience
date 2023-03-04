@@ -1,0 +1,101 @@
+
+Node:
+    A node can be a physical machine or vm and can run with variety of OS.
+    Kubernetes can manage nodes across multiple cloud providers or on-premise data centers.
+    When we deploy an application, k8s take care of running and managing the replicas on available nodes
+    based on resources, health and affinity rules. If nodes become unhealthy, k8s reschedules apps on healthy nodes.
+
+    > kubectl get nodes # to get the control and worker nodes and their statuses.
+
+    > kubectl describe nodes # Get cpu, memory, ip address, CIDR, OS etc of each node.
+
+Namespaces:
+    Namespace make env isolated.
+    Namespaces like dev, test or prod can be created. A team can work in 1 ns(resource like pods, service, deployment can run here) and other in another ns.
+    Each namespace can have different version of application.
+    Resource names with in a namespace must be unique but across namespaces may not be unique.
+    Dont run resources in default namespaces, segregate them.
+
+    By default k8s "kubectl get pods" command  retrieves from "default" namespace.
+
+    > kubectl get pods # get pods running in default namespace.
+
+    > kubectl get pods --namespace=kube-system    # get pods running in kube-system namespace.
+    OR
+    > kubectl get pods -n kube-system
+
+    > kubectl get pods -A # all namespaces pod name, status, restarts, age are given
+    OR
+    > kubectl get pods --all-namespaces
+
+    > kubectl get pods -A -o wide # apart from above ip and node name are also given.
+
+    There are 4 namespaces by default in kubernetes.
+        > kubectl get namespaces # To get namespaces
+        OR
+        > kubectl get ns
+
+        > kubectl api-resources  # this will tell names and short names like ns and namespaces.
+
+        > kubectl api-resources namespaced=false # This will give list of resources which  are not dependent on namespaces.
+
+        1) kube-system:
+            kube-system namespace contains k8s API server, etcd, controller manager, scheduler and DNS service.
+            System level monitoring and logging tools can be installed here.
+            We should not run application pods here.
+
+        2) kube-public:
+            It gives cluster-info and secret cert. This cert is mounted on all the pods in the cluster to access API server.
+            Any user or component in the cluster can access resources in this namespace.
+            It stores configuration files, images, and other resources which are accessed by pods.
+
+            > kubectl get cm -n kube-public
+            > kubectl cluster-info
+
+        3) kube-node-lease:
+            Its like the heart-beat for the nodes.
+            Nodes lease and renew is monitored by kube-node-lease ns.
+            If node fails to renew its lease, the kubelet on the node is marked as not ready, and the node may be considered unavailable.
+
+            > kubectl get lease -n kube-node-lease
+
+        4) default:
+            This is where our applications are run by default.
+            Without specifying the ns, if we create pod, deployment, service or configmap, they show up here.
+
+
+LAB:
+    To create namespace:
+    > kubectl create ns prod
+
+    To run a pod in prod namespace:
+    > kubectl run  nginx --image=nginx --namespace=prod
+
+    > kubectl get pods # this will display pods in  default ns. Not in prod ns.
+
+    > kubectl config set-context --current --namespace=prod # This will switch ns to prod.
+
+    > kubectl get pods # Now it will  display in prod ns pods.
+
+    To create  a deployment in prod namespace:
+    > kubectl create deploy abc --image=nginx -n prod
+
+    To describe a namespace:
+    > kubectl describe ns dev
+
+    To create a declarative way:
+    > kubectl create ns demo --dry-run=client -oyaml
+
+    To delete the namespace:
+    > kubectl delete ns testing
+
+
+
+
+    > kubectl run nginx --image=nginx  # To run a pod
+
+    > kubectl run demo --image=nginx --dry-run=client -oyaml   # sample yaml file of a pod.
+
+
+
+

@@ -1,0 +1,77 @@
+
+Init container:
+    special type of container which is run before the actual container is run.
+    eg: if some files should be present, db to be present before the actual container is run.
+    There can be multiple init containers that can run before actual container are run. If multiple are present, they run in sequential order.
+
+
+    init container:
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: init-demo1
+    spec:
+      containers:
+      -  name: nginx
+         image: nginx
+         ports:
+         - containerPort: 80
+         volumeMounts:
+         -  name: shared
+            mountPath: /usr/share/nginx/html
+    # These containers are run during pod
+      initContainers:
+      -  name: install
+         image: busybox
+         command:
+         - wget
+         - "-O"
+         - "/shared/index.html"
+         - https://kubesimplify.com/
+         volumeMounts:
+         -  name: shared
+            mountPath: /shared
+      volumes:
+      - name: shared
+        emptyDir: {}
+
+
+Multi-container:
+    side-car pattern.
+    Some times a pod can run multiple containers. eg: logs of main app logs, act as reverse proxy to host static files from main container
+
+
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: multi-container
+    spec:
+      volumes:
+      - name: shared-data
+        emptyDir: {}
+
+      containers:
+      -  name: nginx-container
+         image: nginx
+         volumeMounts:
+         - name: shared-data
+           mountPath: /usr/share/nginx/html
+      - name: alpine-container
+        image: alpine
+        volumeMounts:
+        - name: shared-data
+          mountPath: /mem-info
+        command: ["/bin/sh" , "-c"]
+        args:
+        - while true; do
+            date >> /mem-info/index.html ;
+            egrep --color 'Mem|Cache|Swap|' /proc/meminfo >> /mem-info/index.html ;
+            sleep 2;
+          done
+
+    If multiple containers are running, to get logs of 1 container.
+    > kubectl logs -f multi-container -c nginx-container
+
+    To exec into the pod:
+    > kubectl exec -it multi-container -c nginx-container -- sh
+

@@ -1,0 +1,49 @@
+
+Labels:
+    Labels are key/value pairs.
+    They are attached to resources like pods, deployments, service etc.
+    Based on labels we can segregate the resources like prod, dev etc.
+    It is defined under metadata section.
+    We can select the pods based on labels for rolling updates, scaling(create replicas based on label) and send traffic to a pod etc.
+
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: my-pod
+      labels:
+        app: my-app
+        env: production
+    spec:
+      containers:
+      - name: my-container
+        image: my-image
+
+    In this example there are 2 labels, app: my-app, env: production.
+
+    > kubectl get pods -l env=production     # all the pods which have production label are displayed.
+
+
+    > kubectl run nginx --image=nginx   # to run a pod
+    > kubectl label pod nginx env=prod   # attached label prod to pod. env=prod is the label.
+    > kubectl get pods --show-labels     # to show the label attached to pod.
+
+Selectors:
+    selector is way to match set of k8 resources based on labels.
+    There are 2  types  of selectors: label selectors and field selectors.
+
+    Label selectors: Label selector is used to match resources based on labels.
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: my-service
+    spec:
+      selector:
+        app: my-app
+
+    label selector matches all pods with the label app=my-app.
+
+    field selector: match resources based on their fields.
+    > kubectl get pods --field-selector=status.phase=Running    # currently running pods are displayed.
+
+
+

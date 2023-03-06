@@ -1,0 +1,27 @@
+
+Resource requests and limits:
+    requests:
+        specify minimum amount of CPU and memory that a container or pod requires.
+        This helps schedular to decide on which node pod can be run. If there are no nodes, pod will be in pending state.
+    limits:
+        specify maximum amount of CPU and memory that a container or pod requires.
+        When pod reaches resource limit, k8s will either throttle or evict the pod depending on config.
+
+    At the pod level, resource requests and limits are set using the spec.containers[].resources.requests
+    and spec.containers[].resources.limits fields in a pod's definition.
+
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: my-pod
+    spec:
+      containers:
+        - name: my-container
+          image: my-image
+          resources:
+            requests:
+              cpu: "0.25"
+              memory: "256Mi"
+            limits:
+              cpu: "0.5"
+              memory: "512Mi"

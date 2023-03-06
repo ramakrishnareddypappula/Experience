@@ -1,0 +1,17 @@
+
+Probes:
+    Probes  are used to monitor the health of containers running in pod.
+    There are 3 types of probes.
+
+    1) Liveness probe:
+        Checks if container is running or not. If this fails, k8 consider container as dead and will start new.
+        It is httpget. If the response is ok or not.
+
+    2) Readiness probe:
+        Checks if container is ready to server the requests. If this fails, k8s removes it from service endpoint until is passes again.
+
+    3) Startup probe:
+        Checks if the container has started and ready to server the requests. If its taking time, k8s delay the readiness probe until container is ready.
+        It is executed first, until it is success other probes are not executed.
+
+

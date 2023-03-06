@@ -1,0 +1,74 @@
+
+Pod:
+    In k8s, anything you run runs as pod.
+    1 or more containers run inside pod. If 2 containers are present, ip is shared and they talk to each other on local host.
+    Every pod will have its own ip.
+    In below, metadata section tells about pods and spec section tells about container running inside the pod.
+
+    Pod manifest:
+    > kubectl run my-pod --image=nginx  --dry-run=client -o yaml
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: my-pod
+      name: my-pod
+    spec:
+      containers:
+      - image: nginx
+        name: my-pod
+        resources: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+    status: {}
+
+
+    > kubectl run nginx --image=nginx  # To run a pod
+
+    > kubectl create -f init # create 1 time. Apply if any changes are present.
+    > kubectl apply -f init # using yaml file create pods. init is the yaml file name.
+
+    > kubectl get pods  # to display
+
+    > kubectl get pods  -A -o wide # to display ip etc.
+
+    > kubectl describe pods   # gives more information.
+    This shows pods life cycle like 1) assigning node 2) pulling the image 3) download  image 4) Created container 5) running container.
+    Also tells about tolerations.
+    Toleration: Based on different conditions like cpu, gpu a pod can be scheduled on node or not.
+
+    > kubectl  logs -f nginx   # to get and follow the pod logs.
+
+    > kubectl exec -it nginx -- sh  # or bash if bash is present. To enter into pod.
+    exit
+
+    > kubectl delete pod nginx # This deletes the pod gracefully. For example if pod is serving a request, once done, then pod is deleted.
+
+    > kubectl delete pod nginx --force # This is forceful. I will not wait.
+
+    Stages of pod:
+        1) Pending: finding the node. Also PV(Persistent Volume) and PVC(Persistent Volume Claim) is checked.
+            Persistent Volume (PV): storage resource that has been provisioned in the Kubernetes cluster
+            Persistent Volume Claim (PVC): is a request for storage resources by a pod.
+
+        2) ContainerCreating: Pulling image from registry, starting it and attaching network.
+
+        3) Running: Running state.
+
+        4) Error: Error in code.
+
+        5) Crashloopbackoff: process dying too many times because of out of memory, disk etc.
+
+        6) Succeeded: When work is completed, jobs etc.
+
+
+
+
+
+
+
+
+
+
+

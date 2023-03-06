@@ -85,16 +85,16 @@ LAB:
 
     To create a declarative way:
     > kubectl create ns demo --dry-run=client -oyaml
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+        creationTimestamp: null
+        name: demo
+        spec: {}
+        status: {}
 
     To delete the namespace:
     > kubectl delete ns testing
-
-
-
-
-    > kubectl run nginx --image=nginx  # To run a pod
-
-    > kubectl run demo --image=nginx --dry-run=client -oyaml   # sample yaml file of a pod.
 
 
 

@@ -1,0 +1,44 @@
+# YAML Ain't Markup Language
+
+# It can be .yaml or .yml file. Anything is fine
+
+# #is used for comment.
+
+person:      # object
+  name: "abcd"    # string can be represented using abcd, 'abcd', "abcd"
+  occupation: 'programmer'
+  age: &agestd 23         # int
+  gpa: 3.5        # float
+  rank: !!float 5    # 5.0
+  collage_code: !!str 3.5     # "3.5"
+  fav_num: 1e+10
+  male: true
+  birthday: 1994-02-06 12:12:12  # YYYY-MM-DD
+  flaws: null
+  hobbies:
+    - cricket            # OR ["cricket", "movies", "riding"]
+    - movies
+    - riding
+  movies: ["alt", "del"]
+  friends:
+    - name: "rob"
+      age: 22             # below and this is same.
+    - {name: "Adam", age: 22}
+
+description: >     # This > will keep everything in 1 line
+  khkjhkahkhsdf sdfdff
+  kljlsdf kjhksdfh lkj
+  dfgfg
+
+signature: |
+  milo
+  eigth grade
+  mil@ooooo.com
+
+age: &agestd      # Above age of 23 will be used here.
+
+
+
+
+
+

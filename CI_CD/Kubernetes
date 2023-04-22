@@ -1,0 +1,417 @@
+Kubernetes: Used to automate deployments and management containerized application.
+
+Advantages:
+    - Load balancing: Kubernetes evenly distributes traffic between applications.
+    - Automated rollouts and rollbacks: upgrades are done from time to time and rollback when upgrade fails.
+    - Auto scaling: Based on resource utilization, auto scale up and scale down are done.
+    - self healing: kubernetes monitors container health, restarts the containers, replace containers.
+
+Kubernetes objects:
+    There are 2 types of objects.
+    - Basic objects: Pod, service, namespace, volume.
+    - Advanced objects: Replication controllers, Replication sets, deployments, stateful sets and daemon sets.
+
+
+Pod : Smallest deployable unit kubernetes and can hold 1 or more containers.
+Node: pyhsical or vm that can hold multiple pods.
+Cluster: Group of nodes together. Contains 1 master node and multiple worker nodes.
+service : A logical collections of pods in k8 cluster. It maintains single ip. Traffic is sent to virtual ip is distributed to pods.
+ReplicaSet: Its a process that runs multiple instances of a pod.
+Deployment: A deployment will tell how to create and modify the instance of pods. ReplicaSet is automatically created.
+Namespace: Kubernetes cluster is divided into group of virtual clusters. Applications deployed in different namespaces can communicate with each other.
+           A namespace is created using kubectl command or YAML file.
+
+Kubernetes Architecture:
+    Kubernetes groups physical or vms as a cluster.
+    The cluster has control plane and worker node plane.
+    Control plane is the brain of the cluster. It manages worker nodes.
+    Applications are run on worker nodes.
+
+    Control plane components:
+    - Kube API server: kubectl commands interact with the cluster using kubeAPI server.
+    - etcd: A distributed key-value store to store API objects.
+    - kube controller manager: It performs routine checks. It interacts with kube schedular to ensure that kubernetes object brought back to desired state if they are not.
+    - cloud-controller-manager: Helps in integrating kubernetes with cloud provider APIs. Example: AWS s3 can easily interact with kubernetes using Cloud controller manager.
+    - Kube-schedular : Helps in scheduling the pods.
+
+    Worker node components:
+    - kubelet: Its the main service that takes specification from kube-apiserver and keeps the pods in desired state.
+    - kube-proxy: Proxy service running on each pod and exposes services to the external world.
+    - Container runtime: responsible for running containers. Kubernetes supports several container runtimes like docker, containerd.
+
+How kubernetes works:
+    - Kubernetes groups set of physical or virtual machines called nodes.
+    - On nodes, pods are run and each pod consists of 1 or more containers.
+    - Control plane orchestrates and takes care of worker nodes. It does scaling up, reallocating workloads.
+    - Using kubernetes dashboard and kubectl CLI tool we can interact with kubernetes cluster.
+
+Kubernetes labels:
+    labels are key-value pairs that are attached to pods etc.
+    eg: kubectl get pods -l environment=prod
+    here kubernetes pod is created with label env.
+
+Kubernetes deployment file:
+    kubernetes objects are defined in yaml file which is given as input to kubectl command. kubectl converts yaml to json while sending to kubernetes API.
+
+    yaml file contents
+     - apiVersion : version of kubernetes API used for creating this object.
+     - kind - (Pod, Deployment) : kubernetes object type that needs to be created.
+     - metadata : helps uniquely identify the object.
+     - spec : specifies the desired state of kubernetes object.
+
+Defining kubernetes service:
+    service is logical abstraction for deployed group of pods in cluster.
+    traffic directed towards service is directed towards pods.
+    deployment is managed by the selectors mentioned in service object.
+
+    service types:
+    Nodeport: Nodeport along with NodeIp can be used from outside.
+    http://<NodeIp>:<nodeport>
+    Clusterip: with this service type, the application deployment is reachable within the cluster.
+    Load balancer: The service is exposed to the outside world using cloud provider's load balancer. The load balancer's ip is used to route traffic
+                    towards the service.
+
+
+Kubernetes design patterns:
+
+
+
+
+-------my exp ----------
+
+KUBERNETES:
+1) On which host, the container should run?
+2) Some containers need more memory and some need more cpu?
+3) Containers running on multiple hosts, must communicate with each other. how it can be done?
+4) Auto-scaling containers based on demand?
+5) security of containers.
+
+NODE:
+A smallest unit of computing hardware in kubernetes is a node.
+It can be a physical machine or vm where CPU and RAM are utilized.
+Any machine can substitute any other machine in kubernetes cluster.
+
+CLUSTER:
+Nodes combine together to form cluster.
+Programmer does not have knowledge on which node code is being executed.
+Google's internal kubernetes system is borg.
+
+CONTAINER:
+programs are packaged into linux containers and are run on kubernetes.
+Any program along with dependencies are bundled up into an image and shared on internet.
+We should limit 1 program per container.
+
+PODS:
+Kubernetes wraps up 1 or more containers into high level structure called pod.
+Containers in same pod share resources and network and communicate with each other.
+Pods are unit of replication. If an app becomes popular, just by increasing the replicas, we can increase the traffic.
+It is standard to keep multiple copies to allow for load balance when failure.
+Pods typically contain 1 main process and helper containers(called as side-cars)
+
+DEPLOYMENT:
+Pods are managed via deployment.
+Primary purpose is for declaring the replicas for a pod.
+When the pod dies, the deployment will automatically re-create it.
+
+INGRESS:
+To communicate with other pod or external world, we need to open-up a channel for communication. This is referred to as ingress.
+There are 2 common ways to add ingress to cluster. Via ingress controller or via load balancer.
+
+
+VOLUMES:
+VOlume is a directory with some data in it which is accessible to the containers in the pod. Volumes are mounted at specific path within an image.
+The problems are when kubernetes pod crashes or when sharing files between containers, data is lost. Kubernetes volume abstration solves the problems.
+Kubernetes supports many volume types.
+1) Ephemeral volume types have a lifetime of pod. When pod does not exist, kubernetes destroyes this volumes.
+2) Persistant volume exist beyond the lifetime of the pod. When pod does not exist, Persistant volume still exist.
+
+There are different types of volumes like
+1) awsElasticBlockStore
+2) azureDisk
+3) gcePersistentDisk
+
+
+
+Above problems can be solved using kubernetes.
+
+Kubernetes is a container orchestration engine. It converts bunch of hosts with containers into a single entity.
+
+> nproc # returns number of processing units available in linux.
+
+POD:
+smallest unit of k8s.
+contains 1 or more containers.
+Each pod gets its own ip.
+
+SERVICE:
+A static ip address for each pod.
+Even if the pod dies, service(ip) remains.
+To communicate with the outside world, an external service(url) is required. For DB access, internal service(url) is required.
+Service is also a load balancer. It catches the request and send it pod which is free(if 1 or more replicas present).
+
+Typically external service url will be like http://ip:port. But external world can communicate only via url. So INGRESS is present. It translates the external url(https://www.myip.com) to external service url(https://1.2.3.4:8000).
+
+CONFIGMAP:
+If db name is changed then the application needs to be rebuild, push it to repo and pull it to your pod.
+To avoid these steps, configmap is present. Configmap contains external configuration of your application.
+
+SECRET:
+It is similar to configmap. It is used to store usernames/password/certificates in base64 encoded format.
+
+VOLUME:
+DB data is important. If DB restarts, data will be lost. To avoid this, DB is attached local or external storage.
+
+DEPLOYMENT:
+Its a blueprint. In this we specify replicas as 1 or more for an app.
+for DB pods, we cannot create replica. For those we create STATEFUL sets.
+
+NODE:
+Kubernetes cluster consists of multiple nodes(physical or virtual machines).
+A node can be master node or worker node.
+Each worker node has multiple pods in it.
+3 processes must be installed on every worker node.
+1) container runtime(docker container)
+2) kubelet: Process of kubernetes. It schedules the containers. Kubelet intaracts with node and container.
+kubelet starts the pod with container inside.
+3) Kubeproxy: It forwards the requests from services to pods.
+
+4 processes run on master node. In reality, kubernetes cluster is made up of multiple master nodes.
+1) API server: It validates the requests and forwards the requests to respective processes.
+This is the entry point for cluster.
+2) Schedular: Once the API server receives the request to create a pod, it is handed over to schedular. Schedular checks resources in the worker nodes and where more resource(cpu, memory) is available. Then kubelet will go and schedule the pods.
+3) controller manager: It detects the cluster state changes. It makes the schedular to reschedule the pods.
+4) etcd: Its the cluster brain. cluster changes(pod dies or restarted) are stored in this key-value store. api server, schedular, controller manager knows abut cluster health, resource available, cluster state from etcd. Application data is not stored in etcd.
+
+In a typical setup, there can be 2 master nodes and 3 worker nodes. Master nodes require less resources than worker nodes.
+
+
+https://Myapp.com request -> ingress -> myappservice -> myapp -> db
+
+All the above will have replicas.
+
+
+MINIKUBE:
+creates virtualbox on your laptop.
+nodes run on virtualbox.
+1 node k8 cluster which contains both master and worker.
+
+KUBECTL:
+CLI to interact with cluster.
+
+
+# kubectl get nodes  # get nodes information. master and worker.
+# kubectl get pods   # pods that are running. This by default shows default namespace pods.
+# kubectl -n ns get pods # This shows pods running in namespace ns.
+# kubectl get pods -o wide  # to get more info.
+# kubectl get pods --watch   # to watch pods.
+# kubectl get services  # services that are running.
+# kubectl get deployment  # displays the deployments.
+# kubectl get deployment nginx-depl -o yaml  # To get the deployment yaml file.
+# kubectl get replicaset  # Displays the replicas.
+
+# kubectl get all  # pod, service, deployment and replicaset info.
+
+# kubectl create deployment <NAME> --image=IMAGENAME # this creates the deployment and pods. It pulls the images from dockerhub.
+eg: # kubectl create deployment nginx_depl --image=nginx
+
+# kubectl edit deployment <nginx-depl> # this will open yaml which we can edit. Once edited, old pod will be terminated and new pod starts running automatically. Check this using #kubectl get pods
+# kubectl get replicaset   # here we can see the old and new pods.
+
+
+from config files:
+# kubectl apply -f manifests/static-site-deployment.yaml # This will create deplyment and replicas based on yaml file. It will pull the container images from dockerhub. Deployment is an abstraction for pod. We cannot directly create pod.
+# kubectl apply -f static-site-service.yaml   # This will create the service.
+
+DEBUGGING KUBERNETES:
+
+# kubectl logs nginx-depl-7d459cf5c8-sqmwh   # To check the logs.
+# kubectl describe pod mongo-depl-85ddc6d66-t2ht5  # Check if the container is not starting. Check the Events in describe section. WE can check REstart times, Reason like OOMKilled, time when it terminated, CPU, memory limits.
+# kubectl get nodes
+# kubectl describe nodes <nodeid> # After OOMKill from above, check the resources in node where the pod is residing. CPU, memory etc will be displayed.
+# kubectl exec -it mongo-depl-85ddc6d66-t2ht5 -- bin/bash  # To enter into the container.
+# kubectl delete deployment mongo-depl # To delete the pod.
+# kubectl delete pod mongo-depl-85ddc6d66-t2ht5  # If we delete the pod, it will be created again.
+
+NODE: Its working machine in kubernetes. It can be vm or physical machine.
+
+YAML FILE:
+We have configuration files 1) deployment and 2) service
+Each configuration has 3 parts.
+1) metadata
+2) specification
+3) status: Automatically generated and added by kubernetes. etcd contains the status information.
+
+Service and deployment yaml files are linked via selector field of service to label field of deployment.
+
+yaml files have strict indentation.
+
+
+Layers of abstraction:
+deployment manages a -> replicaset which manages a -> pod is an abstraction of -> container.
+
+NAMESPACES:
+Kubernetes organises the resources in namespaces.
+Its like virtual cluster inside a cluster.
+Kubernetes gives 4 namespaces by default.
+1)kube-system: We should not use and modify this namespace.
+system processes are present inside it.
+2) kube-public: it has publicly accessible data. It has config-map, which contains cluster information.
+# kubectl cluster-info
+3) kube-node-lease: heartbeats of the nodes. Determines the availability of the node.
+4) default: resources you create are present here.
+
+
+# kubectl get namespaces
+# kubectl  create namespace my-namespace # To create the namespaces.
+
+Advantages of namespace:
+1) Instead of creating deployments in 1 namespace, we can group DB resources into 1 namespace, monitoring into 1 namespace etc.
+
+2) 2 teams can create a deployment app with same name but keep in different namespace. Then it works fine.
+3) Production can have 2 deployments of same app. 1 is applicable now and 1 in future. This can be done using namespaces.
+4) 1 team can access one deployment in the namespace in the cluster and other can access another deployment in the other namespace in the cluster. No conflicts. Also resource limit quota per namespace can be done.
+
+
+COMPLETE APPLICATION DEPLOYMENT:
+
+external app -> mongo express external service -> pod (mongo express) -> mongo db internal service -> pod (mongo db)
+
+Mongo db:
+mongo-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: mongodb-deployment
+    labels:
+        app: mongodb
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mongodb
+    template:
+        metadata:
+            labels:
+                app: mongodb
+        spec:
+            containers:
+            - name: mongodb
+              image: mongo
+              ports:
+              - containerPort: 27017
+              env:
+              - name: MONGO_INITDB_ROOT_USERNAME
+                valueFrom:
+                    secretKeyRef:
+                        name: mongodb-secret
+                        key: mongo-root-username
+              - name: MONGO_INITDB_ROOT_PASSWORD
+                valueFrom:
+                    secretKeyRef:
+                        name: mongodb-secret
+                        key: mongo-root-password
+
+mongo-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+    name: mongodb-secret
+type: Opaque
+data:
+    mongo-root-username: dXNlcm5hbWU=
+    mongo-root-password: cGFzc3dvcmQ=
+
+
+# kubectl apply -f mongo-secret.yaml
+# kubectl get secret  # to see secret file.
+# kubectl apply -f mongo-deployment.yaml
+
+
+mongo-express.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-express
+  labels:
+    app: mongo-express
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-express
+  template:
+    metadata:
+      labels:
+        app: mongo-express
+    spec:
+      containers:
+      - name: mongo-express
+        image: mongo-express
+        ports:
+        - containerPort: 8081
+        env:
+        - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: mongo-root-username
+        - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: mongo-root-password
+        - name: ME_CONFIG_MONGODB_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: mongodb-configmap
+              key: database_url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-express-service
+spec:
+  selector:
+    app: mongo-express
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+      nodePort: 30000
+
+
+mongo-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-configmap
+data:
+  database_url: mongodb-service
+
+
+# kubectl apply -f mongo-express.yaml
+# kubectl apply -f mongo-configmap.yaml
+# minikube service mongo-express-service # So that mongodb express service will get external ip for opening in browser.
+
+
+Configmap are for connecting the 2 services. Each deployment will have service, either internal or external.
+
+PODS AND CONTAINERS:
+Every pod has unique ip address. That ip is reachable from all other pods in K8s cluster.
+So pod is like host which has ip and can be accessed from outside.
+But with container, 2 containers can have 2 same ips exposed via different ips.
+So each pod can have multiple containers.
+
+
+POD states:
+1) Waiting
+2) Running
+3) Terminated
+
+Crashloopbackoff: starting and crashing and starting and crashing...
+
+
+
+

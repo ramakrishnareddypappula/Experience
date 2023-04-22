@@ -1,0 +1,140 @@
+
+Metrics, Tracing and logging are really important.
+
+Metrics:
+    number values.
+    eg: output of vmstat command.
+    visualizing in time series of output is nice to have.
+    Metrics say WHEN it failed.
+
+Logs:
+    Raw text.
+    eg: Humio logs explain about the operation using transaction, container output, journalctl output.
+    More expensive to store.
+    Logs say WHY it failed.
+
+Tracing:
+    Use Timestamp + request id.
+    eg: strace command. shows flow of execution.
+    Great for debugging latency issues.
+    Traces say WHERE it failed.
+
+Errors, Traffic, Saturation and Latency. These are golden signals of some problem according to Google SRE book. There can be nany as well.
+
+Latency:
+    Time taken to serve a request.
+    eg: If a job is there in the queue. How long its takes to add to queue, to be there in the queue and being finished.
+        This is latency.
+    The age of the oldest job in the queue is latency.
+    For a web server, we can get latency from logs.
+
+Traffic:
+    How much demand for a service/system.
+
+Errors:
+    Rate of failed requests.
+
+Saturation:
+    How fully system is utilized.
+    Performance may degrade before reaching disk full.
+
+SLI, SLO and SLA:
+    SLO = We need to implement.
+
+    SLA even applies to internal teams within a company.
+    SLA can be based on year or month etc. like 99.9% in a month or year.
+
+    SLO: Its the internal goal by service owner.
+    Tighter than SLO.
+
+    99.5% SLA means error budget is 1.83 days per year or 3.6 hours per month.
+
+    If a SLI is beyond SLO, trigger/fire an alarm.
+
+    Eg of SLI/SLO/SLA
+    if an SLO is 99.9% for a service(uptime, latency, requests failed, requests dropped).
+    We give SLA as 99.5%
+
+    To be specific:
+    uptime : monthly uptime percentage
+    Latency: p99 latency beyond a threshold in a time window.
+        Eg: Alert when p99 exceeds 200 ms for 20 min.
+    Requests failed: final failures in a time window.
+        For some requests, retires is success. These are not counted. Only final failures(some purchases of customer) failed, they are counted.
+        eg: Alert if >50 final failures in 20 min.
+    request dropped: percentage of total over time window.
+        eg: Alert if > 0.1%.
+
+Prometheus Demo:
+    Prometheus is metrics solution for monitoring.
+
+    https://prometheus.io/docs/prometheus/latest/getting_started/
+    The above url has how to download, start, monitor itself, expressions we can use, graph, how to add targets(nodes/pods) to yml file and monitor them.
+
+    All the CPU categories like idle, iowait, irq, steal, system, user, softirq etc are shown in logs.
+
+    It scrapes metrics(pull model).
+    Data is stored in Time Series DataBase(TSDB).
+    Functionalities include query, graphs and alert if there is warning.
+
+    It does not support code logs.
+
+Grafana:
+    Query, visualize, alert on and understand you metrics no matter where they are stored.
+
+
+Main purpose of metrics tools:
+    Gather/report
+    storage
+    visualization
+    aggregation
+    alerting
+
+Google(borgmon) and facebook have their own metrics systems.
+
+All the logging came from syslog protocol.
+
+Based on the severity: emergency, Alert, critical, Error, warning, debug, info.
+
+There are polices in EU like usernames should not be captured in logs.
+
+Search and Analysis: Elastic Search, Hadoop or Amazon Redshift.
+
+Metrics are like
+    MTTD : Mean Time To Detect
+    MTTI : Mean Time To Identify
+    MTTR : Mean Time To Recover
+    MTTK : Mean Time To Know
+    MTTA : Mean Time to Acknowledge
+
+On Call and rotation is required. RCA(Root Cause Analysis) at the end of an incident.
+
+Testing for failure:
+    Smoke tests
+    Performance tests
+    Stress tests
+
+Linux tools: top, vmstat, iostat, mpstat, netstat, ping, sar, tcpdump, dig.
+
+> dig @8.8.8.8 facebook.com # DNS record for facebook.
+
+
+- "Black Box monitoring" can detect symptoms while "White Box monitoring" detects the causes.
+- if your service has suddenly stopped serving customer requests, "Black Box monitoring" alerts best.
+- Metrics are cheaper to store than the monitoring logs.
+- logs are better suited for debugging the system or flow.
+- Logs can be stored in raw-string, Json or binary format.
+- Logs and metrics can be used to trigger alerts.
+- First when the problem occurs, mitigate the problem and then solve. Mitigation and solving are different.
+- Incident manager delegates the live problem to corresponding teams.
+
+
+
+
+
+
+
+
+
+
+

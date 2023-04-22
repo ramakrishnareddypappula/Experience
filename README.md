@@ -12,7 +12,7 @@ Jenkins
 
 docker
 
-SRE
+CI/CD
 
 System design
 

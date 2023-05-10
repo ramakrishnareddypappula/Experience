@@ -33,6 +33,10 @@ DNS cacheing is done to make data available as close to client.
 
 127.0.0.1 , ::1 localhost is used to configure the loopback interface.
 
+A record: hostname is resolved to ipv4 address.
+AAAA record: hostname is resolved to ipv6 address.
+PTR record: ip address is resolved to hostname.
+
 Mail Exchangers(MX): Its refers to a host which is acting as Message Transfer Agent(MTA). MTA sends electronic mail from client to server and vice-verse.
 
 Name server(NS): This Implements the network service for providing the responses against the directory service.

@@ -1,0 +1,115 @@
+Grapql automation
+
+- Graph query language
+- opensourced
+- Developed by FB. Handled by diff communities now.
+- Its also an API standard
+- Its more powerful and efficient
+
+Example:
+In REST API
+1) Get userid : /users/<id>
+2) For that userid, get posts: /users/<id>/posts
+
+Graphql:
+1) Describe your data
+
+type Project {
+	name : string
+	tagline : string
+	contributors : [user] --> list
+}
+
+2) Ask what you want
+project (name: "Graphql") {
+	tagline   # I want what is the tagline in project name = graphql
+}
+
+3) Get results:
+project {
+	"tagline" : "A query language"
+}
+
+Schema:
+type User {
+	id : ID!
+	username: string!
+	email: string!
+	posts: [post!]!
+	followers:[User!]!
+}
+! = field is non-nullable, always has value.
+1)  object types: User . It represent types of data that can be queried or manipulated through an API. Each object type defines set of fields.
+2) Fields: id, username, posts, followers etc. Eacj field has type and value.
+3) Queries: Queries define entry points for fetching data from API.
+
+   eg: query{
+    getUser(id: "123") {
+    id
+    username
+    posts{
+          title
+		   comments{
+                   content
+                   }
+    		author{
+    				username
+    				}
+    		}
+    }
+   }
+   we only want id, username for user with id = 123, In the posts we need title etc.
+
+4) Mutations: For modifying or updating data in API. Similar to queries but used for creating/updating or deleting data. Mutation specify input params and return type for operation.
+
+create:
+	mutation {
+  		createUser(input: {
+    		username: "john_doe",
+    		email: "john.doe@example.com"
+  		}) {
+    	id
+    	username
+    	email
+  }
+}
+we want to create user with name and email and want retrieve fields for user, id, username and email.
+
+update:
+
+mutation {
+  updateUser(id: "123", input: {
+    email: "new.email@example.com"
+  }) {
+    id
+    username
+    email
+  }
+}
+
+delete:
+
+mutation {
+  deleteUser(id: "123") {
+    id
+    username
+    email
+  }
+}
+
+
+5) Subscriptions: Define Real time data streaming capabilities in the API. This allows clients to subscribe to changes in data and receive updates in real-time. 
+
+subscription {
+  newPost {
+    id
+    title
+    content
+    author {
+      id
+      username
+    }
+  }
+}
+
+

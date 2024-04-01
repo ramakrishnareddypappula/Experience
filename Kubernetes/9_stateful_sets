@@ -1,0 +1,13 @@
+
+Stateful sets are used for applications like dbs, message queues and other applications that require stable network identities.
+
+During pod restarts, pod name can change. Stateful sets helps to overcome this by providing the unique name to each pod.
+In stateful sets, ordering and uniqueness is guaranteed.
+eg: pod name can be web-0, web-1 etc. If a pod web-1 does, it will always be created with web-1.
+
+While deleting as well, first web-1 is deleted and then web-0 is deleted.
+
+Just like deployments, stateful sets also provide ability to scale up/down replicas, update the pods and perform rolling updates.
+
+For stateful sets we cannot use any service. We need to use headless service.
+In headless service, your pod or app can directly use dns names for writing into pod.

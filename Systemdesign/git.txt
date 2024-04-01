@@ -1,0 +1,13 @@
+
+How git works?
+    git is a distributed version control system that allows multiple users to collaborate on and track the project.
+    Each user creates a local copy of the repo and then sync it with remote repo.
+    When users wants to make a change, creates a local branch, makes the changes, which does not effect the main branch.
+    Once changes are done, they "commit" their changes to local repo. Each commit has unique SHA-1 hash value.
+    Once user is ready, they "push" their changes to the remote repo. This updates the remote repo.
+    Other users can "pull" the changes from remote repo.
+    One of the key features is to track the history of changes made to the file.
+    Git allows multiple users to work on different features at same time.
+
+git algorithm?
+    git uses distributed version control algorithm called "Content Addressable FileSystem"(CAFS)

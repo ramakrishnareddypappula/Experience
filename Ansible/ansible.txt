@@ -213,7 +213,7 @@ ANSIBLE FOLLOWS IDEMPOTENCY:
 If there is no change then ansible wont do the task.
 
 USING FETCH MODULE WE CAN DOWNLOAD FROM NODES TO ANSIBLE SERVER:
-> ansible x.x.x.x -m fetch -a "src=/opt/abc dest=~/" # This will create file keeping samr folder structure as source file folder structure.
+> ansible x.x.x.x -m fetch -a "src=/opt/abc dest=~/" # This will create file keeping samr folder sucture as source file folder structure.
 
 > ansible x.x.x.x -m fetch -a "src=/opt/abc dest=~/ flat=yes" # recommended. This will correctly copy to ~/ folder.
 

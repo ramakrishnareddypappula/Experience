@@ -14,47 +14,43 @@ Datalink layer: frames
 Ethernet, switch, bridge.
 Physical layer: bits. Fiber, hubs, repeaters.
 
--> IPv4 header: minimum size 20 bytes(header without data), max is 65535 bytes.
-VIDETIFFTPCSDO
-Version: It is 4 for ipv4.
-IHL(Internet Header Length): It specifies the size of the header.
-Differentiated Services Code Point(DSCP): Originally used for Type of Service(TOS). It is used in VOIP(Voice Over IP).
-Explicit Congestion Notification(ECN): It tells about network congestion without dropping the packets.
-Total Length: Entire packet size in bytes. Header + data.
-Identification: It uniquely identifies the group of fragments of IP datagram.
-Flags: They are used to identify fragments.
- bit 0: Reserved. Must be zero.
- bit 1: Dont fragment. If this is set and if fragmentation is required for routing the packet, then router will drop the packet.
- bit 2: More fragments. For unfragmented packets this field is cleared. For fragmented packets, this field is set for all except for last.
- For last fragment this field has non-zero value for differentiating from unfragmented packet.
-Fragment offset: It is used to identify the fragmented packets. First fragment has value fragment offset value of 0.
-TTL(Time To Live): In practice it is hop count. When the packet arrives at the router, It decreases the value by 1. When TTL becomes 0, router discards the packet and sends ICMP response to sender. default is 64. max is 255.
-Protocol: This field identifies the protocol used by data portion.
-Header Checksum: Used for error checking. When packet arrives at the router, router calculates the checksum for the header and compares with checksum field.
-If mismatch, then it discards the packet. When packet arrives at router, TTL value is decreased, Hence checksum needs to be calculated every time.
-Source Ipv4 address: senders address. During NATing this address may be changed.
-Destination Ipv4 address: receivers address. During NATing this address may be changed.
+Ipv4 header: 
+Version: version used. Here it is set to 4.
+IHL(Internet Header Length): Specifies the ipv4 header. 
+ipv4 header length depends on IHL. It varies from 20 to 60 bytes. However it can increase beyond 60 with options field.
+ipv4 header length = IHL * 4
+IHL varies from 5 to 15. If IHL is 5, header is 20. If IHL is 15, header is 60.
+Type of Service(TOS): Originally for QOS(Quality Of Service). It is used in VOIP(Voice Over IP).
+  DSCP: Differentiated Service Code Point.
+  		It indicates priority level of packet. Differentiates traffic into classes such as real time traffic(voice , video), interactive traffic(SSH , telnet), best effort traffic(web browsing).
+  		Uses QOS policies in routers and switches.
+  	ECN: Explicit Congestion Notification
+  		This allows routers to notify congestion within network. The router sets CE bit when there is congestion.
+Total length: Ipv4 header length + data payload. Max value 65355 bytes.
+Identification: Used for fragmentation and reassembly. Each packet has unique value.
+ eg: A packet size is 2000 bytes and has identification number 12345. Because of MTU it needs to be fragmented. Then fragemented packets will have same identification number 12345. Identification is used in conjunction with fragment offset. This value will be ever increasing in fragmented packets.
+ So during reassembly, using identification field all fragmented are group and using fragment offset they are sorted.
+Flags: During fragmentation and reassembly, flags are used.
+	Reserved(bit 0): For future use. set to 0.
+	Dont fragment(DF bit 1): If this is set and packet size is more than MTU. If router needs to fragment, then it should drop the packet and send "Destination Unreachable - Fragmentation Needed" to sender.
+	More Fragments(MF bit 2): This flag is set to 1 for all except for last fragment in fragmented packets. If MF set is received by receiver, the receiver should understand that more fragments are supposed to arrive.
+Fragment offset: Used in fragmentation and reassambly. It is used in conjunction with identification field. It specifies offset relative to begining to the original packet.
+TTL(Time To Live): Decremented by 1 at each router. Represents max number of hops to reach destination.
+Protocol: Identifies the protocol used in data portion. eg: TCP, UDP, ICMP.
+Header checksum: Used for error detection.
+source ip: Specifies source ipv4 address.
+destination ip: specifies destination ipv4 address. 
 
-Options: Its not often used.
+ipv4 forwarding:
+ 	>sudo sysctl -w net.ipv4.ip_forward=1
+ 	Allows the host to act as router for packet forwarding.
 
-Fragmentation:
-When the router receives the packet, it examines and determines the out going interface. If the MTU(Maximum Transmission Unit) is smaller than packet size,
-dont fragment field is set to zero, router will fragment the packet.
-Each fragment will have
-1) Total length field is fragment size.
-2) More fragments is set for all fragments except for last. Last will have non-zero value.
-3) fragment offset field except for first fragment is set. For first fragment it is zero.
-4) Header checksum is recomputed.
+Enable Reverse Path Filtering:
+	>sudo sysctl -w net.ipv4.conf.all.rp_filter=1
+	Enable reverse path filtering, which helps prevent ip spoofing attacks.
 
-It is also possible that 1 router can fragment the packet and another router can again fragment the fragments.
 
-Reassembly:
-The receiver identifies the packet is fragmented when
-1) more fragments field is set(except for last)
-2) fragment offset field is set(except for first)
 
-based on source, destination, protocol ID and identification field the receiver identifies fragments of a packet.
-The receiver reassembles based on more fragments and fragment offset field.
 
 -> Ipv6: minimum size is 40 bytes.
 VTFPNHSD
@@ -68,26 +64,178 @@ Source address: source ipv6 address.
 Destination address: destination ipv6 address.
 
 
--> UDP header: 8 bytes
-Source port: sender's port number.
-Destination port: Destination port number.
-length: length(UDP header + UDP data).
-checksum: This field is used for error checking.
+UDP header: 8 bytes
+Source port 2 bytes: sender's port number.
+Destination port 2 bytes: Destination port number.
+length 2 bytes: UDP header + UDP data payload in bytes.
+            example: 8 (header length) + 20(payload length) = 28. 
+checksum 2 bytes (optional): This field is used for error detection.
+
+UDP is connectionless, etc so there are no configurable parameters.
+
 
 TCP header: 20 bytes
-Source port: sender port.
-Destination port: receiver port.
-Sequence number: If SYN flag is set then it is the initial sequence number.
-else it is the accumulated sequence number of first data byte number.
-Acknowledge number: If ACK flag is set then the value is the next sequence number that the sender of ACK is expecting.
-Data offset: tells the size of tcp header.
-Reserved: future use and set to 0.
-Flags - 9 bits. 9 flags
-Window size: receive window. sender of segment is willing to receive.
-Checksum: Used for error-checking mechanism. Sender runs algorithm and keeps checksum value in this field. Again the receiver runs and compares. If checksum not matches then it is dropped.
-Urgent pointer: If URG flag is set, This segment is prioritized over others.
-options: maximum segment size, window scale are some of options.
-Padding: TCP header ends and data begins on 32 bit boundary. 0's are added as padding.
+
+Source port: sending port of host.
+Destination port: destination port of receiving host.
+Sequence number: its a 32-bit field. When client initiates a connection to server, both the client and server randomly select Initial Sequence Number(ISN). Say client's ISN is 1000 and server's is 5000. If client sends a segment of 100 bytes of data. Then sequence numbers will be from 1000 to 1099.
+Then server sends acknowledgement with number 1100. If segment arrives out of order due to network delays or routing, server uses sequence number to reorder them. If client sends more than (2 ^ 32) - 1 data, TCP handles it using sequence number wrapping.
+Ack number: If ACK is set, this field contains the next sequence number the sender is expecting to receive. It acknowledges receipt of all prior bytes.
+Data offset: This field helps to determine the exact length of TCP header and locate the begining of data payload accurately. TCP allows options fields like MSS(Max Segment Size), Window Scale factor and timestamps. Data offset allows for that.
+ If the Data offset is set to 5, TCP header is 5 * 32 bits = 160 bits long.
+Reserved: 6 bit reserved for future use. Typically set to 0.
+Flags: 1 bit flags. Can be set(1) or not set(0).
+	URG(Urgent): To indicates the presence of urgent data in TCP segmennt. URG flag is used in conjunction with URG pointer.
+	Example: If URG flag is set and Urgent Pointer is 100 bytes. This indicates 100 bytes of data starting from sequence number specified in TCP header are considered urgent.
+	ACK(Acknowledgement): If ACK is set, the Ack number field containns the next sequence number that the sender of segment is expecting to receive.
+	PSH(Push): Indicates receiver should push buffered data to application immediately instead of waiting for TCP buffer to fill up.
+	Example: Interactive or real-time apps which require low latency.
+	RST(Reset): Indicates sender wishes to reset to connection immediately. This flag is used in unexpected or erroneous condition such as malformed segment.
+	SYN(Synchronize): Used to establish TCP connection. When this is set, sender wants to synchronize sequence number with receiver during 3 way hand shake.
+	FIN(Finish): Graceful termination of TCP connection. Sender has finished sending data and wishes to close connection. Its FIN flag is typically included in final segment of TCP termination process.
+Window Size: The amount of data(in bytes) the sender can transmit before expecting ACK from receiver.
+The window size is receiver window size. Suppose 4096 bytes is window size, the receiver can accept 4096 bytes without waiting for ack.
+Say 1500 bytes is sent. The window size is reduced by 1500 bytes. If window buffer is not full, server can wait or send ack. If it sends ack, its updates ack number to indicate the next expected seq number it is wanting to receive. Server will also updated window size in ack message. The ack mesg will contain ack number(ex: 300) and window size(2596 bytes = 4096 - 1500 bytes).
+Checksum: 16 bit field for error-checking TCP header and data. It detects errors such as bit errors, packet corruption or transmission errors. The sender calculates the checksum for both TCP header(say 20 bytes) and Data Payload(100 bytes) using algorithm stores the value(say 0XABCD) in checksum. The receiver again calculates the checksum and compares it with sender value. If there is mismatch, receiver will discard and request for retransmission.
+Urgent Pointer: 16 bit field used in conjunction with URG flag to indicate urgency of segment.
+options: Various options like MMS(Max Segment Size), Window Scale Factor, Timestamps etc.
+Padding: If options field does not fill entire header, padding is added to ensure that the header ends in 32 bit boundary.
+
+MSS: Max Segment Size.
+MSS value determines the largest TCP segment that can be sent over TCP connection.
+MSS is negotiated during 3 way handshake(in SYN segment) and lowest of sender and receiver is selected. If data more than MSS need to be transmitted, then fragmentation is done enough to fit within MTU(Max Tranmission Unit) for avoiding IP fragmentation.
+	Max MTU in ethernet networks used for LANs/WANs/ is 1500 bytes.
+	MSS = MTU - IP header size - TCP size
+		  1500 - 20  - 20 = 1460 bytes.
+
+TCP fragmentation:
+Process of breaking down the TCP segments into smaller units to accomodate MTU is called fragmentation. 
+
+TCP Windowing: Or TCP window Scaling Or TCP congestion window
+Control the flow of data between 2 hosts.
+Initial window: When connection is established, sender and receiver negotiate initial window size.
+Dynamic adjustment: As sender sends, it maintains sliding window of unacknowledged segments.
+congestion control: If congestion is detected, sender reduces the tcp window size.
+Window scaling: Window scaling allows for large window size, enabling more efficient utilization of high speed networks. Max window size is 65535 bytes.
+Flow control: FLow control allows receiver to regulate the rate of transmission adjusting the size of TCP window. The receiver advertises its window size to sender indicating amount of available buffer space.
+
+TCP Congestion control:
+There TCP Congestion control algorithms whose main goal is to avoid packet loss and optimize throughput.
+Algorithms:
+AIMD(Additive Increase, Multiplicate Decrease) Algorithm: TCP increase sending rate linearly until it detects signs of congestion. Upon detecting congestion, TCP reduces sending rate multiplicatively.
+Slow Start algorithm: slow start and then quickly ramps up. TCP exponentially increases its sending rate until it reaches threshold known as congestion window.
+Congestion avoidance: Once TCP reaches congestion window, it switches to congestion avoidance mode, where it increases its sending rate more gradually. During this time, to avoid congestion, tcp increases congestion window size linearly in response to acks received from receiver, aiming to maximize throughput without causing congestion. 
+Fast Recovery: When tcp detects packet loss it enters fast recovery phase instead of reverting to slow start.   
+
+Linux tc command:
+tc: manipulate traffic control settings
+   qdisc: Queueing discipline. When kernel wants to send packet to an interface, it is enqueued to qdisc configured on interface. Immediately kernel tries to get as many packets from the qdisc.
+   classes: some qdiscs contain classes
+
+   limit the rate of outgoind traffic on eth0 interface to 1 MBPS with burst size of 15 KB
+   > tc qdisc add dev eth0 root tbf rate 1mbit burst 15k
+   tc: command
+   qdisc: queueing discipline
+   add: indicates new qdisc to be added to network intf.
+   eth0: intf
+   root: qdisc should be attached at root level intf.
+   tbf: Token Bucket filter discipline. Used for traffic shaping.
+   rate: rate limit for outgoing traffic.
+   burst: specifies burst size.
+
+   # Create a class for VoIP traffic with higher priority (e.g., classid 1:1)
+   > tc class add dev <interface> parent 1: classid 1:1 htb rate <voip_rate> ceil <voip_rate>
+
+   Implement QoS policies to prioritize certain types of traffic (e.g., VoIP).
+   >tc qdisc add dev eth0 root handle 1: htb default 10
+
+sysctl commands:
+	Increase Maximum Receive Buffer Size:
+	> sysctl -w net.core.rmem_max=8388608
+
+	Increase Maximum Send Buffer Size:
+	>sysctl -w net.core.wmem_max=8388608
+
+	Adjust TCP Receive Buffer Sizes: 
+	> sysctl -w net.ipv4.tcp_rmem='<min_size> <default_size> <max_size>'
+	> sysctl -w net.ipv4.tcp_rmem='4096 65536 8388608'
+
+	Adjust TCP Send Buffer Sizes:
+	> sysctl -w net.ipv4.tcp_wmem='<min_size> <default_size> <max_size>'
+	> sysctl -w net.ipv4.tcp_wmem='4096 87380 8388608'
+
+	Set TCP Memory Usage Limits:
+	> sysctl -w net.ipv4.tcp_mem='<low_pressure> <pressure> <high_pressure>'
+	> sysctl -w net.ipv4.tcp_mem='8388608 12582912 16777216'   # example val
+	low pressue is minimum amount of memory used by tcp stack.
+	pressue: When memory usage reaches this threshold, tcp may start reducing size of buffers.
+	high pressue: When memory usage exceeds this threshold, tcp aggressively tries to free up memory by reducing buffer sizes.
+
+	Enable TCP MTU Probing:
+	> sysctl -w net.ipv4.tcp_mtu_probing=1   # enable
+	> sysctl -w net.ipv4.tcp_mtu_probing=0   # disable
+	MTU probing is a feature that allows TCP to dynamically adjust MSS based on Path MTU discovery(PMTUD). PMTUD is used to discover MTU size of network path between 2 hosts.
+	Whenenabled, TCP adaptively adjust MSS to avoid fragmentation and maximize efficiency of data transmission over network path. Useful in traversing tunnels and VPN connection scenarios.
+	When enabled, TCP actively checks MSS of sending packets with Dont Fragment(DF) set and monitor for ICMP fragmentation indicating that packet was too large to be forwarded without fragmentation.
+
+	Enable TCP Timestamps
+	> sysctl -w net.ipv4.tcp_timestamps=1
+	Allowshosts to include timestamps in TCP. Used for measuring round trip times, calculating retransmission timeouts. It can be part of tcp header options.
+
+	Retransmits
+	> sudo sysctl -w net.ipv4.tcp_retransmits=10   #default is 15.  # -w = modify
+	> sysctl net.ipv4.tcp_retransmits # to display the current value.
+	TCP segment is sent and ack is not received within the retransmission timeout period, sender retransmits it. This process continues until tcp_retranmits param. For all retansmits, the connection is closed or recovery procedures are initiated.
+
+	Duplicate detection:
+	Identified by the receivers. They occur due to network issues, such as packet reordering or retransmissions. The receiver checks the sequence number with its expected sequence number. If its not expected, it checks the receiver buffer if the sequence already exists. If yes, duplicated is detected.
+
+	Fast retransmission:
+	If the receiver detects some missing segments, it sends duplicate acks for the last correctly received segment. The sender uses these duplicate acks as signal to retransmit the missing segment without waiting for timeout.  
+
+
+	Enable TCP SACK (Selective Acknowledgments):
+	> sysctl -w net.ipv4.tcp_sack=1
+	Selective Acks(SACK) is extension to TCP that allows receiver to inform sender about segments that are received out of order or are missing.It reduces unnecessary retranmissions and improves overall efficiency and performance.
+	Instead of only acknowledging the last contiguous byte, the receiver includes a list of non-contiguous blocks or "holes" in the received data. Each block indicates a range of sequence numbers that have not been received.
+	ex: Segment A: Sequence numbers 1000 to 1999
+		Segment B: Sequence numbers 2000 to 2999
+		Segment C: Sequence numbers 3000 to 3999 (lost)
+		Segment D: Sequence numbers 4000 to 4999 (lost)
+		Segment E: Sequence numbers 5000 to 5999
+	The server sends an ACK acknowledging the receipt of Segments A and B. server includes Selective Acknowledgment blocks indicating the missing segments C and D.
+
+
+	Standard TCP ACK: Cumulative acks
+	A cumulative ack indicates highest sequence number of contiguous bytes received successfully. If segments out of order received. only acks last contigous byte.
+	ex: segment A with seq 1000 to 1999 are received, then receiver will send 2000.
+	    segment B with seq 2000 to 2999 are received, then receiver will send 3000.
+	    This is cumulative acks.
+
+
+	Enable TCP Window Scaling:
+	> sysctl -w net.ipv4.tcp_window_scaling=1
+
+	Enable TCP Fast Open:
+	> sysctl -w net.ipv4.tcp_fastopen=0  fast open is disabled
+	> sysctl -w net.ipv4.tcp_fastopen=1  client-side mode, client includes initial SYN packet. Server must also support TCP fast open.
+	> sysctl -w net.ipv4.tcp_fastopen=2    server-side mode. server accepts data during SYN and sends data in SYN-ACK .
+	> sysctl -w net.ipv4.tcp_fastopen=3   full mode. both client and server send and receive data durinng initial handshake.
+
+	TCP Fast Open(TFO) is extension of TCP that enables data to be exchanged during initial TCP handshake, reducing latency. With TFO, data is included in initial SYN packet, allowing client to send data to server before tcp handshake completion.
+
+	TCP Congestion Control Algorithms:
+	> sysctl -w net.ipv4.tcp_congestion_control=<algorithm>
+	Algorithms
+	Reno: oldest and most widely used. It uses slow start mechanism and increase window side. When packet loss occurs, reno reduces congestion window size by halving it and uses slow start to ramp up again.
+	New Reno: It improves reno behaviour during fast retransmit and fast recovery phases.
+
+	TCP buffering:
+	TCP receivers store out of order segments in buffers. It receiver receives segment Sequence nnumber great what it is expecting, receiver buffers it for later processing. 
+
+
+
+
 
 TCP and UDP comparison:
 -TCP rearranges segments according to sequence number.
@@ -95,49 +243,8 @@ TCP and UDP comparison:
 -Error-free data transfer.
 -Flow control: limits the rate of sender transfers for guarantee delivery.
 
--> What is TCP windowing?
-As TCP is connection-oriented protocol, both ends of connection keep track of data.
-Lost or jumbled packets are reordered.
-Hosts during connection formation, agree to limit the amount of unacknowledged data that it can transit at any given time.
-This is called window size. This is 16-bit field in TCP header.
-Suppose, Host A and B agree to allocate 32KB buffer size for incoming data.
-So Host A can send up to 32768 bytes(Maximum Segment Size MSS) before it must pause and wait for ack. Host B can keep in buffer.
-If the ack is not sent, the sender will stop and wait. This is called stop and wait protocol.
-When the ack is being sent, Host B can report that upper-layer application is processing at half the rate. Then Host B
-can reduce the window size to 16 kb. If the Host B buffer is full, It can set the window size as 0, which means it cannot accept more data.
 
-Example: Assume there is 10 Mbps connection setup between 2 hosts with 80 ms 1 way delay.
-Maximum window size of 65535 bytes. Calculate data transmission
 
-bandwidth * delay = (10 000 000/ 8 bytes) * 0.08 sec = 1000000 bytes
-
-->Receive window?
-who sends out windows sizes to sender.
-Number of bytes the sender can still send without needing ack from the receiver.
-
--> Congestion window?
-Sender detects there is packet loss in the network and it will cut the window in half.
-The sender detects packet loss when it fails to receive the ack of packet with in estimated timeout.
-
--> TCP Flow control?
-TCP will help ensure the sender is not overwhelming the receiver by sending more packets than it can handle it.
-Slow down or speed up. TCP implements flow control by increasing or decreasing window size.
-
--> URG flag?
-This flag is used to inform receiving station that certain data within segment is urgent and should be prioritized.
-
-TCP Flags:
-There are 6 control flags.
-Each flag is 1 bit. We can set or unset.
-1) SYN : synchronize the communication.
-2) ACK : Acknowledge the syn segment. sent from receiver to sender.
-3) FIN : Used to close the connection.
-4) URG: If this flag is set, it indicates this segment has priority over other segments.
-5) PUSH : Sent by sender to indicate flushing for TCP buffers.
-6) RST : Reset the connection.
-7) NS:
-8) CWR: Congestion window reduced.
-9) ECE: Explains about Explicit Congestion Notification.
 
 TCP FLOW:
 1) Sender will segment to receiver to initiate a connection. SYN segment. Lets say sequence number is 0. SYN flag in control bits is set.
@@ -152,33 +259,6 @@ FIN is sent by receiver. FIN bit is set. ACK is sent.
 
 https://www.youtube.com/watch?v=F27PLin3TV0
 
-Error detection:
-Sequence numbers allow receivers to identify duplicate segments and also to reorder the segments.
-Acknowledgements allow senders to determine if there is a segment loss.
-However TCP has weak checksum computation and it uses layer 2 CRC for more strict checking.
-
-Denial of service.
-With the spoofed ip(Creating ip packets with false source ip address in order to damage server) repeatedly sending assembled SYN packets followed by many acks to create bogus connections. Is called SYN flood attack is 1 varient of DOS. Also PUSH and ACK floods are other varients of DOS attacks.
-
-Duplicate retransmission:
-If a single packet is lost. The receiver will send ack 3 times. Then sender will retransmit the lost packet.
-
-Timeout retransmission:
-Whenever the packet is sent, sender sets the timer. If the sender does not receive ack within the timeout of timer set, it will retransmit the packet. After retransmit, the sender will set timer of double the previous time.
-
-Flow control:
-Flow control is used to avoid the sender to send data too fast.
-eg: If pc sends data fast, mobile will be overwhelmed.
-TCP sliding window flow control protocol.
-sender can send upto receiver buffers max size. Then it will wait for ack.
-If sender receives with window size 0. Sender stops sending and starts persistent timer.
-After timer expires it will send small size packets.
-If the receiver acks with small window size, every time for many packets, this is called silly window syndrome as it is inefficient to send small size packet with huge TCP header.
-
-Maximum segment size:
-It is the largest amount of data(bytes) that tcp will receive in 1 segment.
-
-Ideally it should minimum to avoid fragmenting which allows packet loss and retransmission.
 
 -> Types of errors in TCP/UDP?
  - Incorrect order of packets
@@ -503,3 +583,5 @@ In ipv4, autoconfiguration is done using DHCPv4 server.
 In Ipv6, autoconfiguration to generate link-local address.whether or not router advertisement messages present.
 
 Using SLAAC(stateless address autoconfiguration) ipv6 address can be obtained.
+
+

@@ -1,0 +1,448 @@
+ end to end testing framework for web applications.
+
+automatic waiting, real time reloads and debug directly on browser.
+
+Built on javascript and runs directly on browser.
+
+Cypress is asynchronous in nature. 
+
+    1) Cypress handles asynchronous behavior automatically by waiting for commands and assertions to complete before proceeding. This eliminates the need for explicit waits or timeouts in test code.	
+
+    2) In cypress, commands are chainable, meaning sequence of commands can be executed together.
+
+// Example of chaining Cypress commands
+
+cy.get('input').type('Hello').should('have.value', 'Hello');
+
+
+
+// Example of an assertion using .should()
+
+cy.get('button').should('be.visible').click();  
+
+    3) support for promises. cypress supports working with promises explicitly using .then() allowing you to handle asynchronous actions.
+
+// Example of a Cypress command that returns a Promise    
+
+cy.get('button').click().then(() => {
+
+         // This code executes after the button click command has completed
+
+        });
+
+    4) In assertions, cypress automatically waits and retries until script timeout or passes.
+
+async/wait functions:
+
+In Cypress, you can use async/await to handle asynchronous behavior, such as waiting for commands or assertions to complete.
+
+
+
+describe('Async/Await Example', () => {
+
+  it('should wait for element to be visible using async/await', async () => {
+
+    // Use await with Cypress commands to wait for them to complete
+
+    await cy.visit('/'); // Visit the homepage
+
+    await cy.get('button').click(); // Click a button
+
+
+
+    // Use await with Cypress assertions to wait for them to complete
+
+    await cy.get('input').should('be.visible'); // Assert input is visible
+
+    await cy.get('input').type('Hello'); // Type into the input
+
+    await cy.get('input').should('have.value', 'Hello'); // Assert input value
+
+  });
+
+});
+
+
+
+Inside the test case, we use the async keyword to mark the test function as asynchronous.
+
+We use await with Cypress commands like cy.visit(), cy.get().click(), cy.get().should(), and cy.get().type() to wait for each command to complete before moving on to the next line of code.
+
+We also use await with Cypress assertions like .should('be.visible') and .should('have.value', 'Hello') to wait for the assertions to complete before moving on.
+
+
+
+Time travel: Allows us to see every step. We can go back and move forward to see what script is doing in every step. Hence debugging will be easier.
+
+Real time reloading: As you modify the code and save, reload and run will happen.
+
+Dynamic test execution: Cypress executes dynamically meaning it interacts with application in realtime simulating user actions and responses. 
+
+Automatic waiting: Cypress framework is unique this way. It waits for elements and commands before proceeding to execution. It eliminates the need of explicit waits and manual timeouts.
+
+screenshots and videos: 
+
+Screenshots
+
+cy.screenshot() is used to take screenshot. Entire browser screenshot is taken.
+
+cy.screenshot('abcd')  # abcd is the name of screenshot.
+
+by default screenshots are saved in cypress/screenshots folder.
+
+we can customize this by changing following in cypress.json folder.
+
+{
+
+"screenshotsFolder" : "/abcd/xyz"
+
+}
+
+we can take screenshots when the test step fails as well. Change following in cypress.json folder.
+
+{
+
+"screenshotOnRunFailure" : true
+
+}
+
+Videos:
+
+we can take videos using following in cypress.json folder.
+
+{
+
+"video":true
+
+}
+
+Also, we can change video formatting values
+
+{
+
+"video": true,
+
+"videoCompression": 32,
+
+"videoUploadOnPasses": false
+
+}
+
+videos are uploaded to cypress/videos folder by default.
+
+
+
+Sample Cypress example:
+
+describe("browsing a website", () => {
+
+it("visit a website", () => {
+
+cy.visit("https://www.cypress.io/");
+
+cy.title().should("include", "Cypress");
+
+})
+
+})
+
+
+
+describe() and it() are mocha functions for defining test suites and test cases.
+
+describe() is used to group 1 or more cases together. It takes 2 params. 1 is a string that describes the test suite. 2 is a call back function that contains the test cases or other nested describe() functions.
+
+
+
+it() is used to define individual test cases. It is present within describe block.
+
+It also takes 2 params. 1 is a string that describes the test case. 2 is a call back function that contains the test steps or assertions.
+
+
+
+Other mocha functions are before, after, beforeEach and afterEach. 
+
+before: before all test cases are run.
+
+beforeEach: before each test case is run.
+
+cy.title().should('include', 'Cypress') is a chai assertion. It checks if page title contains Cypress tile. if assertion fails, test case fails.
+
+Click on element: Also interact with buttons, links, checkboxxes
+
+cy.get("button").click()    # with the specific selector
+
+cy.get("#mybutton").click()   # based on id
+
+cy.get(".parent-class").find("button").click()   # based on classname
+
+cy.contains("a",  "click me").click() #based on specific text.
+
+input text on element:
+
+// Typing text into an input field with a specific selector
+
+cy.get('input[type="text"]').type('Hello, world!');
+
+
+
+// Typing text into an input field with a specific ID
+
+cy.get('#myInput').type('Cypress is awesome!');
+
+
+
+// Typing text into an input field with specific placeholder text
+
+cy.get('input[placeholder="Enter your name"]').type('John Doe');
+
+
+
+// Typing text into an input field within a specific parent element
+
+
+cy.get('.parent-class').find('input').type('Testing with Cypress');
+
+
+
+To print and debug in cypress:
+
+
+
+cy.log(), cy.debug() and time travel to rewind and debug.
+
+Cypress custom commands:
+
+To reduce code duplication and easier to maintain, cypress provides custom commands.
+
+describe("login to webside" , () => {
+
+it("should login", () => {
+
+cy.login("username", "password")
+
+})
+
+})
+
+
+
+Now for login we need to write function definition. custom commands are written in support folder(cypress/support) . 
+
+Cypress.Commands.add('login', (username, password) => {
+
+  cy.visit('/login');
+
+  cy.get('#username').type(username);
+
+  cy.get('#password').type(password);
+
+  cy.get('button[type="submit"]').click();
+
+
+});
+
+
+
+
+
+Fixtures:
+
+fixtures are a way to provide external static data to your tests.
+
+Fixture files are JSON or plain text files. 
+
+typically stored in the fixtures directory
+
+Fixtures are loaded using cy.fixture()
+
+Once loaded, fixture data can be accessed within your test using .then() or aliasing.
+
+describe('Using Fixtures in Cypress', () => {
+
+  it('should load fixture data', () => {
+
+    // Load fixture data from the users.json file
+
+    cy.fixture('users').then((users) => {
+
+      // Use the loaded fixture data in the test
+
+      expect(users).to.have.lengthOf.at.least(1);
+
+      expect(users[0]).to.have.property('name', 'John Doe');
+
+    });
+
+  });
+
+
+
+  it('should use fixture data with aliases', () => {
+
+    // Alias fixture data for easy reference
+
+    cy.fixture('users').as('usersData');
+
+
+
+    // Access fixture data using the alias
+
+    cy.get('@usersData').then((usersData) => {
+
+      // Use the alias to access fixture data in the test
+
+      expect(usersData).to.have.lengthOf.at.least(1);
+
+      expect(usersData[0]).to.have.property('name', 'Jane Smith');
+
+    });
+
+  });
+
+
+});
+
+
+
+.cy.js
+
+
+
+test cases which are called specs in cypress are written spec files(.cy.js)
+
+
+
+
+
+cypress methods:
+
+		cy.visit(): Loads a webpage. eg: cy.visit('https://www.example.com')
+		cy.get(): Selects DOM elements. eg: cy.get('button').contains('Submit')
+		cy.contains(): Finds elements containing specific text.eg: cy.contains(element)
+		cy.click(): Clicks on an element.
+                      eg: cy.click() / cy.click({force: true}) / its optional parameter. Even when not visible or covered by other elements, will be clicked.
+
+cy.get('button').click({ x: 100, y: 200 }); clicks the element at cordinates 100 and 200. 
+
+		cy.type(): Types into form elements.
+cy.get('input').type('Hello, world!', { delay: 100 });  // delay the keystoke by 100 milli sec.
+
+		cy.should(): Asserts that a DOM element matches certain conditions.
+		cy.wait(): Pauses the test execution for a specified amount of time or until a specific condition is met.
+		cy.intercept(): Intercepts and stubs network requests.
+cy.intercept('GET', '/api/data', { fixture: 'exampleData.json' }).as('getData');
+
+cy.intercept('GET', '/api/data', (req) => {
+
+  req.reply({ body: 'Mocked response', statusCode: 200 });
+
+}).as('getData');
+
+
+
+		cy.request(): Makes an HTTP request.
+cy.request({
+
+  method: 'POST',
+
+  url: '/api/login',
+
+  headers: {
+
+    'Content-Type': 'application/json'
+
+  },
+
+  body: {
+
+    username: 'user123',
+
+    password: 'password123'
+
+  }
+
+}).then((response) => {
+
+  // Assertions or further actions based on the response
+
+});
+
+
+
+cy.intercept() vs cy.request():
+
+cy.intercept for mocking responses and cy.request for real responses.
+cy.intercept simulates various network scenarios and cy.request interacts with external APIs.
+cy.intercept used to intercept and stub network requests. cy.request make HTTP requests from your tests to external servers or APIs
+
+
+		cy.route(): Aliases cy.intercept() for easier migration from older versions of Cypress.
+cy.route() is a legacy command that has been replaced by cy.intercept()
+
+		cy.reload(): Reloads the webpage. refresh behaviour.
+		cy.contains(): Finds elements containing specific text.
+		cy.url(): Retrieves the current URL.
+cy.url().should('include', '/home');
+
+		cy.title(): Retrieves the current page title.
+cy.title() retrieves the title of the current page.
+
+		cy.viewport(): Sets the viewport size.
+cy.viewport() command is used to set the dimensions. allows you to simulate different screen sizes and resolutions to test how your application behaves across various devices and screen sizes.
+
+cy.viewport(1280, 720); 1280 is width and 720 is height.
+
+cy.viewport('iphone-6'); set dimensions of iphone 6.
+
+
+
+		cy.scrollIntoView(): Scrolls an element into view. cy.get('#myElement').scrollIntoView({ offset: { top: 100, left: 0 }, duration: 1000 });
+offset: Specifies how far away from the top/bottom edge of the viewport the element will be scrolled. It can be a positive or negative number.
+
+duration: Specifies the duration of the scrolling animation.
+
+easing: Specifies the easing function to use for the scrolling animation.
+
+
+
+		cy.exec(): Executes a shell command.
+cy.exec('ls -al', { log: false }).then((result) => {
+
+  // Handle the command execution result
+
+  console.log(result.stdout); // Output the standard output of the command
+
+});      // log: false does not log it. but default cypress logs it.
+
+		cy.fixture(): Loads data from a fixture file.
+cy.fixture('example.json').then((data) => {
+
+  // Handle the loaded fixture data
+
+  console.log(data); // Output the loaded fixture data
+
+});
+
+cy.fixture() command is used to load fixture data from external files within your tests. Fixture files typically contain static data such as JSON, XML, or text files that your tests can use as test data or expected values.
+
+		cy.readFile(): Reads the contents of a file.
+cy.readFile('example.txt').then((fileContent) => {
+
+  // Handle the contents of the read file
+
+  console.log(fileContent); // Output the contents of the file
+
+});
+
+cy.readFile() command is used to read the contents of a file from the file system directly within your test.
+
+cy.fixture() vs cy.readFile(): cy.fixture() loads file from fixture directory of cypress project cy.readFile() loads file from system.
+
+		cy.writeFile(): Writes data to a file.
+cy.writeFile(filepath, data)
+
+cy.writeFile(“example.json”, {“abcd”: 1234})
+
+              cy.scrollTo('bottom'); // cy.scrollTo(0, 500); scrolls to the position (0, 500) on the page, where 0 is the X coordinate (horizontal) and 500 is the Y coordinate (vertical).
+
